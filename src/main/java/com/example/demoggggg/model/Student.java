@@ -30,7 +30,7 @@ public class Student  {
     {
         solutions = new ArrayList<>();
     }
-    public Collection<Solution> getSolutions() {
+    public List<Solution> getSolutions() {
         return solutions;
     }
 

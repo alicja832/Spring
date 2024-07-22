@@ -54,7 +54,7 @@ const TeacherProfile = () => {
 
   const deleteExercise = (e) => {
 
-    const url = "http://localhost:8080/exercise/delete";
+    const url = "http://localhost:8080/exercise/delete/"+e.target.value;
     fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },

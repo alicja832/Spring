@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { TextField, IconButton, Paper, Typography, Button, Box } from '@mui/material';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { makeStyles } from '@mui/styles';
-import { json } from 'react-router-dom';
 
 
 const useStyles = makeStyles({
@@ -61,12 +60,12 @@ export default function SolutionRetake({ task }) {
 
   const paperStyle = { padding: '50px 20px', width: 600, margin: "20px auto" }
   const classes = useStyles();
+  
   const [solution, setSolution] = useState(null);
   const [exercise, setExercise] = useState(null);
   const [student, setStudent] = useState(null);
 
   const [solutionContent, setSolutionContent] = useState('');
-  const [compare, setCompare] = useState(false);
   const [output, setOutput] = useState('');
   const [visible, setVisible] = useState(false);
   const [score, setScore] = useState(0);
@@ -153,7 +152,7 @@ export default function SolutionRetake({ task }) {
 
   useEffect(() => {
 
-    fetch("http://localhost:8080/exercise/solution/id?id=" + task, {
+    fetch("http://localhost:8080/exercise/solution/" + task, {
       method:"GET",
       headers: { "Content-Type": "application/json" }
     })
@@ -162,6 +161,7 @@ export default function SolutionRetake({ task }) {
         console.log('Fetched students:', result); // Dodaj t
         setSolution(result[0]);
         setExercise(result[0].exercise);
+        setScore(result[0].score)
         const name = "";
         const email = "";
         const password ="";
@@ -171,7 +171,7 @@ export default function SolutionRetake({ task }) {
        
       }
       ).catch(error => console.error('Error fetching students:', error));
-  }, [])
+  }, [task])
   if (!solution) {
     return <div>Loading...</div>;
   }

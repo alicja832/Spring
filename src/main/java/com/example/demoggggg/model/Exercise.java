@@ -31,7 +31,7 @@ public class Exercise {
     private Collection<Solution> solutions = null;
 
     @ManyToOne
-    @JoinColumn(name="teacher_id", nullable=false)
+    @JoinColumn(name="teacher_id")
     private Teacher teacher;
 
     public String getCorrectOutput() {

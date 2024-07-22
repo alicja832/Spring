@@ -61,7 +61,6 @@ export default function Solution({ task }) {
   const paperStyle = { padding: '50px 20px', width: 600, margin: "20px auto" }
   const classes = useStyles();
   const [solutionContent, setSolutionContent] = useState('');
-  const [compare, setCompare] = useState(false);
   const [output, setOutput] = useState('');
   const [exercise, setExercise] = useState(null);
   const [visible, setVisible] = useState(false);
@@ -137,7 +136,7 @@ export default function Solution({ task }) {
 
   useEffect(() => {
 
-    fetch("http://localhost:8080/exercise/id?id=" + task, {
+    fetch("http://localhost:8080/exercise/"+task, {
       method:"GET",
       headers: { "Content-Type": "application/json" }
     })
@@ -148,7 +147,7 @@ export default function Solution({ task }) {
 
       }
       ).catch(error => console.error('Error fetching students:', error));
-  }, [])
+  }, [task])
   if (!exercise) {
     return <div>Loading...</div>;
   }

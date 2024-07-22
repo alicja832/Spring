@@ -51,8 +51,8 @@ public class ExerciseController {
      * @param id
      * @return
      */
-    @PostMapping("/delete")
-    public void delete(@RequestBody int id){
+    @PostMapping("/delete/{id}")
+    public void delete(@PathVariable int id){
 
         userController.deleteExercise(exerciseService.findById(id));
         exerciseService.delete(id);
@@ -88,8 +88,8 @@ public class ExerciseController {
      * @param id
      * @return
      */
-    @GetMapping("/id")
-    public List<Exercise> FindById(@RequestParam("id") int id) {
+    @GetMapping("/{id}")
+    public List<Exercise> FindById(@PathVariable int id) {
         List<Exercise> exercises = List.of(exerciseService.findById(id));
         return exercises;
     }
@@ -126,8 +126,8 @@ public class ExerciseController {
         }
         return excercisesAndScores;
     }
-    @GetMapping("/solution/id")
-    public List<Solution> getSolution(@RequestParam("id") int id){
+    @GetMapping("/solution/{id}")
+    public List<Solution> getSolution(@PathVariable int id){
 
         return List.of(exerciseService.findByI(id));
     }
@@ -135,10 +135,7 @@ public class ExerciseController {
     @PutMapping("/solution")
     public void updateSolution(@RequestBody Solution solution){
 
-        System.out.println(solution.getStudentId());
         exerciseService.updateSolution(solution.getId(),solution);
-        System.out.println(userController.getStudent().get(0).getSolutions());
-        System.out.println(getSolution(solution.getId()));
         if(!userController.getStudent().isEmpty())
             userController.getStudent().get(0).getSolutions().set( userController.getStudent().get(0).getSolutions().indexOf(solution),getSolution(solution.getId()).get(0));
 
@@ -146,13 +143,17 @@ public class ExerciseController {
 
     @PostMapping("/check")
     public int checkSolution(@RequestBody Solution solution){
+
         String expectedOutput = solution.getExercise().getCorrectOutput();
         int maxPoints =  solution.getExercise().getMaxPoints();
+
         if(expectedOutput.equals(solution.getOutput()) || expectedOutput.trim().equals(solution.getOutput().trim()))
         {
-            userController.getStudent().get(0).addPoints(maxPoints);
+            int points = maxPoints - solution.getScore();
+            userController.getStudent().get(0).addPoints(points);
             return maxPoints;
         }
+
         return 0;
     }
 
