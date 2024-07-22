@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { TextField, IconButton, Paper, Typography, Button, Box } from '@mui/material';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { makeStyles } from '@mui/styles';
+import { json } from 'react-router-dom';
 
 
 const useStyles = makeStyles({
@@ -56,20 +57,24 @@ const useStyles = makeStyles({
   },
 });
 
-export default function Solution({ task }) {
+export default function SolutionRetake({ task }) {
 
   const paperStyle = { padding: '50px 20px', width: 600, margin: "20px auto" }
   const classes = useStyles();
+  const [solution, setSolution] = useState(null);
+  const [exercise, setExercise] = useState(null);
+  const [student, setStudent] = useState(null);
+
   const [solutionContent, setSolutionContent] = useState('');
   const [compare, setCompare] = useState(false);
   const [output, setOutput] = useState('');
-  const [exercise, setExercise] = useState(null);
   const [visible, setVisible] = useState(false);
   const [score, setScore] = useState(0);
 
   const handleInputChange = (e) => {
     setSolutionContent(e.target.value);
   };
+
   const handleKeyDown = (e) => {
     if (e.key === 'Tab') {
       e.preventDefault();
@@ -83,24 +88,35 @@ export default function Solution({ task }) {
       }, 0);
     }
   };
-  
+
   const save = () => {
-    var student = null;
-    const solution = { solutionContent, exercise, student, score,output };
-    fetch("http://localhost:8080/user/solution", {
-      method: "POST",
+    /*
+     private int id;
+    private String name;
+    private String email;
+    private String password;
+    private int score;
+    */ 
+   
+    const id = solution.id;
+
+    const updatesolution = { id,solutionContent, exercise, student, score,output };
+    console.log(updatesolution);
+    fetch("http://localhost:8080/exercise/solution", {
+      //tutaj nalezy pobrać studenta
+      method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(solution)
+      body: JSON.stringify(updatesolution)
     }).then(res => res.text())
       .then((result) => {
-        alert("Zapisano");
+        console.log('Exec', result);
       })
       .catch((error) => {
         console.error('Error:', error);
       });
   };
   const handleButtonClick = () => {
-   
+    console.log(solutionContent);
     fetch("http://localhost:8080/exercise/interpreter", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -125,7 +141,7 @@ export default function Solution({ task }) {
       body: JSON.stringify(solution)})
       .then(res => res.text())
       .then((result) => {
-        setScore(result);
+        console.log('Exec', result);
       })
       .catch((error) => {
         console.error('Error:', error);
@@ -137,28 +153,37 @@ export default function Solution({ task }) {
 
   useEffect(() => {
 
-    fetch("http://localhost:8080/exercise/id?id=" + task, {
+    fetch("http://localhost:8080/exercise/solution/id?id=" + task, {
       method:"GET",
       headers: { "Content-Type": "application/json" }
     })
       .then(res => res.json())
       .then((result) => {
         console.log('Fetched students:', result); // Dodaj t
-        setExercise(result[0]);
-
+        setSolution(result[0]);
+        setExercise(result[0].exercise);
+        const name = "";
+        const email = "";
+        const password ="";
+        const id = result[0].studentId;
+        const student ={id,name,email,password};
+        setStudent(student);
+       
       }
       ).catch(error => console.error('Error fetching students:', error));
   }, [])
-  if (!exercise) {
+  if (!solution) {
     return <div>Loading...</div>;
   }
 
   return (
     <div>
-      <h2>Zadanie</h2>
+      <p> Z {exercise.name}</p>
+      <p>{exercise.introduction}</p>
       <p>Treść: {exercise.content}</p>
-      <p>Maksymalna ilość punktów: {exercise.maxPoints}</p>
       <p>Oczekiwane wyjście programu: {exercise.correctOutput}</p>
+      <p>Maksymalna ilość punktów: {exercise.maxPoints}</p>
+      <p>Twój wynik: {solution.score}</p>
       {
         <div className={classes.container}>
           <div className={classes.textFieldContainer}>
@@ -166,7 +191,7 @@ export default function Solution({ task }) {
               className={classes.textField}
               variant="outlined"
               placeholder="Miejsce na rozwiązanie..."
-              value={solutionContent}
+              defaultValue={solution.solutionContent}
               onChange={handleInputChange}
               onKeyDown={handleKeyDown}
               fullWidth
@@ -182,7 +207,7 @@ export default function Solution({ task }) {
             </IconButton>
           </div>
           <Paper className={classes.output}>
-            <Typography variant="body1">
+            <Typography defaultValue={solution.output} variant="body1">
               {output}
             </Typography>
           </Paper>

@@ -12,7 +12,7 @@ const TeacherProfile = () => {
   const paperStyletwo = { padding: '50px 20px', width: '90%', margin: "30px auto", color: "blue" }
 
   const classes = useStyles();
-  const [id,setId]=useState(0);
+  const [id, setId] = useState(0);
   const [teacher, setTeacher] = useState(null);
   const [name, setName] = useState("");
   const [content, setContent] = useState("");
@@ -30,10 +30,22 @@ const TeacherProfile = () => {
   const closeForm = () => {
     setIsFormVisible(false);
   };
-
+ 
   const showFormTwo = (e) => {
+
     setIsFormTwoVisible(true);
     setId(e.target.value);
+
+    function isEqual(a) {
+      return a.id === parseInt(e.target.value);
+    }
+    
+    const found = exercises.find(isEqual);
+    setContent(found.content);
+    setName(found.name);
+    setIntroduction(found.introduction);
+    setcorrectSolution(found.correctSolution);
+    setmaxPoints(found.maxPoints);
   };
   const closeFormTwo = () => {
     setIsFormTwoVisible(false);
@@ -55,15 +67,18 @@ const TeacherProfile = () => {
   }
   const editExercise = (e) => {
 
-    const exercise = { id,name, introduction, content, maxPoints, correctSolution }
-    const url = "http://localhost:8080/exercise/update";
+    const exercise = { id, name, introduction, content, maxPoints, correctSolution }
+    const url = "http://localhost:8080/exercise/";
+    
     fetch(url, {
-      method: "POST",
+      method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(exercise)
 
     }).then(() => {
-      window.location.reload()
+      closeFormTwo();
+      window.location.reload();
+      
     })
 
   }
@@ -184,50 +199,50 @@ const TeacherProfile = () => {
                   </Box>
                 </div>
                 {isFormTwoVisible && (
-        <Container>
-          <Paper elevation={3} style={paperStyle}>
+                  <Container>
+                    <Paper elevation={3} style={paperStyle}>
 
-            <form className={classes.root} noValidate autoComplete="off">
+                      <form className={classes.root} noValidate autoComplete="off">
 
-              <TextField id="outlined-basic" label="Nazwa" variant="outlined" fullWidth
-                defaultValue={exercise.name}
-                onChange={(e) => setName(e.target.value)}
-              />
+                        <TextField id="outlined-basic" label="Nazwa" variant="outlined" fullWidth
+                          defaultValue={exercise.name}
+                          onChange={(e) => setName(e.target.value)}
+                        />
 
-              <TextField id="outlined-basic" label="Treść" variant="outlined" fullWidth
-                defaultValue={exercise.content}
-                onChange={(e) => setContent(e.target.value)}
-              />
+                        <TextField id="outlined-basic" label="Treść" variant="outlined" fullWidth
+                          defaultValue={exercise.content}
+                          onChange={(e) => setContent(e.target.value)}
+                        />
 
-              <TextField id="outlined-basic" label="Wstęp teoretyczny" variant="outlined" fullWidth
-                defaultValue={exercise.introduction}
-                onChange={(e) => setIntroduction(e.target.value)}
-              />
-              <TextField id="outlined-basic" label="Poprawne rozwiązanie" variant="outlined" fullWidth
-                defaultValue={exercise.correctSolution}
-                onChange={(e) => setcorrectSolution(e.target.value)}
-              />
-              <TextField id="outlined-basic" label="max ilość punktów" variant="outlined" fullWidth
-                defaultValue={exercise.maxPoints}
-                onChange={(e) => setmaxPoints(e.target.value)}
-              />
+                        <TextField id="outlined-basic" label="Wstęp teoretyczny" variant="outlined" fullWidth
+                          defaultValue={exercise.introduction}
+                          onChange={(e) => setIntroduction(e.target.value)}
+                        />
+                        <TextField id="outlined-basic" label="Poprawne rozwiązanie" variant="outlined" fullWidth
+                          defaultValue={exercise.correctSolution}
+                          onChange={(e) => setcorrectSolution(e.target.value)}
+                        />
+                        <TextField id="outlined-basic" label="max ilość punktów" variant="outlined" fullWidth
+                          defaultValue={exercise.maxPoints}
+                          onChange={(e) => setmaxPoints(e.target.value)}
+                        />
 
-              <FormControl fullWidth>
-              </FormControl>
-              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                        <FormControl fullWidth>
+                        </FormControl>
+                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
 
-                <Box display="flex" flexDirection="column" gap={2}>
-                  <Button variant="contained" color="secondary" onClick={editExercise}>
-                   Zmień
-                  </Button>
-                </Box>
-              </div>
-            </form>
+                          <Box display="flex" flexDirection="column" gap={2}>
+                            <Button variant="contained" color="secondary" value={index} onClick={editExercise}>
+                              Zmień
+                            </Button>
+                          </Box>
+                        </div>
+                      </form>
 
-          </Paper>
+                    </Paper>
 
-        </Container>
-      )}
+                  </Container>
+                )}
               </Paper>
             ))
             }

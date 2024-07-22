@@ -30,7 +30,7 @@ public class ExerciseServiceImpl implements ExerciseService {
     }
     public void update(int id,Exercise exercise)
     {
-         exerciseRepository.updateById(id,exercise.getName());
+         exerciseRepository.updateById(id,exercise.getName(),exercise.getIntroduction(),exercise.getContent(),exercise.getMaxPoints(),exercise.getCorrectSolution(),exercise.getCorrectOutput());
     }
     @Override
     public List<Exercise> getAllExercises()
@@ -116,5 +116,17 @@ public class ExerciseServiceImpl implements ExerciseService {
     {
         return solutionRepository.findAllByStudentEquals(student);
     }
+    @Override
+    public Solution findByI(int id)
+    {
+        return solutionRepository.findById(id);
+    }
+    @Override
+    public void updateSolution(int id,Solution solution)
+    {
+        solutionRepository.updateById(id,solution.getSolutionContent());
+    }
+
+
 
 }

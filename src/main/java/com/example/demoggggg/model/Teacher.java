@@ -6,18 +6,19 @@
 
     @Entity
     public class Teacher {
+
         @Id
-        @GeneratedValue(strategy = GenerationType.AUTO)
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
         @Column(unique = true, name = "id",nullable = false)
         private int id;
         private String name;
         private String email;
         private String password;
-        @OneToMany(
-                cascade = CascadeType.ALL,
-                orphanRemoval = true
-        )
+
+        @OneToMany(cascade = CascadeType.ALL)
+        @JoinColumn(name = "teacher_id")
         private List<Exercise> exercises = new ArrayList<>();
+
         public Teacher() {}
         public void AddExc(Exercise something)
         {
@@ -66,4 +67,14 @@
             this.password = password;
         }
 
+        public boolean equals(Object o) {
+            if (this == o)
+                return true;
+            if (o == null)
+                return false;
+            if (getClass() != o.getClass())
+                return false;
+            Teacher teacher = (Teacher) o;
+            return this.id == teacher.id;
+        }
     }

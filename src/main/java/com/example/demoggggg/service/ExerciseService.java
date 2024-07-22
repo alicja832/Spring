@@ -14,4 +14,6 @@ public interface ExerciseService {
     Exercise findById(int id);
     void update(int id,Exercise exercise);
     List<Solution> findStudentSolution(Student student);
+    Solution findByI(int id);
+    void updateSolution(int id,Solution solution);
 }

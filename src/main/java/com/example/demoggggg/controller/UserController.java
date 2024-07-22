@@ -17,6 +17,7 @@ import java.util.List;
 public class UserController {
     @Autowired
     private UserService userService;
+    private ExerciseController exerciseController;
     private int userId;
     private String role;
     private Student loginStudent;
@@ -120,12 +121,27 @@ public class UserController {
 
     @PostMapping("/solution")
     public Solution addSolution(@RequestBody Solution solution){
-        solution.setStudent(loginStudent);
-        loginStudent.getSolutions().add(solution);
-        loginStudent.addpoints(solution.getScore());
+
+        if(loginStudent!=null) {
+            solution.setStudent(loginStudent);
+
+            if (loginStudent.getSolutions().contains(solution)) {
+                int ind = loginStudent.getSolutions().indexOf(solution);
+                int score = loginStudent.getSolutions().get(ind).getScore();
+                loginStudent.getSolutions().remove(solution);
+                loginStudent.setScore(loginStudent.getScore() - score);
+                loginStudent.getSolutions().add(solution);
+                loginStudent.setScore(solution.getScore());
+                return solution;
+            } else {
+                loginStudent.getSolutions().add(solution);
+                loginStudent.setScore(solution.getScore());
+            }
+        }
         return userService.saveSolution(solution);
 
     }
+
     @GetMapping("/exercises")
     public List<Exercise> getExercises(){
 
@@ -133,6 +149,7 @@ public class UserController {
             return loginTeacher.getExercises();
         return new ArrayList<>();
     }
+
     @GetMapping("/logout")
     public void logout(){
         loginStudent = null;

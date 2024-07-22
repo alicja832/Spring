@@ -2,29 +2,45 @@ package com.example.demoggggg.model;
 
 import jakarta.persistence.*;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 @Entity
+@Table(name = "exercise")
 public class Exercise {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(unique = true, name = "id",nullable = false)
     private int id;
-    @Column(name="name",updatable=true)
+    @Column(unique = true,name="name",updatable=true)
     private String name;
-    @Column(name="introduction",updatable=true)
+    @Column(unique = true,name="introduction",updatable=true)
     private String introduction;
-    @Column(name="content",updatable=true)
+    @Column(unique = true,name="content",updatable=true)
     private String content;
-    @Column(name="maxPoints",updatable=true)
+    @Column(name="maxpoints",updatable=true)
     private int maxPoints;
-    @Column(name="correctSolution",updatable=true)
+    @Column(name="correctsolution",updatable=true)
     private String correctSolution;
+    @Column(name="correctoutput",updatable=true)
     private String correctOutput = null;
 
-    @OneToMany(mappedBy="exercise")
-    List<Solution> solutions = null;
+    @OneToMany
+    @JoinColumn(name = "exercise_id")
+    private Collection<Solution> solutions = null;
 
+    @ManyToOne
+    @JoinColumn(name="teacher_id", nullable=false)
+    private Teacher teacher;
+
+    public String getCorrectOutput() {
+        return correctOutput;
+    }
+
+    public void setCorrectOutput(String correctOutput) {
+        this.correctOutput = correctOutput;
+    }
     public Exercise() {
     }
 

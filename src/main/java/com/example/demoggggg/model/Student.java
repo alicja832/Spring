@@ -1,6 +1,7 @@
 package com.example.demoggggg.model;
 
 import jakarta.persistence.*;
+import org.springframework.web.bind.annotation.RequestBody;
 
 
 import java.util.ArrayList;
@@ -11,31 +12,30 @@ import java.util.List;
 @Table(name = "student")
 public class Student  {
     @Id
-    @GeneratedValue(strategy= GenerationType.AUTO)
+    @GeneratedValue(strategy= GenerationType.IDENTITY)
     @Column(unique = true, name = "id",nullable = false)
     private int id;
     private String name;
+
+    @Column(unique = true)
     private String email;
     private String password;
-    private int score;
-    @OneToMany(mappedBy = "student")
+    private int score=0;
+
+    @OneToMany
+    @JoinColumn(name = "exercise_id")
     List<Solution> solutions;
+
     public Student()
     {
         solutions = new ArrayList<>();
     }
-    public List<Solution> getSolutions() {
+    public Collection<Solution> getSolutions() {
         return solutions;
     }
 
     public void setSolutions(List<Solution> solutions) {
         this.solutions = solutions;
-    }
-
-    public int addpoints(int points)
-    {
-        score+=points;
-        return score;
     }
 
     public int getId() {
@@ -76,6 +76,20 @@ public class Student  {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null)
+            return false;
+        if (getClass() != o.getClass())
+            return false;
+        Student student = (Student) o;
+        return this.id == student.id;
+    }
+    public void addPoints(@RequestBody int score){
+        this.score+=score;
     }
 
 }

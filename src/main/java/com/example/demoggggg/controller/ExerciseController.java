@@ -9,11 +9,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+@CrossOrigin("*")
 @RestController
 @RequestMapping("/exercise")
-@CrossOrigin
+
 public class ExerciseController {
     @Autowired
     private ExerciseService exerciseService;
@@ -35,6 +38,7 @@ public class ExerciseController {
         savedExercise.setIntroduction(exercise.getIntroduction());
         savedExercise.setCorrectSolution(exercise.getCorrectSolution());
         savedExercise.setMaxPoints(exercise.getMaxPoints());
+        savedExercise.setCorrectOutput(exerciseService.getOut("\n"+exercise.getCorrectSolution()+"\n"));
 
         exerciseService.save(savedExercise);
         userController.addExercise(savedExercise);
@@ -58,11 +62,16 @@ public class ExerciseController {
      * update excercise
      * @param exercise
      */
-    @PostMapping("/update")
+    @PutMapping("/")
     public void update(@RequestBody Exercise exercise){
+
+        exercise.setCorrectOutput(exerciseService.getOut("\""+exercise.getCorrectSolution()+"\""));
         exerciseService.update(exercise.getId(), exercise);
         Exercise newExercise = exerciseService.findById(exercise.getId());
-        userController.getTeacher().get(0).getExercises().set( userController.getTeacher().get(0).getExercises().indexOf(exercise),newExercise);
+
+        if(userController.getTeacher()!=null)
+            userController.getTeacher().get(0).getExercises().set( userController.getTeacher().get(0).getExercises().indexOf(exercise),newExercise);
+
     }
     /**
      * get all exercises
@@ -99,22 +108,52 @@ public class ExerciseController {
      * TODO Add posibility to list all excercises which are solved by user and score from its
      **/
     @GetMapping("/solutions")
-    public List<List<String>> getSolutions(@RequestBody int id){
+    public List<Map<String,String>> getSolutions(){
 
-        List<List<String>> excercisesAndScores = new ArrayList<>();
-        List<Solution> solutions=exerciseService.findStudentSolution(userController.getUserService().findbyId(id));
+        List<Map<String, String>> excercisesAndScores = new ArrayList<>();
+        List<Solution> solutions=exerciseService.findStudentSolution(userController.getStudent().get(0));
 
         for(Solution solution:solutions){
 
-            List<String> solutionList = new ArrayList<>();
+            Map<String,String> map = new HashMap<String,String>();
             Exercise exercise=exerciseService.findById(solution.getExercise().getId());
             if(exercise!=null){
-                solutionList.add(solution.getExercise().getName());
-                solutionList.add( Integer.toString(solution.getScore()));
+                map.put("id", Integer.toString(solution.getId()));
+                map.put("name",solution.getExercise().getName());
+                map.put("maxPoints", Integer.toString(solution.getScore()));
             }
-            excercisesAndScores.add(solutionList);
+            excercisesAndScores.add(map);
         }
         return excercisesAndScores;
+    }
+    @GetMapping("/solution/id")
+    public List<Solution> getSolution(@RequestParam("id") int id){
+
+        return List.of(exerciseService.findByI(id));
+    }
+
+    @PutMapping("/solution")
+    public void updateSolution(@RequestBody Solution solution){
+
+        System.out.println(solution.getStudentId());
+        exerciseService.updateSolution(solution.getId(),solution);
+        System.out.println(userController.getStudent().get(0).getSolutions());
+        System.out.println(getSolution(solution.getId()));
+        if(!userController.getStudent().isEmpty())
+            userController.getStudent().get(0).getSolutions().set( userController.getStudent().get(0).getSolutions().indexOf(solution),getSolution(solution.getId()).get(0));
+
+    }
+
+    @PostMapping("/check")
+    public int checkSolution(@RequestBody Solution solution){
+        String expectedOutput = solution.getExercise().getCorrectOutput();
+        int maxPoints =  solution.getExercise().getMaxPoints();
+        if(expectedOutput.equals(solution.getOutput()) || expectedOutput.trim().equals(solution.getOutput().trim()))
+        {
+            userController.getStudent().get(0).addPoints(maxPoints);
+            return maxPoints;
+        }
+        return 0;
     }
 
 }

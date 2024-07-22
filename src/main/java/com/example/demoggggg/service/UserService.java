@@ -12,6 +12,7 @@ public interface UserService {
     public int loginTeacher(Teacher teacher);
     public Solution saveSolution(Solution solution);
     public Student findbyId(int id);
+    public void updateStudent(int id,int score);
 
 }
 
