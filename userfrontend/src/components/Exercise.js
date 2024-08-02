@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { makeStyles } from '@mui/styles';
 import { useNavigate } from 'react-router-dom';
 import { Paper, Button, Box } from '@mui/material';
+import LoginInformation from '../api/LoginInformation';
 
 const useStyles = makeStyles({
   points: {
@@ -35,9 +36,11 @@ export default function Exercise() {
     navigate('/solution/:' + e.target.value);
   }
 
-
+//zrobić to pójźniej
   useEffect(() => {
-    fetch("http://localhost:8080/exercise/")
+    const url = (LoginInformation.getLoggedInRole()==="student")?"http://localhost:8080/exercise/"+LoginInformation.getLoggedInUser():"http://localhost:8080/exercise/";
+
+    fetch(url)
       .then(res => res.json())
       .then((result) => {
         console.log('Fetched students:', result); // Dodaj t

@@ -1,39 +1,25 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-
+import LoginInformation from '../api/LoginInformation'
 const Profile = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
     // Fetch user profile data
     const fetchProfile = async () => {
-      try {
-        const response = await fetch("http://localhost:8080/user/role", {
-        });
-
-        if (response.ok) {
-          const role = (await response.text()).trim();
+     
+       
+          const role = LoginInformation.getLoggedInRole();
           console.log(role);
-          const url = role === "Teacher" ? "http://localhost:8080/user/teacher" : "http://localhost:8080/user/student";
-
-          const res = await fetch(url);
-          if (res.ok) {
-            const result = await res.json();
-            console.log('Fetched profile:', result[0]);
-            if (role === "Teacher") {
+          if (role === "teacher") {
             
               navigate('/teacherprofil');
-            } else {
+          } else {
              
               navigate('/studentprofil');
-            }
-          } else {
-            console.error('Error fetching profile data:', res.statusText);
           }
-        }
-      } catch (error) {
-        console.error('Error fetching role:', error);
-      }
+          
+        
     };
 
     fetchProfile();

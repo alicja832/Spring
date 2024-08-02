@@ -3,6 +3,8 @@ import TextField from '@mui/material/TextField';
 import { Container, Paper, Button, Box } from '@mui/material';
 import { FormControl } from '@mui/material';
 import React, { useEffect, useState } from 'react';
+import LoginInformation from '../api/LoginInformation';
+
 const useStyles = makeStyles((theme) => ({
 
 }));
@@ -54,7 +56,7 @@ const TeacherProfile = () => {
 
   const deleteExercise = (e) => {
 
-    const url = "http://localhost:8080/exercise/delete/"+e.target.value;
+    const url = "http://localhost:8080/exercise/delete";
     fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -67,8 +69,8 @@ const TeacherProfile = () => {
   }
   const editExercise = (e) => {
 
-    const exercise = { id, name, introduction, content, maxPoints, correctSolution }
-    const url = "http://localhost:8080/exercise/";
+    const exercise = { id, name, introduction, content, maxPoints, correctSolution,teacher}
+    const url = "http://localhost:8080/exercise";
     
     fetch(url, {
       method: "PUT",
@@ -87,7 +89,7 @@ const TeacherProfile = () => {
 
     e.preventDefault()
 
-    const exercise = { name, introduction, content, maxPoints, correctSolution }
+    const exercise = { name, introduction, content, maxPoints, correctSolution,teacher }
 
     const url = "http://localhost:8080/exercise/";
     fetch(url, {
@@ -102,22 +104,27 @@ const TeacherProfile = () => {
     closeForm();
   };
   useEffect(() => {
-    const fetchTeacherProfile = async () => {
-      const response = await fetch("http://localhost:8080/user/teacher");
 
-      if (response.ok) {
-        const teacherData = await response.json();
-        setTeacher(teacherData[0]); // Assuming the API returns an array with the teacher data
-      }
-      fetch("http://localhost:8080/user/exercises")
+        fetch("http://localhost:8080/user/teacher/" + LoginInformation.getLoggedInUser(), {
+          method:"GET",
+          headers: { "Content-Type": "application/json" }
+
+        })
+          .then(res => res.json())
+          .then((result) => {
+            console.log('Fetched students:', result); // Dodaj t
+            setTeacher(result);
+
+          }
+          ).catch(error => console.error('Error fet ching students:'));
+     
+
+      fetch("http://localhost:8080/user/exercises/"+LoginInformation.getLoggedInUser())
         .then(res => res.json())
         .then((result) => {
           setExercises(result);
-        })
-    };
-
-    fetchTeacherProfile();
-  }, []);
+        });
+      }, []);
 
   if (!teacher) {
     return <div>Loading...</div>;

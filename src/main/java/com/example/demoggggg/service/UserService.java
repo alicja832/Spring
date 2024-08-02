@@ -2,17 +2,26 @@ package com.example.demoggggg.service;
 import com.example.demoggggg.model.Solution;
 import com.example.demoggggg.model.Student;
 import com.example.demoggggg.model.Teacher;
+import com.example.demoggggg.model.UserEntity;
 
 import java.util.List;
 
 public interface UserService {
-    public Student saveStudent(Student student);
-    public Teacher saveTeacher(Teacher teacher);
-    public int loginStudent(Student student);
-    public int loginTeacher(Teacher teacher);
-    public Solution saveSolution(Solution solution);
-    public Student findbyId(int id);
-    public void updateStudent(int id,int score);
 
+    Student saveStudent(Student student);
+    Teacher saveTeacher(Teacher teacher);
+    Teacher findById(long id);
+    Solution saveSolution(Solution solution);
+    Student findbyId(long id);
+    UserEntity findbyEmail(String email);
+    Teacher findTeacherByEmail(String email);
+    Student findStudentByEmail(String email);
+    Teacher findTeacherByName(String name);
+    Student findStudentByName(String name);
+    void updateStudent(int id,int score);
+    long deleteUser(long id);
+    List<UserEntity> listAll();
+    UserEntity findUserByNameAndPassword(String username, String password);
+    UserEntity findByName(String name);
 }
 

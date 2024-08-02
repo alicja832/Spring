@@ -3,6 +3,8 @@ import { Paper} from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { Button, Box } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import LoginInformation from '../api/LoginInformation';
+import { Login } from '@mui/icons-material';
 const useStyles = makeStyles({
   points: {
     width: '30px',
@@ -38,31 +40,37 @@ const StudentProfile = () => {
   }
   
   useEffect(() => {
-    // Fetch student profile data
-    const fetchStudentProfile = async () => {
-      const response = await fetch("http://localhost:8080/user/student");
-      
-      if (response.ok) {
-        const studentData = await response.json();
-        setStudent(studentData[0]); // Assuming the API returns an array with the student data
-      }
-      
+    // Fetch student profile data 
+   
+        fetch("http://localhost:8080/user/student/" + LoginInformation.getLoggedInUser(), {
+          method:"GET",
+          headers: { "Content-Type": "application/json" }
+        })
+          .then(res => res.json())
+          .then((result) => {
+            console.log('Fetched students:', result); // Dodaj t
+            setStudent(result);
     
-      fetch("http://localhost:8080/exercise/solutions",{
+          }
+          ).catch(error => console.error('Error fetching students:', error));
+    
+      
+      
+
+      fetch("http://localhost:8080/exercise/solutions/"+LoginInformation.getLoggedInUser(),{
         method: "GET",
         headers: { "Content-Type": "application/json" }
       })
       .then(res=>res.json())
       .then((result)=>{
-        console.log('Fetched students:', result); // Dodaj t
+        console.log('Fetched studxxxxents:', result); // Dodaj t
         setExercisesWithScores(result);       
       }
     ).catch(error => console.error('Error fetching students:', error));
-  };
-    fetchStudentProfile();
-  },[]);
+  }, []);
   
   if (!student) {
+  
     return <div>Loading...</div>;
   }
 
@@ -78,7 +86,7 @@ const StudentProfile = () => {
 
           {exercisesWithScores.map(exercise => (
             <Paper elevation={6} style={{ margin: "10px", padding: "15px", textAlign: "left" }} /*key={exercise.id}*/>
-              <div className={classes.headerContainer}> <h3> {exercise.name}</h3><p>Twój wynik:</p><Box className={classes.points}>{exercise.maxPoints}</Box></div>
+              <div className={classes.headerContainer}> <h3> {exercise.name}</h3><p>Twój wynik:</p><Box className={classes.points}>{exercise.score}</Box></div>
 
               <div>
                 <Box display="flex" flexDirection="column" gap={2}>

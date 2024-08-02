@@ -6,6 +6,7 @@ import { FilledInput, IconButton,InputAdornment } from "@mui/material";
 import { VisibilityOffOutlined, VisibilityOutlined } from "@mui/icons-material";
 import {MenuItem} from '@mui/material';
 import {Select,InputLabel,FormControl} from '@mui/material';
+import LoginInformation from '../api/LoginInformation'
 
 const useStyles = makeStyles((theme) => ({
  
@@ -17,21 +18,21 @@ export default function Register() {
     const[name,setName]=useState('')
     const[email,setEmail]=useState('')
     const[role,setRole]=useState('')
-    const[password,setPassword]=useState([])
-    const [psw, setPsw] = useState(false);
-    const handleShowPsw = () => setPsw((show) => !show);
-    const handleHidePsw = (e) => {
+    const[password,setPassword]=useState('')
+    const [showPassword, setShowPassword] = useState(false);
+
+    const handleShowPassword = () => setShowPassword((prev) => !prev);
+    const handleHidePassword = (e) => {
       e.preventDefault();
    };
     const classes = useStyles();
 
   const register=(e)=>{  
-    e.preventDefault()
-    const student={name,email,password}
-    const url = role === 1 
+    e.preventDefault();
+    const student={name,email,password};
+    const url = role === "teacher"
     ? "http://localhost:8080/user/teacher"
     : "http://localhost:8080/user/student";
-
     
         fetch(url,{
           method:"POST",
@@ -39,8 +40,12 @@ export default function Register() {
           body:JSON.stringify(student)
     
       }).then(()=>{
-        console.log("New user added")
-      })
+        console.log("New user added");
+        role === "teacher" ? LoginInformation.registerTeacher(name) : LoginInformation.registerStudent(name);
+
+      }).catch((error) => {
+        console.error('Error:', error);
+      });
 }
   
   return (
@@ -62,16 +67,16 @@ export default function Register() {
               value={password}
               placeholder="Hasło"
               onChange={(e)=>setPassword(e.target.value)}
-              type={psw ? 'text' : 'password'}
+              type={password ? 'text' : 'password'}
               fullWidth
               endAdornment={
                   <InputAdornment position="start">
                      <IconButton
-                        onClick={handleShowPsw}
-                        onMouseDown={handleHidePsw}
+                        onClick={handleShowPassword}
+                        onMouseDown={handleHidePassword}
                         edge="end"
                      >
-                        {psw ? <VisibilityOffOutlined /> : <VisibilityOutlined />}
+                        {password ? <VisibilityOffOutlined /> : <VisibilityOutlined />}
                         
                      </IconButton>
                   
@@ -86,8 +91,8 @@ export default function Register() {
     // fullWidth
     onChange={(e)=>setRole(e.target.value)}
   >
-    <MenuItem value={0}>Uczeń</MenuItem>
-    <MenuItem value={1}>Nauczyciel</MenuItem>
+    <MenuItem value={"student"}>Uczeń</MenuItem>
+    <MenuItem value={"teacher"}>Nauczyciel</MenuItem>
   </Select>
   </FormControl>
        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>

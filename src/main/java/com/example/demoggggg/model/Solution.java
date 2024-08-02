@@ -1,4 +1,5 @@
 package com.example.demoggggg.model;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 @Entity
@@ -6,7 +7,7 @@ import jakarta.persistence.*;
 public class Solution {
 
     @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    @GeneratedValue(strategy= GenerationType.AUTO)
     @Column(unique = true,name="id" ,nullable = false)
     private int Id;
     @Column(name="solutioncontent" ,nullable = false)
@@ -17,9 +18,8 @@ public class Solution {
     private Exercise exercise;
 
     @ManyToOne
-    @JoinColumn(name="student_id")
+    @JoinColumn(name="student_id",nullable=true)
     private Student student;
-
     private int score = 0;
     private String output = null;
 
@@ -53,8 +53,8 @@ public class Solution {
     public void setExercise(Exercise exercise) {
             this.exercise = exercise;
         }
-    public int getStudentId() {
-            return student.getId();
+    public Student getStudent() {
+            return student;
         }
     public void setStudent(Student student) {
             this.student = student;
@@ -66,13 +66,14 @@ public class Solution {
             this.score = score;
         }
     public boolean equals(Object o) {
-            if (this == o)
+
+        if (this == o)
                 return true;
             if (o == null)
                 return false;
             if (getClass() != o.getClass())
                 return false;
             Solution solution = (Solution) o;
-            return this.exercise.getId() == solution.getExercise().getId() && this.student.getId() == solution.getStudentId();
+            return (this.exercise.getId() == solution.getExercise().getId()) && (this.student.getId() == solution.getStudent().getId());
         }
 }

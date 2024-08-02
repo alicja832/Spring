@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { TextField, IconButton, Paper, Typography, Button, Box } from '@mui/material';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { makeStyles } from '@mui/styles';
-
+import LoginInformation from '../api/LoginInformation';
 
 const useStyles = makeStyles({
   container: {
@@ -84,9 +84,15 @@ export default function Solution({ task }) {
   };
   
   const save = () => {
-    var student = null;
-    const solution = { solutionContent, exercise, student, score,output };
-    fetch("http://localhost:8080/user/solution", {
+    //svar student = null;
+    var id=0;
+    var name =LoginInformation.getLoggedInUser();
+    var email = "f";
+    var password = "f";
+    const student={id,name,email,password};
+    const solution = { solutionContent, exercise,student,score,output };
+    console.log(solution.student);
+    fetch("http://localhost:8080/exercise/solution", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(solution)
@@ -136,7 +142,7 @@ export default function Solution({ task }) {
 
   useEffect(() => {
 
-    fetch("http://localhost:8080/exercise/"+task, {
+    fetch("http://localhost:8080/exercise/" + task, {
       method:"GET",
       headers: { "Content-Type": "application/json" }
     })
@@ -147,7 +153,7 @@ export default function Solution({ task }) {
 
       }
       ).catch(error => console.error('Error fetching students:', error));
-  }, [task])
+  }, [])
   if (!exercise) {
     return <div>Loading...</div>;
   }

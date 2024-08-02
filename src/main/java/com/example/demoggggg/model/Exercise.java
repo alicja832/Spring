@@ -1,13 +1,16 @@
 package com.example.demoggggg.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 @Entity
 @Table(name = "exercise")
-public class Exercise {
+public class Exercise implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,13 +29,31 @@ public class Exercise {
     @Column(name="correctoutput",updatable=true)
     private String correctOutput = null;
 
-    @OneToMany
-    @JoinColumn(name = "exercise_id")
-    private Collection<Solution> solutions = null;
-
+//    @OneToMany
+//    @JoinColumn(name = "exercise_id")
+//    private List<Solution> solutions = null;
     @ManyToOne
-    @JoinColumn(name="teacher_id")
+    @JoinColumn(name="teacher_id", nullable=false)
+    @JsonIgnore
     private Teacher teacher;
+
+//    public List<Solution> getSolutions() {
+//        return solutions;
+//    }
+//
+//    public void setSolutions(List<Solution> solutions) {
+//        this.solutions = solutions;
+//    }
+
+
+
+    public Teacher getTeacher() {
+        return teacher;
+    }
+
+    public void setTeacher(Teacher teacher) {
+        this.teacher = teacher;
+    }
 
     public String getCorrectOutput() {
         return correctOutput;
@@ -76,27 +97,21 @@ public class Exercise {
         this.maxPoints = maxPoints;
     }
 
-    public void addSolution(Solution solution) {
-        if (solutions == null) {
-            solutions = new ArrayList<>();
-        }
-        solutions.add(solution);
-    }
+//    public void addSolution(Solution solution) {
+//        if (solutions == null) {
+//            solutions = new ArrayList<>();
+//        }
+//        solutions.add(solution);
+//    }
     public int getId() {
         return id;
     }
-
     public void setId(int id) {
         this.id = id;
     }
-
     public String getContent() { return content;}
     public void setContent(String content) {
         this.content = content;
-    }
-    public String toString()
-    {
-        return String.valueOf(id);
     }
     @Override
     public boolean equals(Object o) {

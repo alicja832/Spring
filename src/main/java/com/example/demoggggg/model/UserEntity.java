@@ -2,7 +2,6 @@ package com.example.demoggggg.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.*;
-import org.springframework.data.annotation.Id;
 import com.example.demoggggg.model.enums.RoleEnum;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -13,7 +12,6 @@ import java.util.List;
 @Table(name = "users")
 public class UserEntity{
 
-    @jakarta.persistence.Id
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     protected Long id;
@@ -23,13 +21,14 @@ public class UserEntity{
     protected String email;
     @Column(name = "password", nullable = false, updatable = true)
     protected String password;
-    protected RoleEnum role;
+    @Column(name = "role", nullable = false)
+    protected String role;
 
-    public RoleEnum getRole() {
+    public String getRole() {
         return role;
     }
 
-    public void setRole(RoleEnum role) {
+    public void setRole(String role) {
         this.role = role;
     }
 
