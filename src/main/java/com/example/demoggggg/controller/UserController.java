@@ -12,6 +12,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import com.example.demoggggg.model.enums.RoleEnum;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -29,6 +30,9 @@ public class UserController {
     private UserService userService;
     @Autowired
     private MyJwt jwt;
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
     @PostMapping("/teacher")
     public ResponseEntity<Teacher> add(@RequestBody Teacher teacher){
 
@@ -53,12 +57,7 @@ public class UserController {
     @PostMapping("/authenticate")
     public JWTResponse authenticate(@RequestBody UserEntity userEntity)throws Exception{
         String token = null;
-//        try {
-//            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userEntity.getName(), userEntity.getPassword())).getName();
-//            //returnujemy token
-//        }catch (BadCredentialsException e) {
-//            throw new Exception("INVALID_CREDENTIALS", e);
-//        }
+
         String password = userEntity.getPassword();
         String name = userEntity.getName();
         System.out.println(name);
@@ -68,6 +67,21 @@ public class UserController {
             System.out.println(entity.getRole());
         UserDetails userDetails=new User(name,password,List.of(new SimpleGrantedAuthority("ROLE_" +entity.getRole()))) ;
         token = jwt.generateToken(userDetails);
+
+        try {
+            System.out.println(userDetails.getAuthorities());
+            UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(userDetails, userDetails, userDetails.getAuthorities());
+            System.out.println(usernamePasswordAuthenticationToken.isAuthenticated());
+            authenticationManager.authenticate(usernamePasswordAuthenticationToken);
+        }
+        catch (BadCredentialsException e) {
+            throw new Exception("INVALID_CREDENTIALS", e);
+        }
+        catch(Exception ex)
+        {
+            System.out.println(ex.getMessage());
+        }
+
         return new JWTResponse(token);
     }
     @GetMapping("/teacher/{name}")
