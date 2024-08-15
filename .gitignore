@@ -1,3 +1,4 @@
 .idea
 target/*
 userfrontend/node_modules
+node_modules/.cache/

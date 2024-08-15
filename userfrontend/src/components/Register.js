@@ -7,6 +7,8 @@ import { VisibilityOffOutlined, VisibilityOutlined } from "@mui/icons-material";
 import {MenuItem} from '@mui/material';
 import {Select,InputLabel,FormControl} from '@mui/material';
 
+
+
 const useStyles = makeStyles((theme) => ({
  
 }));
@@ -24,8 +26,10 @@ export default function Register() {
       e.preventDefault();
    };
     const classes = useStyles();
+    const [infoWindowShown, setInfoWindowShown] = useState(false);
+    const [errorWindowShown, seterrorInfoWindowShown] = useState(false);
 
-  const register=(e)=>{  
+    const register=(e)=>{  
     e.preventDefault()
     const student={name,email,password}
     const url = role === 1 
@@ -39,9 +43,33 @@ export default function Register() {
           body:JSON.stringify(student)
     
       }).then(()=>{
-        console.log("New user added")
-      })
-}
+
+        setName('');
+        setEmail('');
+        setPassword('');
+        setRole('');
+
+           setInfoWindowShown(isShown => !isShown);
+           setTimeout(() => {
+            setInfoWindowShown(false);
+          }, 3000); // Okienko zniknie po 3 sekundach
+          // if the maps api closes the infowindow, we have to synchronize our state
+          
+        }).catch((error) => {
+          console.error('Error:', error);
+          seterrorInfoWindowShown(true);
+        });
+    }
+
+  function Toast({ message }) {
+    return (
+      <div className="toast">
+        {message}
+      </div>
+    );
+  }
+
+ 
   
   return (
 
@@ -96,12 +124,24 @@ export default function Register() {
       <Button variant="contained" color="secondary" onClick={register}>
         Zarejestruj
       </Button>
+      {infoWindowShown && (
+   <Toast 
+   message="Zarejestrowano!"
+ />
+)}
+ {errorWindowShown && (
+   <Toast 
+   message="Podana nazwa użytkownika już istnieje!"
+ />
+)}
       </Box>
     </div>
     </form>
    
     </Paper>
-   
+  
     </Container>
+
+
   );
 }

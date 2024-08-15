@@ -28,6 +28,19 @@
   color: #61dafb;
 }
 
+.toast {
+  position: relative;
+  bottom: 20px;
+  background-color: #240775;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+
+
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);
