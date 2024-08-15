@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { makeStyles } from '@mui/styles';
 import { useNavigate } from 'react-router-dom';
 import { Paper, Button, Box } from '@mui/material';
-import LoginInformation from '../api/LoginInformation';
+// import LoginInformation from '../api/LoginInformation';
 
 const useStyles = makeStyles({
   points: {
@@ -38,8 +38,8 @@ export default function Exercise() {
 
 //zrobić to pójźniej
   useEffect(() => {
-    const url = (LoginInformation.getLoggedInRole()==="student")?"http://localhost:8080/exercise/"+LoginInformation.getLoggedInUser():"http://localhost:8080/exercise/";
-
+   // const url = (LoginInformation.getLoggedInRole()==="student")?"http://localhost:8080/exercise/"+LoginInformation.getLoggedInUser():"http://localhost:8080/exercise/";
+    const url = "http://localhost:8080/exercise/LoginInformation";
     fetch(url)
       .then(res => res.json())
       .then((result) => {

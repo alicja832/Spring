@@ -8,10 +8,9 @@ import com.example.demoggggg.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import com.example.demoggggg.model.enums.RoleEnum;
@@ -58,6 +57,8 @@ public class UserController {
     public JWTResponse authenticate(@RequestBody UserEntity userEntity)throws Exception{
         String token = null;
 
+
+
         String password = userEntity.getPassword();
         String name = userEntity.getName();
         System.out.println(name);
@@ -70,9 +71,11 @@ public class UserController {
 
         try {
             System.out.println(userDetails.getAuthorities());
-            UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(userDetails, userDetails, userDetails.getAuthorities());
-            System.out.println(usernamePasswordAuthenticationToken.isAuthenticated());
-            authenticationManager.authenticate(usernamePasswordAuthenticationToken);
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(userEntity.getName(), userEntity.getPassword())
+            );
+
+            System.out.println("Authentication successful: " + authentication.getName());
         }
         catch (BadCredentialsException e) {
             throw new Exception("INVALID_CREDENTIALS", e);
@@ -81,7 +84,7 @@ public class UserController {
         {
             System.out.println(ex.getMessage());
         }
-
+        System.out.println("OK");
         return new JWTResponse(token);
     }
     @GetMapping("/teacher/{name}")
@@ -118,7 +121,7 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    @Operation(summary = "Login based on user role after authentication", security = @SecurityRequirement(name = "bearerAuth"))
+  //  @Operation(summary = "Login based on user role after authentication", security = @SecurityRequirement(name = "bearerAuth"))
     public String login(@RequestBody UserEntity user) {
 
         System.out.println(user.getPassword());

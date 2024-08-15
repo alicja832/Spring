@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import LoginInformation from '../api/LoginInformation'
+// import LoginInformation from '../api/LoginInformation'
 const Profile = () => {
   const navigate = useNavigate();
 
@@ -9,7 +9,8 @@ const Profile = () => {
     const fetchProfile = async () => {
      
        
-          const role = LoginInformation.getLoggedInRole();
+          //const role = LoginInformation.getLoggedInRole();
+          const role = "Teacher";
           console.log(role);
           if (role === "teacher") {
             

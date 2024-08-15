@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { TextField, IconButton, Paper, Typography, Button, Box } from '@mui/material';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { makeStyles } from '@mui/styles';
-import LoginInformation from '../api/LoginInformation';
+// import LoginInformation from '../api/LoginInformation';
 
 const useStyles = makeStyles({
   container: {
@@ -86,7 +86,8 @@ export default function Solution({ task }) {
   const save = () => {
     //svar student = null;
     var id=0;
-    var name =LoginInformation.getLoggedInUser();
+    // var name =LoginInformation.getLoggedInUser();
+    var name = "aa";
     var email = "f";
     var password = "f";
     const student={id,name,email,password};

@@ -6,7 +6,7 @@ import { FilledInput, IconButton,InputAdornment } from "@mui/material";
 import { VisibilityOffOutlined, VisibilityOutlined } from "@mui/icons-material";
 import {MenuItem} from '@mui/material';
 import {Select,InputLabel,FormControl} from '@mui/material';
-import LoginInformation from '../api/LoginInformation'
+// import LoginInformation from '../api/LoginInformation'
 
 const useStyles = makeStyles((theme) => ({
  
@@ -41,7 +41,7 @@ export default function Register() {
     
       }).then(()=>{
         console.log("New user added");
-        role === "teacher" ? LoginInformation.registerTeacher(name) : LoginInformation.registerStudent(name);
+        //role === "teacher" ? LoginInformation.registerTeacher(name) : LoginInformation.registerStudent(name);
 
       }).catch((error) => {
         console.error('Error:', error);

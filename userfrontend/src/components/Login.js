@@ -7,8 +7,8 @@ import { VisibilityOffOutlined, VisibilityOutlined } from "@mui/icons-material";
 import {MenuItem} from '@mui/material';
 import {Select,InputLabel,FormControl} from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import TokenService from '../api/TokenService';
-import LoginInformation from '../api/LoginInformation'
+// import TokenService from '../api/TokenService';
+// import LoginInformation from '../api/LoginInformation'
 import axios from 'axios';
 const useStyles = makeStyles((theme) => ({
  
@@ -103,7 +103,7 @@ export default function Login() {
             Authorization: `Bearer ${token}` 
           }
         }
-        LoginInformation.setUpToken(token);
+        // LoginInformation.setUpToken(token);
         axios.post(`http://localhost:8080/user/login`, 
           credentials,
           config

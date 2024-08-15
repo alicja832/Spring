@@ -3,7 +3,7 @@ import { Paper} from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { Button, Box } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import LoginInformation from '../api/LoginInformation';
+// import LoginInformation from '../api/LoginInformation';
 import { Login } from '@mui/icons-material';
 const useStyles = makeStyles({
   points: {
@@ -39,10 +39,11 @@ const StudentProfile = () => {
     navigate('/solutionRetake/:' + e.target.value);
   }
   
+  //LoginInformation.getLoggedInUser() ->(wiesz w ktorym to miejscu)
   useEffect(() => {
     // Fetch student profile data 
    
-        fetch("http://localhost:8080/user/student/" + LoginInformation.getLoggedInUser(), {
+        fetch("http://localhost:8080/user/student/" + "Name", {
           method:"GET",
           headers: { "Content-Type": "application/json" }
         })
@@ -55,9 +56,9 @@ const StudentProfile = () => {
           ).catch(error => console.error('Error fetching students:', error));
     
       
-      
+         // LoginInformation.getLoggedInUser()
 
-      fetch("http://localhost:8080/exercise/solutions/"+LoginInformation.getLoggedInUser(),{
+      fetch("http://localhost:8080/exercise/solutions/"+"name",{
         method: "GET",
         headers: { "Content-Type": "application/json" }
       })

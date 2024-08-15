@@ -67,7 +67,7 @@ public class MyJwt implements Serializable {
 
     //validate token
     public Boolean validateToken(String token, UserDetails userDetails) {
-        final String username = getUsernameFromToken(token);
+        //final String username = getUsernameFromToken(token);
         return true;
         //return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }

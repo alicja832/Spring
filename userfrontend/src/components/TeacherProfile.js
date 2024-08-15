@@ -3,7 +3,7 @@ import TextField from '@mui/material/TextField';
 import { Container, Paper, Button, Box } from '@mui/material';
 import { FormControl } from '@mui/material';
 import React, { useEffect, useState } from 'react';
-import LoginInformation from '../api/LoginInformation';
+// import LoginInformation from '../api/LoginInformation';
 
 const useStyles = makeStyles((theme) => ({
 
@@ -103,9 +103,10 @@ const TeacherProfile = () => {
     })
     closeForm();
   };
+  //LoginInformation.getLoggedInUser()
   useEffect(() => {
 
-        fetch("http://localhost:8080/user/teacher/" + LoginInformation.getLoggedInUser(), {
+        fetch("http://localhost:8080/user/teacher/" + "dd", {
           method:"GET",
           headers: { "Content-Type": "application/json" }
 
@@ -118,8 +119,8 @@ const TeacherProfile = () => {
           }
           ).catch(error => console.error('Error fet ching students:'));
      
-
-      fetch("http://localhost:8080/user/exercises/"+LoginInformation.getLoggedInUser())
+//LoginInformation.getLoggedInUser()
+      fetch("http://localhost:8080/user/exercises/")
         .then(res => res.json())
         .then((result) => {
           setExercises(result);

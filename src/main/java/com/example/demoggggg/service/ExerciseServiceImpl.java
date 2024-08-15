@@ -14,8 +14,6 @@ import java.io.StringWriter;
 import java.security.interfaces.EdECKey;
 import java.util.ArrayList;
 import java.util.List;
-
-
 @Service
 public class ExerciseServiceImpl implements ExerciseService {
 
