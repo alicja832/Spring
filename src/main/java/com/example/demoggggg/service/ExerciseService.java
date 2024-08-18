@@ -2,18 +2,22 @@ package com.example.demoggggg.service;
 import com.example.demoggggg.model.Exercise;
 import com.example.demoggggg.model.Solution;
 import com.example.demoggggg.model.Student;
+import com.example.demoggggg.model.UserEntity;
 
 import java.util.List;
 
 public interface ExerciseService {
 
     Exercise save(Exercise exercise);
-    void delete(int id);
+    Solution save(Solution solution);
+    void delete(long id);
     List<Exercise> getAllExercises();
     String getOut(String text);
-    Exercise findById(int id);
-    void update(int id,Exercise exercise);
+    Exercise findExerciseById(long id);
+    void update(long id,Exercise exercise);
     List<Solution> findStudentSolution(Student student);
-    Solution findByI(int id);
+    Solution findSolutionById(int id);
     void updateSolution(int id,Solution solution);
+    long deleteSolutionById(long id);
+
 }

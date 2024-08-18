@@ -10,8 +10,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 @Repository
-public interface StudentRepository extends JpaRepository<Student,Integer> {
-   public Student findById(int id);
+public interface StudentRepository extends JpaRepository<Student,Long> {
+
+   Student findById(long id);
+   Student findByEmail(String email);
+   Student findByName(String name);
    @Transactional
    @Modifying
    @Query(value = "update student set score=:score where id=:id", nativeQuery = true)

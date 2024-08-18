@@ -15,6 +15,7 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import { Link } from 'react-router-dom';
+//import logo from '/logo.svg';
 
 const drawerWidth = 240;
 const navItems = ['Profil', 'Zadania', 'Główna','Zaloguj','Zarejestruj','Wyloguj'];
@@ -51,7 +52,7 @@ export default function DrawerAppBar(props){
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
-      <AppBar component="nav">
+      <AppBar component="nav"  sx={{ backgroundColor: '#001f3f' }}>
         <Toolbar>
           <IconButton
             color="inherit"
@@ -60,13 +61,18 @@ export default function DrawerAppBar(props){
             onClick={handleDrawerToggle}
             sx={{ mr: 2, display: { sm: 'none' } }}
           >
-            <MenuIcon />
+          <MenuIcon />
           </IconButton>
+          
           <Typography
             variant="h6"
             component="div"
             sx={{ flexGrow: 1, display: { xs: 'none', sm: 'block' } }}
           >
+            <img
+            src={'/logo.svg'} 
+            alt="Logo"
+            style={{ height: '24px', verticalAlign: 'middle', marginRight: '8px' }}/>
            Nauka Pythona
           </Typography>
           <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
@@ -100,11 +106,7 @@ export default function DrawerAppBar(props){
 }
 
 DrawerAppBar.propTypes = {
-  /**
-   * Injected by the documentation to work in an iframe.
-   * You won't need it on your project.
-   */
-  window: PropTypes.func,
+   window: PropTypes.func,
 };
 
 
@@ -113,34 +115,3 @@ DrawerAppBar.propTypes = {
 
 
 
-// const useStyles = makeStyles((theme) => ({
-//   root: {
-//     flexGrow: 1,
-//   },
-//   // menuButton: {
-//   //   marginRight: theme.position(2),
-//   // },
-//   title: {
-//     flexGrow: 1,
-//   },
-// }));
-
-// export default function Appbar() {
-//   const classes = useStyles();
-
-//   return (
-//     <div className={classes.root}>
-//       <AppBar position="static">
-//         <Toolbar>
-//           <IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="menu">
-//             <MenuIcon />
-//           </IconButton>
-//           <Typography variant="h6" className={classes.title}>
-//             Spring Boot React Full Stack Application 
-//           </Typography>
-         
-//         </Toolbar>
-//       </AppBar>
-//     </div>
-//   );
-// }

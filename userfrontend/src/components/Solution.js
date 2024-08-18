@@ -2,16 +2,19 @@ import React, { useEffect, useState } from 'react';
 import { TextField, IconButton, Paper, Typography, Button, Box } from '@mui/material';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { makeStyles } from '@mui/styles';
-
-
+import {getLogin} from './api/TokenService';
+import MyParticles from './MyParticles';
 const useStyles = makeStyles({
+  position:'relative',
   container: {
     display: 'flex',
+    position:'relative',
     flexDirection: 'column',
     alignItems: 'center',
     gap: '10px', // Odstęp między elementami
   },
   textFieldContainer: {
+    position:'relative',
     width: '600px',
     border: '4px',
     borderStyle: "solid",
@@ -22,7 +25,21 @@ const useStyles = makeStyles({
     alignItems: 'center',
     gap: '10px', // Odstęp między polem tekstowym a przyciskiem
   },
+  textFxx: {
+    position:'relative',
+    width: '600px',
+    border: '1px',
+    borderStyle: "solid",
+    borderColor: "blue",
+    height: '100px',
+    backgroundColor: 'white',
+    color:'black',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px', // Odstęp między polem tekstowym a przyciskiem
+  },
   textField: {
+    position:'relative',
     // Szerokość pola tekstowego
     height: '392px',
     backgroundColor: '#000', // Czarny kolor tła
@@ -36,6 +53,7 @@ const useStyles = makeStyles({
 
   },
   button: {
+    position:'relative',
     color: '#fff', // Biały kolor ikony
     backgroundColor: '#000', // Czarny kolor tła
     '&:hover': {
@@ -43,6 +61,7 @@ const useStyles = makeStyles({
     },
   },
   output: {
+    position:'relative',
     backgroundColor: '#000', // Czarny kolor tła
     color: '#fff', // Biały kolor tekstu
     padding: '10px',
@@ -58,7 +77,7 @@ const useStyles = makeStyles({
 
 export default function Solution({ task }) {
 
-  const paperStyle = { padding: '50px 20px', width: 600, margin: "20px auto" }
+  const paperStyle = { padding: '50px 20px', width: 600, margin: "20px auto", textAlign:"center" }
   const classes = useStyles();
   const [solutionContent, setSolutionContent] = useState('');
   const [output, setOutput] = useState('');
@@ -84,9 +103,9 @@ export default function Solution({ task }) {
   };
   
   const save = () => {
-    var student = null;
-    const solution = { solutionContent, exercise, student, score,output };
-    fetch("http://localhost:8080/user/solution", {
+    var studentEmail = getLogin(); 
+    const solution = { solutionContent, exercise, studentEmail, score,output };
+    fetch("http://localhost:8080/exercise/solution", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(solution)
@@ -136,7 +155,7 @@ export default function Solution({ task }) {
 
   useEffect(() => {
 
-    fetch("http://localhost:8080/exercise/"+task, {
+    fetch("http://localhost:8080/exercise/one/"+task, {
       method:"GET",
       headers: { "Content-Type": "application/json" }
     })
@@ -154,12 +173,16 @@ export default function Solution({ task }) {
 
   return (
     <div>
-      <h2>Zadanie</h2>
-      <p>Treść: {exercise.content}</p>
-      <p>Maksymalna ilość punktów: {exercise.maxPoints}</p>
-      <p>Oczekiwane wyjście programu: {exercise.correctOutput}</p>
+    <MyParticles></MyParticles>
+    <div >
       {
         <div className={classes.container}>
+           <Paper elevation={3} style={paperStyle}>
+           <h2>Zadanie</h2>
+            <p>Treść: {exercise.content}</p>
+            <p>Maksymalna ilość punktów: {exercise.maxPoints}</p>
+            <p>Oczekiwane wyjście programu: {exercise.correctOutput}</p>
+           </Paper>
           <div className={classes.textFieldContainer}>
             <TextField
               className={classes.textField}
@@ -181,7 +204,7 @@ export default function Solution({ task }) {
             </IconButton>
           </div>
           <Paper className={classes.output}>
-            <Typography variant="body1">
+            <Typography>
               {output}
             </Typography>
           </Paper>
@@ -208,6 +231,7 @@ export default function Solution({ task }) {
           </div>
         </div>
       }
+    </div>
     </div>
   );
 

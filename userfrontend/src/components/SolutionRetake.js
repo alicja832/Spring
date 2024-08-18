@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { TextField, IconButton, Paper, Typography, Button, Box } from '@mui/material';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { makeStyles } from '@mui/styles';
-
+import {getLogin} from './api/TokenService';
+// import LoginInformation from '../api/LoginInformation';
 
 const useStyles = makeStyles({
   container: {
@@ -60,12 +61,12 @@ export default function SolutionRetake({ task }) {
 
   const paperStyle = { padding: '50px 20px', width: 600, margin: "20px auto" }
   const classes = useStyles();
-  
   const [solution, setSolution] = useState(null);
   const [exercise, setExercise] = useState(null);
-  const [student, setStudent] = useState(null);
+  const [studentEmail, setStudentEmail] = useState(null);
 
   const [solutionContent, setSolutionContent] = useState('');
+  const [compare, setCompare] = useState(false);
   const [output, setOutput] = useState('');
   const [visible, setVisible] = useState(false);
   const [score, setScore] = useState(0);
@@ -89,20 +90,13 @@ export default function SolutionRetake({ task }) {
   };
 
   const save = () => {
-    /*
-     private int id;
-    private String name;
-    private String email;
-    private String password;
-    private int score;
-    */ 
+   
    
     const id = solution.id;
+    setStudentEmail(getLogin());
+    const updatesolution = { id,solutionContent, exercise, studentEmail, score,output };
 
-    const updatesolution = { id,solutionContent, exercise, student, score,output };
-    console.log(updatesolution);
     fetch("http://localhost:8080/exercise/solution", {
-      //tutaj nalezy pobrać studenta
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(updatesolution)
@@ -122,18 +116,16 @@ export default function SolutionRetake({ task }) {
       body: JSON.stringify(solutionContent)
     }).then(res => res.text())
       .then((result) => {
-        console.log('Exec', result);
         setOutput(result);
       })
       .catch((error) => {
         console.error('Error:', error);
-        setOutput('Error occurred');
       });
   };
   const check = () => {
 
     var student = null;
-    const solution = { solutionContent, exercise, student, score,output };
+    const solution = { solutionContent, exercise, studentEmail, score,output };
     fetch("http://localhost:8080/exercise/check", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -141,6 +133,7 @@ export default function SolutionRetake({ task }) {
       .then(res => res.text())
       .then((result) => {
         console.log('Exec', result);
+        setScore(result);
       })
       .catch((error) => {
         console.error('Error:', error);
@@ -158,20 +151,12 @@ export default function SolutionRetake({ task }) {
     })
       .then(res => res.json())
       .then((result) => {
-        console.log('Fetched students:', result); // Dodaj t
         setSolution(result[0]);
         setExercise(result[0].exercise);
-        setScore(result[0].score)
-        const name = "";
-        const email = "";
-        const password ="";
-        const id = result[0].studentId;
-        const student ={id,name,email,password};
-        setStudent(student);
-       
+        setStudentEmail(result[0].studentEmail);
       }
       ).catch(error => console.error('Error fetching students:', error));
-  }, [task])
+  }, [])
   if (!solution) {
     return <div>Loading...</div>;
   }

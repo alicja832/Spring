@@ -1,35 +1,40 @@
 package com.example.demoggggg.controller;
-
+import javafx.util.Pair;
+import com.example.demoggggg.dto.ExerciseDto;
 import com.example.demoggggg.model.Exercise;
 import com.example.demoggggg.model.Solution;
 import com.example.demoggggg.model.Student;
+import com.example.demoggggg.model.Teacher;
 import com.example.demoggggg.service.ExerciseService;
 import com.example.demoggggg.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.web.config.EnableSpringDataWebSupport;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
+//localhost na porcie 3000
 
-@CrossOrigin("*")
 @RestController
 @RequestMapping("/exercise")
-
+@CrossOrigin(origins = "http://localhost:3000")
 public class ExerciseController {
     @Autowired
     private ExerciseService exerciseService;
     @Autowired
-    private UserController userController;
-
+    private UserService userService;
     /**
      * add new exercise
      * @param exercise
      * @return
      */
     @PostMapping("/")
-    public Exercise add(@RequestBody Exercise exercise){
+    public ResponseEntity<Exercise> add(@RequestBody ExerciseDto exercise){
 
         Exercise savedExercise = new Exercise();
 
@@ -38,12 +43,14 @@ public class ExerciseController {
         savedExercise.setIntroduction(exercise.getIntroduction());
         savedExercise.setCorrectSolution(exercise.getCorrectSolution());
         savedExercise.setMaxPoints(exercise.getMaxPoints());
+        savedExercise.setTeacher(exercise.getTeacher());
         savedExercise.setCorrectOutput(exerciseService.getOut("\n"+exercise.getCorrectSolution()+"\n"));
 
-        exerciseService.save(savedExercise);
-        userController.addExercise(savedExercise);
+        savedExercise = exerciseService.save(savedExercise);
+        Teacher teacher = userService.findTeacherByName(exercise.getTeacher().getName());
+        teacher.AddExc(savedExercise);
 
-        return savedExercise;
+        return new ResponseEntity<>(savedExercise, HttpStatus.CREATED);
     }
 
     /**
@@ -51,27 +58,24 @@ public class ExerciseController {
      * @param id
      * @return
      */
-    @PostMapping("/delete/{id}")
+    @DeleteMapping("/{id}")
     public void delete(@PathVariable int id){
 
-        userController.deleteExercise(exerciseService.findById(id));
+        exerciseService.findExerciseById(id).getTeacher().removeExercise(exerciseService.findExerciseById(id));
         exerciseService.delete(id);
     }
-
     /**
+     *
      * update excercise
      * @param exercise
      */
-    @PutMapping("/")
+    @PutMapping
     public void update(@RequestBody Exercise exercise){
 
         exercise.setCorrectOutput(exerciseService.getOut("\""+exercise.getCorrectSolution()+"\""));
         exerciseService.update(exercise.getId(), exercise);
-        Exercise newExercise = exerciseService.findById(exercise.getId());
-
-        if(userController.getTeacher()!=null)
-            userController.getTeacher().get(0).getExercises().set( userController.getTeacher().get(0).getExercises().indexOf(exercise),newExercise);
-
+        Exercise newExercise = exerciseService.findExerciseById(exercise.getId());
+        exercise.getTeacher().updateExercise(newExercise);
     }
     /**
      * get all exercises
@@ -83,17 +87,46 @@ public class ExerciseController {
         return exerciseService.getAllExercises();
     }
 
+    @GetMapping("/{email}")
+    public List<Pair<Exercise,Boolean>> listExercises(@PathVariable String email){
+
+        List<Solution> solutions;
+        Student student = userService.findStudentByEmail(email);
+
+        if(student!=null)
+        {
+            solutions = exerciseService.findStudentSolution(student);
+        }
+        else {
+
+            solutions = new ArrayList<Solution>();
+        }
+
+        List<Exercise> list = exerciseService.getAllExercises();
+        List<Pair<Exercise,Boolean>> listExercise = new ArrayList<>();
+
+        for(Exercise e:list)
+        {
+            Predicate<Solution> function = (solution) ->solution.getExercise().equals(e);
+            boolean flag = solutions.stream().anyMatch(function);
+            if(flag)
+                listExercise.add(new Pair<Exercise,Boolean>(e,true));
+            else
+                listExercise.add(new Pair<Exercise,Boolean>(e,false));
+        }
+
+        return listExercise;
+    }
     /**
      * get one exercise
      * @param id
      * @return
      */
-    @GetMapping("/{id}")
+    @GetMapping("/one/{id}")
     public List<Exercise> FindById(@PathVariable int id) {
-        List<Exercise> exercises = List.of(exerciseService.findById(id));
+        List<Exercise> exercises = List.of(exerciseService.findExerciseById(id));
         return exercises;
     }
-
     /**
      * get response from python interpreter
      * @param text
@@ -105,43 +138,93 @@ public class ExerciseController {
         return exerciseService.getOut(text);
     }
     /**
-     * TODO Add posibility to list all excercises which are solved by user and score from its
+     * get one's solutions with name exercise and score
      **/
-    @GetMapping("/solutions")
-    public List<Map<String,String>> getSolutions(){
+    @GetMapping("/solutions/{name}")
+    public List<Map<String,String>> getSolutions(@PathVariable String name){
 
         List<Map<String, String>> excercisesAndScores = new ArrayList<>();
-        List<Solution> solutions=exerciseService.findStudentSolution(userController.getStudent().get(0));
+        List<Solution> solutions = exerciseService.findStudentSolution(userService.findStudentByName(name));
 
-        for(Solution solution:solutions){
-
+        for(Solution solution:solutions) {
+            System.out.println(solution.getScore());
             Map<String,String> map = new HashMap<String,String>();
-            Exercise exercise=exerciseService.findById(solution.getExercise().getId());
+            Exercise exercise=solution.getExercise();
             if(exercise!=null){
                 map.put("id", Integer.toString(solution.getId()));
                 map.put("name",solution.getExercise().getName());
-                map.put("maxPoints", Integer.toString(solution.getScore()));
+                map.put("score", Integer.toString(solution.getScore()));
             }
             excercisesAndScores.add(map);
         }
+
         return excercisesAndScores;
     }
+    @PostMapping("/solution")
+    public ResponseEntity<Solution> addSolution(@RequestBody Solution solution){
+
+
+        Student loginStudent = userService.findStudentByEmail(solution.getStudentEmail());
+
+        if(solution.getScore()==0)
+        {
+            this.checkSolution(solution);
+        }
+        if (loginStudent.getSolutions().contains(solution)) {
+
+            System.out.println(loginStudent.getEmail());
+            int ind = loginStudent.getSolutions().indexOf(solution);
+            int score = loginStudent.getSolutions().get(ind).getScore();
+
+            loginStudent.getSolutions().remove(solution);
+            loginStudent.setScore(loginStudent.getScore() - score);
+            loginStudent.getSolutions().add(solution);
+            loginStudent.addPoints(solution.getScore());
+
+            return new ResponseEntity<>(solution,HttpStatus.CREATED);
+        } else {
+
+            exerciseService.save(solution);
+            loginStudent.addSolution(solution);
+            loginStudent.addPoints(solution.getScore());
+            System.out.println("Dodawanie rozwiazan");
+            System.out.println(loginStudent.getSolutions().toString());
+        }
+
+        return new ResponseEntity<>(solution,HttpStatus.CREATED);
+
+    }
+    /**
+     * get one solution from database
+     * @param id
+     * @return
+     */
     @GetMapping("/solution/{id}")
     public List<Solution> getSolution(@PathVariable int id){
 
-        return List.of(exerciseService.findByI(id));
+        Solution solution = exerciseService.findSolutionById(id);
+        return List.of(solution);
     }
 
+    /**
+     * function to update one solution by one user
+     * @param solution new version of solution
+     */
     @PutMapping("/solution")
     public void updateSolution(@RequestBody Solution solution){
-
+        int oldScore = exerciseService.findSolutionById(solution.getId()).getScore();
         exerciseService.updateSolution(solution.getId(),solution);
-        if(!userController.getStudent().isEmpty())
-            userController.getStudent().get(0).getSolutions().set( userController.getStudent().get(0).getSolutions().indexOf(solution),getSolution(solution.getId()).get(0));
-
+        Student student = userService.findStudentByEmail(solution.getStudentEmail());
+        student.setScore(student.getScore()-oldScore+solution.getScore());
     }
 
+    /**
+     * function which check the solution and change the user's score
+     * @param solution - solution to check
+     * @return
+     */
     @PostMapping("/check")
+
     public int checkSolution(@RequestBody Solution solution){
 
         String expectedOutput = solution.getExercise().getCorrectOutput();
@@ -149,8 +232,7 @@ public class ExerciseController {
 
         if(expectedOutput.equals(solution.getOutput()) || expectedOutput.trim().equals(solution.getOutput().trim()))
         {
-            int points = maxPoints - solution.getScore();
-            userController.getStudent().get(0).addPoints(points);
+            solution.setScore(maxPoints);
             return maxPoints;
         }
 

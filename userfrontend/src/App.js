@@ -7,10 +7,11 @@
   import Profile from './components/Profile';
   import Exercise from './components/Exercise';
   import Login from './components/Login';
-import DrawerAppBar from './components/DrawerAppBar';
-import TeacherProfile from './components/TeacherProfile';
-import StudentProfile from './components/StudentProfile';
-import Solution from './components/Solution';
+  import DrawerAppBar from './components/DrawerAppBar';
+  import TeacherProfile from './components/TeacherProfile';
+  import StudentProfile from './components/StudentProfile';
+  import Solution from './components/Solution';
+  import SolutionRetake from './components/SolutionRetake';
 
   function App() {
    
@@ -28,6 +29,7 @@ import Solution from './components/Solution';
           <Route path="/teacherprofil" element={<TeacherProfile/>} />
           <Route path="/studentprofil" element={<StudentProfile/>} />
           <Route path="/solution/:id" element={<SolutionWrapper />} />
+          <Route path="/solutionRetake/:id" element={<SolutionRetakeWrapper />} />
           </Routes>
       </div>
     </Router>
@@ -37,4 +39,10 @@ import Solution from './components/Solution';
     const { id } = useParams();
     return <Solution task={id.charAt(1)} />;
   }
+
+  function SolutionRetakeWrapper() {
+    const { id } = useParams();
+    return <SolutionRetake task={id.charAt(1)} />;
+  }
+  
   export default App;

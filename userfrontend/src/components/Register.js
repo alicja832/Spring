@@ -6,8 +6,8 @@ import { FilledInput, IconButton,InputAdornment } from "@mui/material";
 import { VisibilityOffOutlined, VisibilityOutlined } from "@mui/icons-material";
 import {MenuItem} from '@mui/material';
 import {Select,InputLabel,FormControl} from '@mui/material';
-
-
+import  {setLogin} from './api/TokenService' ;
+import MyParticles from './MyParticles';
 
 const useStyles = makeStyles((theme) => ({
  
@@ -15,7 +15,7 @@ const useStyles = makeStyles((theme) => ({
 
 export default function Register() {
 
-    const paperStyle={padding:'50px 20px', width:600,margin:"20px auto"}
+    const paperStyle={padding:'50px 20px', width:600,margin:"20px auto",position:"relative"}
     const[name,setName]=useState('')
     const[email,setEmail]=useState('')
     const[role,setRole]=useState('')
@@ -36,31 +36,39 @@ export default function Register() {
     ? "http://localhost:8080/user/teacher"
     : "http://localhost:8080/user/student";
 
-    
-        fetch(url,{
-          method:"POST",
-          headers:{"Content-Type":"application/json"},
-          body:JSON.stringify(student)
-    
-      }).then(()=>{
+    fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(student)
+  })
+  .then(response => {
+      if (!response.ok) {
+          throw new Error('Network response was not ok.');
+      }
+      return response.json(); // Opcjonalnie: jeśli API zwraca JSON
+  })
+  .then(() => {
 
-        setName('');
-        setEmail('');
-        setPassword('');
-        setRole('');
+      setLogin(email);
+      setName('');
+      setEmail('');
+      setPassword('');
+      setRole('');
 
-           setInfoWindowShown(isShown => !isShown);
-           setTimeout(() => {
-            setInfoWindowShown(false);
-          }, 3000); // Okienko zniknie po 3 sekundach
-          // if the maps api closes the infowindow, we have to synchronize our state
-          
-        }).catch((error) => {
-          console.error('Error:', error);
-          seterrorInfoWindowShown(true);
-        });
-    }
-
+      setInfoWindowShown(true);
+      setTimeout(() => {
+          setInfoWindowShown(false);
+      }, 3000);
+  })
+  .catch((error) => {
+      
+      console.error('Error:', error);
+      seterrorInfoWindowShown(true);
+      setTimeout(() => {
+          seterrorInfoWindowShown(false);
+      }, 3000);
+  });
+}
   function Toast({ message }) {
     return (
       <div className="toast">
@@ -72,7 +80,9 @@ export default function Register() {
  
   
   return (
-
+    <div>
+    <MyParticles></MyParticles>
+    <div id= "sthelse">
     <Container>
         <Paper elevation={3} style={paperStyle}>
 
@@ -141,7 +151,7 @@ export default function Register() {
     </Paper>
   
     </Container>
-
-
+    </div>
+    </div>
   );
 }

@@ -13,12 +13,13 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Repository
-public interface SolutionRepository extends JpaRepository<Solution,Integer> {
-    List<Solution> findAllByStudentEquals(Student userId);
+public interface SolutionRepository extends JpaRepository<Solution,Long> {
+    List<Solution> findAllByStudentEmailEquals(String StudentEmail);
     Solution findById(int id);
+    Long deleteById(int id);
     @Transactional
     @Modifying
-    @Query(value = "update solution set solutioncontent=:solutioncontent where id=:id", nativeQuery = true)
-    void updateById(@Param("id") int id, @Param("solutioncontent") String solutioncontent);
+    @Query(value = "update solution set solutioncontent=:solutioncontent,score=:score where id=:id", nativeQuery = true)
+    void updateById(@Param("id") int id, @Param("solutioncontent") String solutioncontent, @Param("score") int score);
 
 }

@@ -3,6 +3,7 @@ import TextField from '@mui/material/TextField';
 import { Container, Paper, Button, Box } from '@mui/material';
 import { FormControl } from '@mui/material';
 import React, { useEffect, useState } from 'react';
+import MyParticles from './MyParticles';
 const useStyles = makeStyles((theme) => ({
 
 }));
@@ -67,8 +68,8 @@ const TeacherProfile = () => {
   }
   const editExercise = (e) => {
 
-    const exercise = { id, name, introduction, content, maxPoints, correctSolution }
-    const url = "http://localhost:8080/exercise/";
+    const exercise = { id, name, introduction, content,teacher, maxPoints, correctSolution }
+    const url = "http://localhost:8080/exercise";
     
     fetch(url, {
       method: "PUT",
@@ -87,7 +88,7 @@ const TeacherProfile = () => {
 
     e.preventDefault()
 
-    const exercise = { name, introduction, content, maxPoints, correctSolution }
+    const exercise = { name, introduction,content, maxPoints, correctSolution,teacher }
 
     const url = "http://localhost:8080/exercise/";
     fetch(url, {
@@ -113,6 +114,7 @@ const TeacherProfile = () => {
         .then(res => res.json())
         .then((result) => {
           setExercises(result);
+          console.log("hhh");
         })
     };
 
@@ -124,7 +126,11 @@ const TeacherProfile = () => {
   }
 
   return (
-
+    <div>
+      <MyParticles></MyParticles>
+   
+    <div id ="sthelse">
+      
     <Container>
       <Paper style={paperStyletwo}>
         <div>
@@ -260,7 +266,8 @@ const TeacherProfile = () => {
       </Container>
 
     </Container>
-
+    </div>
+    </div>
   );
 };
 

@@ -16,22 +16,21 @@ const Profile = () => {
           console.log(role);
           const url = role === "Teacher" ? "http://localhost:8080/user/teacher" : "http://localhost:8080/user/student";
 
-          const res = await fetch(url);
-          if (res.ok) {
-            const result = await res.json();
-            console.log('Fetched profile:', result[0]);
+          //const res = await fetch(url);
+          //if (res.ok) {
+           // const result = await res.json();
+           //  console.log('Fetched profile:', result[0]);
             if (role === "Teacher") {
-            
               navigate('/teacherprofil');
             } else {
-             
               navigate('/studentprofil');
             }
           } else {
-            console.error('Error fetching profile data:', res.statusText);
+            console.error('Error fetching profile data:');  
           }
         }
-      } catch (error) {
+      //}
+       catch (error) {
         console.error('Error fetching role:', error);
       }
     };

@@ -3,6 +3,7 @@ package com.example.demoggggg.service;
 import com.example.demoggggg.model.Exercise;
 import com.example.demoggggg.model.Solution;
 import com.example.demoggggg.model.Student;
+import com.example.demoggggg.model.UserEntity;
 import com.example.demoggggg.repository.ExerciseRepository;
 import com.example.demoggggg.repository.SolutionRepository;
 import org.python.util.PythonInterpreter;
@@ -13,7 +14,7 @@ import java.io.StringWriter;
 import java.security.interfaces.EdECKey;
 import java.util.ArrayList;
 import java.util.List;
-
+import java.util.Optional;
 
 @Service
 public class ExerciseServiceImpl implements ExerciseService {
@@ -28,9 +29,19 @@ public class ExerciseServiceImpl implements ExerciseService {
     public Exercise save(Exercise exercise){
         return exerciseRepository.save(exercise);
     }
-    public void update(int id,Exercise exercise)
+    @Override
+    public Solution save(Solution solution){
+
+        if(solution.getOutput()==null)
+        {
+            solution.setOutput(this.getOut(solution.getSolutionContent()));
+        }
+        return solutionRepository.save(solution);
+    }
+    @Override
+    public void update(long id,Exercise exercise)
     {
-         exerciseRepository.updateById(id,exercise.getName(),exercise.getIntroduction(),exercise.getContent(),exercise.getMaxPoints(),exercise.getCorrectSolution(),exercise.getCorrectOutput());
+        exerciseRepository.updateById(id,exercise.getName(),exercise.getIntroduction(),exercise.getContent(),exercise.getMaxPoints(),exercise.getCorrectSolution(),exercise.getCorrectOutput());
     }
     @Override
     public List<Exercise> getAllExercises()
@@ -46,10 +57,11 @@ public class ExerciseServiceImpl implements ExerciseService {
         String def = "def";
         String clas = "class";
         text = text.substring(1,text.length()-1);
-        System.out.println(text);
+
         if(text.charAt(0)=='\n'){
             text = text.substring(1);
         }
+
         try {
             interpreter = new PythonInterpreter();
             ArrayList<String> list = new ArrayList<>();
@@ -75,7 +87,7 @@ public class ExerciseServiceImpl implements ExerciseService {
                         break;
                     }
                 }
-                if(i<=(text.length()))
+                if(i<(text.length()))
                     list.add(text.substring(begin,i));
             }
             if(i<=(text.length()))
@@ -84,8 +96,9 @@ public class ExerciseServiceImpl implements ExerciseService {
             for(i=0;i< list.size()-1;i++)
             {
                 System.out.println(list.get(i));
-                interpreter.exec(list.get(i));
+                //interpreter.exec(list.get(i));
             }
+            System.out.println();
             System.out.println(list.get(i));
             interpreter.setOut(output);
             interpreter.exec(list.get(i));
@@ -100,13 +113,13 @@ public class ExerciseServiceImpl implements ExerciseService {
     }
 
     @Override
-    public Exercise findById(int id)
+    public Exercise findExerciseById(long id)
     {
         return exerciseRepository.findById(id);
     }
 
     @Override
-    public void delete(int id)
+    public void delete(long id)
     {
         exerciseRepository.deleteById(id);
     }
@@ -114,17 +127,27 @@ public class ExerciseServiceImpl implements ExerciseService {
     @Override
     public List<Solution> findStudentSolution(Student student)
     {
-        return solutionRepository.findAllByStudentEquals(student);
+        return  solutionRepository.findAllByStudentEmailEquals(student.getEmail());
+
     }
+
     @Override
-    public Solution findByI(int id)
+    public Solution findSolutionById(int id)
     {
         return solutionRepository.findById(id);
     }
+
     @Override
     public void updateSolution(int id,Solution solution)
     {
-        solutionRepository.updateById(id,solution.getSolutionContent());
+        solutionRepository.updateById(id,solution.getSolutionContent(),solution.getScore());
+    }
+
+    @Override
+    public long deleteSolutionById(long id)
+    {
+        solutionRepository.deleteById(id);
+        return id;
     }
 
 

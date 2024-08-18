@@ -1,70 +1,43 @@
     package com.example.demoggggg.model;
 
     import jakarta.persistence.*;
+
+    import java.io.Serializable;
     import java.util.ArrayList;
     import java.util.List;
 
     @Entity
-    public class Teacher {
+    public class Teacher extends UserEntity implements Serializable {
 
-        @Id
-        @GeneratedValue(strategy = GenerationType.IDENTITY)
-        @Column(unique = true, name = "id",nullable = false)
-        private int id;
-        private String name;
-        private String email;
-        private String password;
 
-        @OneToMany(cascade = CascadeType.ALL)
+
+        @OneToMany(fetch = FetchType.EAGER)
         @JoinColumn(name = "teacher_id")
-        private List<Exercise> exercises = new ArrayList<>();
+        private List<Exercise> exercises = null;
 
-        public Teacher() {}
+        public Teacher() {
+            exercises = new ArrayList<>();
+        }
         public void AddExc(Exercise something)
         {
-            System.out.println("Excercise Id");
-            System.out.println(something.getId());
+            System.out.println(something.getName());
             exercises.add(something);
+            System.out.println(exercises.toString());
         }
-
-        public int getId() {
-            return id;
+        public void removeExercise(Exercise something)
+        {
+            exercises.remove(something);
         }
-
-        public void setId(int id) {
-            this.id = id;
+        public void updateExercise(Exercise exercise)
+        {
+            exercises.set( exercises.indexOf(exercise),exercise);
         }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public String getEmail() {
-            return email;
-        }
-
-        public void setEmail(String email) {
-            this.email = email;
-        }
-
         public List<Exercise> getExercises() {
             return exercises;
         }
 
         public void setExercises(List<Exercise> exercises) {
             this.exercises = exercises;
-        }
-
-        public String getPassword() {
-            return password;
-        }
-
-        public void setPassword(String password) {
-            this.password = password;
         }
 
         public boolean equals(Object o) {
