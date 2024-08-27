@@ -77,7 +77,7 @@ const useStyles = makeStyles({
 
 export default function Solution({ task }) {
 
-  const paperStyle = { padding: '50px 20px', width: 600, margin: "20px auto", textAlign:"center" }
+  const paperStyle = { backgroundColor : "#FDF5E6",padding: '50px 20px', width: 600, margin: "20px auto", textAlign:"center" }
   const classes = useStyles();
   const [solutionContent, setSolutionContent] = useState('');
   const [output, setOutput] = useState('');

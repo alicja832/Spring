@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
@@ -18,10 +18,20 @@ import { Link } from 'react-router-dom';
 //import logo from '/logo.svg';
 
 const drawerWidth = 240;
-const navItems = ['Profil', 'Zadania', 'Główna','Zaloguj','Zarejestruj','Wyloguj'];
-const purposes = ["/profil","/tasks","/","/login","/register"];
+const navItems = ['Zadania', 'Główna','Zaloguj','Zarejestruj','Wyloguj','Profil'];
+const purposes = ["/tasks","/","/login","/register","/profil","/profil"];
 
-export default function DrawerAppBar(props){
+
+export function setData(){
+  
+  navItems.splice(0, 0, 'Profil');
+  purposes.splice(0, 0, "/profil");
+  console.log(navItems);
+
+}
+
+export default function DrawerAppBar(props){ 
+
   const { window } = props;
   const [mobileOpen, setMobileOpen] = React.useState(false);
 

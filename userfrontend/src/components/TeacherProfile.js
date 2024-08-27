@@ -9,8 +9,8 @@ const useStyles = makeStyles((theme) => ({
 }));
 const TeacherProfile = () => {
 
-  const paperStyle = { padding: '50px 20px', width: '90%', margin: "30px auto" }
-  const paperStyletwo = { padding: '50px 20px', width: '90%', margin: "30px auto", color: "blue" }
+  const paperStyle = { backgroundColor : "#FDF5E6",padding: '50px 20px', width: '90%', margin: "30px auto",position: "relative" }
+  const paperStyletwo = { padding: '50px 20px', width: '90%', margin: "30px auto", position: "relative" }
 
   const classes = useStyles();
   const [id, setId] = useState(0);

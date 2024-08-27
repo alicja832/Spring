@@ -12,11 +12,7 @@ export default function Home() {
   <div>
    <MyParticles></MyParticles>
     {/* Text on top of particles */}
-    <div id = "sthelse" style={{
-        position: "relative",
-        color: "black",  // Text color
-        textAlign: "center",
-      }}>
+    <div id = "sthelse">
     <h2>Home</h2>
      <p>Welcome to the Python learning application.</p>
     </div>

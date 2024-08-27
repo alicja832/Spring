@@ -31,7 +31,7 @@ const useStyles = makeStyles({
 });
 
 export default function Exercise() {
-  const paperStyle = { padding: '50px 20px', width: 600, margin: "20px auto" ,position: "relative",}
+  const paperStyle = { backgroundColor : "#FDF5E6",top: '4em',padding: '50px 20px', width: 600, margin: "20px auto" ,position: "relative",}
   const classes = useStyles();
   const [exercises, setExercises] = useState([]);
   const navigate = useNavigate();
@@ -56,8 +56,7 @@ export default function Exercise() {
    <div>
     <MyParticles></MyParticles>
     <div className={classes.container}>
-      
-      <h1>Zadania</h1>
+    
       {
        <Paper elevation={3} style={paperStyle}>
        {exercises.map(exercise => (

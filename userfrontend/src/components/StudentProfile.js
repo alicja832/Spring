@@ -10,7 +10,7 @@ const useStyles = makeStyles({
   points: {
     width: '30px',
     height: '30px',
-    display: 'flex',
+    display: 'flex', 
     alignItems: 'center',
     border: '3px',
     borderStyle: 'solid',
@@ -32,7 +32,7 @@ const StudentProfile = () => {
 
   const classes = useStyles();
   const navigate = useNavigate();
-  const paperStyle={padding:'50px 20px', width:600,margin:"20px auto",position:"relative"}
+  const paperStyle={backgroundColor : "#FDF5E6",padding:'50px 20px', width:600,margin:"20px auto",position:"relative"}
   const [student, setStudent] = useState(null);
   const [exercisesWithScores, setExercisesWithScores] = useState([]);
 
