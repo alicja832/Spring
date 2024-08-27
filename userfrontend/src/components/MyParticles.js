@@ -15,76 +15,92 @@ const MyParticles = (props) => {
   const [stop, setStop] = useState(false);
   const pythonlength = 40;
  
-  const draw = (frameCount) => {
+  const draw = (frameCount) => {  
+    const halfwidth = context.canvas.width / 2;
+    const halfheight = context.canvas.height / 2;
+    if(stop){
+      context.fillStyle = "black";
+          context.beginPath();
+          context.arc(halfwidth+5, halfheight+18, 1, 0, 2 * Math.PI);
+          context.fill();
+          
+          context.beginPath();
+          context.arc(halfwidth-5, halfheight-18, 1, 0, 2 * Math.PI);
+          context.fill();
+    }
     if (!stop) {
-      context.clearRect(0, 0, context.canvas.width, context.canvas.height);
-      context.strokeStyle = "#6495ED";
-      context.lineWidth = 20;
-      context.beginPath();
-      
-
-      if (frameCount >= context.canvas.height / 2 - 50) {
+      context.clearRect(0, 0, context.canvas.width, context.canvas.height);  
+      context.lineWidth = 20;  
+      if (frameCount >= halfheight - 50) {
         if (
-          frameCount <= context.canvas.height / 2 &&
-          context.canvas.height / 2 - frameCount > 40
+          frameCount <= halfheight &&
+          (halfheight - frameCount) > 20
         ) {
 
           context.strokeStyle = "#FFD700";
           context.beginPath();
           context.moveTo(
-            context.canvas.width / 2,
+            halfwidth,
             context.canvas.height - frameCount
           ); // Move the pen to (30, 50)
-          context.lineTo(context.canvas.width / 2, context.canvas.height / 2); // Draw a line to (150, 100)
+          context.lineTo(halfwidth, halfheight); // Draw a line to (150, 100)
           context.moveTo(
-            context.canvas.width / 2,
-            context.canvas.height / 2
+            halfwidth,
+            halfheight
           ); // Draw a line to (150, 100)
           context.lineTo(
-            context.canvas.width / 2 +
-              (70 - (context.canvas.height / 2 - frameCount)),
-            context.canvas.height / 2
+            halfwidth +
+              (50 - (halfheight - frameCount)),
+            halfheight
           ); // Draw a line to (150, 100)
           context.stroke();
 
 
           context.strokeStyle = "#6495ED";
           context.beginPath();
-          context.moveTo(context.canvas.width / 2 , frameCount); // Move the pen to (30, 50)
+          context.moveTo(halfwidth , frameCount); // Move the pen to (30, 50)
           context.lineTo(
-            context.canvas.width / 2,
-            context.canvas.height / 2
+            halfwidth,
+            halfheight
           ); // Draw a line to (150, 100)
           context.moveTo(
-            context.canvas.width / 2-10,
-            context.canvas.height / 2
+            halfwidth-10,
+            halfheight
           ); // Draw a line to (150, 100)
           context.lineTo(
             context.canvas.width / 2  -
-              (70 - (context.canvas.height / 2 - frameCount)),
+              (50 - (context.canvas.height / 2 - frameCount)),
             context.canvas.height / 2
           ); // Draw a line to (150, 100)
+          // context.lineTo(
+          //   halfwidth  -
+          //     (pythonlength - (halfheight - frameCount)),
+          //   halfheight
+          // ); // Draw a line to (150, 100)
           context.stroke();
 
           
-          if (context.canvas.height / 2 - (frameCount + 1) <= 40) {
+          if (halfheight - (frameCount + 1) <= 20) {          
             setStop(true);
           }
         }
       } else {
-        context.moveTo(context.canvas.width / 2, frameCount); // Move the pen to (30, 50)
-        context.lineTo(context.canvas.width / 2 , frameCount + 70); // Draw a line to (150, 100)
+
+        context.strokeStyle = "#6495ED";
+        context.beginPath();
+        context.moveTo(halfwidth, frameCount); // Move the pen to (30, 50)
+        context.lineTo(halfwidth , frameCount + pythonlength); // Draw a line to (150, 100)
         context.stroke(); // Render the path
 
         context.strokeStyle = "#FFD700";
         context.beginPath();
         context.moveTo(
-          context.canvas.width / 2,
+          halfwidth,
           context.canvas.height - frameCount
         ); // Move the pen to (30, 50)
         context.lineTo(
-          context.canvas.width / 2,
-          context.canvas.height - (frameCount + 70)
+          halfwidth,
+          context.canvas.height - (frameCount + pythonlength)
         ); // Draw a line to (150, 100)
       }
       context.stroke(); // Render the path
@@ -107,7 +123,8 @@ const MyParticles = (props) => {
       //Our draw came here
       const render = () => {
         frameCount += 0.4;
-
+        const halfwidth = context.canvas.width / 2;
+        const halfheight = context.canvas.height / 2;
         if (frameCount > context.canvas.height) {
           setStop(false);
           frameCount = 0;
