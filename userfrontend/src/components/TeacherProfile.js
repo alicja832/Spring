@@ -1,5 +1,6 @@
 import { makeStyles } from '@mui/styles';
 import TextField from '@mui/material/TextField';
+import Textarea from '@mui/joy/Textarea';
 import { Container, Paper, Button, Box } from '@mui/material';
 import { FormControl } from '@mui/material';
 import React, { useEffect, useState } from 'react';
@@ -10,7 +11,7 @@ const useStyles = makeStyles((theme) => ({
 const TeacherProfile = () => {
 
   const paperStyle = { backgroundColor : "#FDF5E6",padding: '50px 20px', width: '90%', margin: "30px auto",position: "relative" }
-  const paperStyletwo = { padding: '50px 20px', width: '90%', margin: "30px auto", position: "relative" }
+  const paperStyletwo = { backgroundColor : "#FDF5E6",padding: '50px 20px', width: '90%', margin: "30px auto", position: "relative" }
 
   const classes = useStyles();
   const [id, setId] = useState(0);
@@ -23,7 +24,6 @@ const TeacherProfile = () => {
   const [exercises, setExercises] = useState([]);
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [isFormTwoVisible, setIsFormTwoVisible] = useState(false);
-
 
   const showForm = () => {
     setIsFormVisible(true);
@@ -151,10 +151,10 @@ const TeacherProfile = () => {
                 onChange={(e) => setName(e.target.value)}
               />
 
-              <TextField id="outlined-basic" label="Treść" variant="outlined" fullWidth
+              {/* <Textarea name="Outlined" placeholder="Type in here…" variant="outlined"
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-              />
+              /> */}
 
               <TextField id="outlined-basic" label="Wstęp teoretyczny" variant="outlined" fullWidth
                 value={introduction}
@@ -174,7 +174,9 @@ const TeacherProfile = () => {
               <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
 
                 <Box display="flex" flexDirection="column" gap={2}>
-                  <Button variant="contained" color="secondary" onClick={addExercise}>
+                  <Button 
+                  style = {{backgroundColor:'#001f3f'}}
+                  variant="contained" color="secondary" onClick={addExercise}>
                     Dodaj
                   </Button>
                 </Box>
@@ -196,10 +198,10 @@ const TeacherProfile = () => {
                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
 
                   <Box display="flex" flexDirection="column" gap={2}>
-                    <Button variant="contained" value={exercise.id} color="inherit" onClick={deleteExercise}>
+                    <Button style = {{backgroundColor:'#001f3f',color:'white'}} variant="contained" value={exercise.id} color="inherit" onClick={deleteExercise}>
                       Usuń
                     </Button>
-                    <Button variant="contained" value={exercise.id} color="inherit" onClick={showFormTwo}>
+                    <Button style = {{backgroundColor:'#001f3f', color:'white'}} variant="contained" value={exercise.id} color="inherit" onClick={showFormTwo}>
                       Edytuj
                     </Button>
                   </Box>
@@ -257,7 +259,7 @@ const TeacherProfile = () => {
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
 
           <Box display="flex" flexDirection="column" gap={2}>
-            <Button variant="contained" color="secondary" onClick={showForm}>
+            <Button style = {{backgroundColor:'#001f3f'}} variant="contained" color="secondary" onClick={showForm}>
               Dodaj zadanie
             </Button>
           </Box>

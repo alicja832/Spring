@@ -206,6 +206,7 @@ export default function Login() {
                 }}
               >
                 <Button
+                  style = {{backgroundColor:'#001f3f'}}
                   variant="contained"
                   color="primary"
                   component={Link}
@@ -224,6 +225,7 @@ export default function Login() {
               >
                 <Box display="flex" flexDirection="column" gap={2}>
                   <Button
+                    style = {{backgroundColor:'#001f3f'}}
                     variant="contained"
                     color="primary"
                     onClick={loginClicked}

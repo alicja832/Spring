@@ -93,14 +93,14 @@ const StudentProfile = () => {
       {
         
         <Paper elevation={3} style={paperStyle}>
-          <Button onClick={fetchStudentExercises}>Zobacz swoje rozwiązania</Button>
+          <Button style = {{backgroundColor:'#001f3f'}} onClick={fetchStudentExercises}>Zobacz swoje rozwiązania</Button>
           {exercisesWithScores.map(exercise => (
             <Paper elevation={6} style={{ margin: "10px", padding: "15px", textAlign: "left" }} key={exercise.id}>
               <div className={classes.headerContainer}> <h3> {exercise.name}</h3><p>Twój wynik:</p><Box className={classes.points}>{exercise.score}</Box></div>
 
               <div>
                 <Box display="flex" flexDirection="column" gap={2}>
-                  <Button variant="contained" value={parseInt(exercise.id)} onClick={retake} color="secondary" >
+                  <Button style = {{backgroundColor:'#001f3f'}} variant="contained" value={parseInt(exercise.id)} onClick={retake} color="secondary" >
                     Wykonaj ponownie
                   </Button>
                   

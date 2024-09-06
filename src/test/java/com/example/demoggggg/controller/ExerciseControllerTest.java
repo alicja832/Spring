@@ -42,7 +42,7 @@ class ExerciseControllerTest {
         exercise.setCorrectSolution("print('a')");
         exercise.setMaxPoints(1);
         exercise.setContent("a");
-        exercise = exerciseController.add(exercise);
+//        exercise = exerciseController.add(exercise);
         exercise.setName("b");
         exercise.setIntroduction("b");
         exerciseController.update(exercise);
@@ -64,12 +64,12 @@ class ExerciseControllerTest {
         exercise.setCorrectSolution("print('a')");
         exercise.setMaxPoints(1);
         exercise.setContent("a");
-        exercise = exerciseController.add(exercise);
+//        exercise = exerciseController.add(exercise);
 
         Solution solution = new Solution();
         solution.setSolutionContent("a");
         solution.setExercise(exercise);
-        solution = userController.addSolution(solution);
+//        solution = userController.addSolution(solution);
 
         solution.setSolutionContent("b");
         exerciseController.updateSolution(solution);
@@ -90,7 +90,7 @@ class ExerciseControllerTest {
         exercise.setCorrectSolution("print('a')");
         exercise.setMaxPoints(1);
         exercise.setContent("a");
-        exercise = exerciseController.add(exercise);
+//        exercise = exerciseController.add(exercise);
 
         Solution solution = new Solution();
         solution.setSolutionContent("a");

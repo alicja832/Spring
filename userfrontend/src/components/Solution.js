@@ -216,7 +216,7 @@ export default function Solution({ task }) {
           <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
 
             <Box display="flex" flexDirection="column" gap={2}>
-              <Button variant="contained" color="secondary" onClick={check}>
+              <Button style = {{backgroundColor:'#001f3f'}} variant="contained" color="secondary" onClick={check}>
                 Sprawdz
               </Button>
             </Box>
@@ -224,8 +224,8 @@ export default function Solution({ task }) {
           <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
 
             <Box display="flex" flexDirection="column" gap={2}>
-              <Button variant="contained" color="secondary" onClick={save}>
-                Zapisz
+              <Button style = {{backgroundColor:'#001f3f'}} variant="contained" color="secondary" onClick={save}>
+                Zapisz rozwiązanie
               </Button>
             </Box>
           </div>

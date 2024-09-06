@@ -30,6 +30,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Teacher saveTeacher(Teacher teacher) {
+
         return teacherRepository.save(teacher);
     }
     @Override
@@ -104,6 +105,11 @@ public class UserServiceImpl implements UserService {
     {
         return userRepository.findByName(name);
     }
+    @Override
+    public void updateUser(String email,String password)
+    {
+        userRepository.updateByEmail(email, password);
+    }
     /**
      *
      * TODO To będzie do zmiany ponieważ autoryzacja i uwierzytelnienie będzie innaczej
@@ -119,7 +125,6 @@ public class UserServiceImpl implements UserService {
         Student probe = new Student();
         probe.setEmail(student.getEmail());
         probe.setPassword(student.getPassword());
-        System.out.println(student.getPassword());
         probe.setName(student.getName());
         Example<Student> example = Example.of(probe, modelMatcher);
 

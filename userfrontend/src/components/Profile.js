@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-
+import { MyParticles } from './MyParticles'
 const Profile = () => {
   const navigate = useNavigate();
 

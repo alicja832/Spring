@@ -8,12 +8,13 @@ import { MenuItem } from "@mui/material";
 import { Select, InputLabel, FormControl } from "@mui/material";
 import { setLogin } from "./api/TokenService";
 import MyParticles from "./MyParticles";
-import { setData } from "./DrawerAppBar";
 import { Background } from "@tsparticles/engine";
+
 
 const useStyles = makeStyles((theme) => ({}));
 
-export default function Register() {
+export default function Register(props) {
+  
   const paperStyle = {
     top: "4em",
     padding: "50px 20px",
@@ -23,6 +24,7 @@ export default function Register() {
     position: "relative",
     backgroundColor : "#FDF5E6"
   };
+  
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("");
@@ -79,6 +81,7 @@ export default function Register() {
         }
         else
         {
+          props.changeProperties();
           setLogin(email);
           setName("");
           setEmail("");
@@ -162,7 +165,7 @@ export default function Register() {
                 <Box display="flex" flexDirection="column" gap={2}>
                   <Button
                     variant="contained"
-                    color="primary"
+                    style = {{backgroundColor:'#001f3f'}}
                     onClick={register}
                   >
                     Zarejestruj

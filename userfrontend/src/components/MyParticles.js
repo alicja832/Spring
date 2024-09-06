@@ -1,7 +1,6 @@
+import { ContentCopyRounded } from "@mui/icons-material";
 import React, { useRef } from "react";
-import { useCallback, useEffect, useState } from "react";
-import Particles, { initParticlesEngine } from "@tsparticles/react";
-import { loadSlim } from "@tsparticles/slim";
+import { useEffect, useState } from "react";
 
 const MyParticles = (props) => {
   const {
@@ -10,123 +9,358 @@ const MyParticles = (props) => {
     backgroundColor = "#D3D3D3",
     ...rest
   } = props;
+
+  const pythonlength = 20;
   const canvasRef = useRef(null);
   const [context, setContext] = useState(null);
-  const [stop, setStop] = useState(false);
-  const pythonlength = 40;
- 
-  const draw = (frameCount) => {  
+  const step = 0.2;
+  var frameCount = 0;
+  //show moment with snakes
+  var wait = false;
+  //tu small in background
+  const points = [
+    [20, 20],
+    [70, 70],
+    [130, 200],
+    [210, 250],
+  ];
+  const sizes = [40, 70, 80, 40];
+
+  const draw = (frameCount) => {
+
     const halfwidth = context.canvas.width / 2;
     const halfheight = context.canvas.height / 2;
-    if(stop){
-      context.fillStyle = "black";
-          context.beginPath();
-          context.arc(halfwidth+5, halfheight+18, 1, 0, 2 * Math.PI);
-          context.fill();
+    context.lineWidth = 10;
+    const lineWidth = 10;
+    const between = 0.75 * context.lineWidth;
+
+    if (wait) {
+      
+      let wyzn = halfheight - pythonlength;
+      //zolty i co dalej
+     
+        if(frameCount>context.canvas.height / 2 + 0.5* pythonlength)
+        {
           
+          context.strokeStyle = "white"; 
           context.beginPath();
-          context.arc(halfwidth-5, halfheight-18, 1, 0, 2 * Math.PI);
-          context.fill();
-    }
-    if (!stop) {
-      context.clearRect(0, 0, context.canvas.width, context.canvas.height);  
-      context.lineWidth = 20;  
-      if (frameCount >= halfheight - 50) {
-        if (
-          frameCount <= halfheight &&
-          (halfheight - frameCount) > 20
-        ) {
+          context.moveTo(
+            halfwidth,
+            halfheight +lineWidth/2
+          );
+          context.lineTo(
+            halfwidth + between,
+            halfheight + lineWidth/2
+          );
+          context.lineWidth = 1;
+          context.stroke();
+
+          context.beginPath();
+          context.moveTo(
+            halfwidth,
+            halfheight -lineWidth/2
+          );
+          context.lineTo(
+            halfwidth - between,
+            halfheight - lineWidth/2
+          );
+          context.stroke();   
+
+          context.strokeStyle = "#FFD700"; 
+          context.beginPath();
+          context.moveTo(
+            halfwidth,
+            halfheight +lineWidth/2+1
+          );
+          context.lineTo(
+            halfwidth + between,
+            halfheight + lineWidth/2 +1
+          );
+          context.lineWidth = 1;
+          context.stroke();
+          
+          context.strokeStyle ="#6495ED"
+          context.beginPath();
+          context.moveTo(
+            halfwidth,
+            halfheight -lineWidth/2-1
+          );
+          context.lineTo(
+            halfwidth - between,
+            halfheight - lineWidth/2 -1
+          );
+          context.stroke();   
+          
+        }
+        
+        else if(frameCount > wyzn) {
 
           context.strokeStyle = "#FFD700";
           context.beginPath();
           context.moveTo(
-            halfwidth,
-            context.canvas.height - frameCount
-          ); // Move the pen to (30, 50)
-          context.lineTo(halfwidth, halfheight); // Draw a line to (150, 100)
-          context.moveTo(
-            halfwidth,
-            halfheight
-          ); // Draw a line to (150, 100)
+            halfwidth - between,
+            halfheight + context.lineWidth / 2
+          );
           context.lineTo(
-            halfwidth +
-              (50 - (halfheight - frameCount)),
-            halfheight
-          ); // Draw a line to (150, 100)
+            halfwidth + between,
+            halfheight + context.lineWidth / 2
+          );
           context.stroke();
-
 
           context.strokeStyle = "#6495ED";
           context.beginPath();
-          context.moveTo(halfwidth , frameCount); // Move the pen to (30, 50)
-          context.lineTo(
-            halfwidth,
-            halfheight
-          ); // Draw a line to (150, 100)
           context.moveTo(
-            halfwidth-10,
-            halfheight
-          ); // Draw a line to (150, 100)
+            halfwidth - between,
+            halfheight - context.lineWidth / 2
+          );
           context.lineTo(
-            context.canvas.width / 2  -
-              (50 - (context.canvas.height / 2 - frameCount)),
-            context.canvas.height / 2
-          ); // Draw a line to (150, 100)
-          // context.lineTo(
-          //   halfwidth  -
-          //     (pythonlength - (halfheight - frameCount)),
-          //   halfheight
-          // ); // Draw a line to (150, 100)
+            halfwidth + between,
+            halfheight - context.lineWidth / 2
+          );
+          context.stroke();
+        
+        if (frameCount < wyzn + 2 * context.lineWidth) {
+          
+          context.fillStyle = "white";
+          
+          //zolty 
+          context.beginPath();
+          context.arc(
+            halfwidth - between + context.lineWidth / 4,
+            frameCount + 0.75 * context.lineWidth,
+            1,
+            0,  
+            2 * Math.PI
+          );
+          context.fill();
+
+          //niebieski
+          context.beginPath();
+          context.arc(
+            halfwidth + between - context.lineWidth / 4,
+            halfheight - context.lineWidth / 4-(frameCount-halfheight+0.5*context.lineWidth),
+            1,
+            0,
+            2 * Math.PI
+          );
+          context.fill();
+        
+        } else {
+          //to jest akurat oczko przesuwajace sie w prawo
+          context.fillStyle = "white";
+          console.log("jestem");
+          context.beginPath();
+          context.arc(
+            halfwidth -
+              between +
+              context.lineWidth / 4 +
+              frameCount -
+              (wyzn + 2.0 * context.lineWidth),
+            wyzn + 2.75 * context.lineWidth,
+            1,
+            0,
+            2 * Math.PI
+          );
+          context.fill();
+
+           //to jest akurat oczko przesuwajace sie w lewo
+           context.fillStyle = "white";
+           console.log("jestem");
+           context.beginPath(); 
+           context.arc(
+             halfwidth +
+               between -
+               context.lineWidth / 4 -
+               (frameCount -
+               (wyzn + 2.0 * context.lineWidth)),
+               halfheight - 0.75*context.lineWidth,
+             1,
+             0,
+             2 * Math.PI
+           );
+           context.fill();
+        }
+      } else {
+        context.fillStyle = "white";
+        context.beginPath();
+        context.arc(
+          halfwidth +
+            between -
+            (pythonlength - context.lineWidth / 2) -
+            context.lineWidth / 4,
+          frameCount + context.lineWidth / 2,
+          1,
+          0,
+          2 * Math.PI
+        );
+        context.fill();
+
+        context.beginPath();
+        context.arc(
+          halfwidth -
+            between +
+            (pythonlength - (context.lineWidth / 2 + 1)) -
+            context.lineWidth / 4,
+          halfheight - context.lineWidth / 4,
+          1,
+          0,
+          2 * Math.PI
+        );
+        context.fill();
+      }
+    } else {
+      
+      context.clearRect(0, 0, context.canvas.width, context.canvas.height);
+
+      if (frameCount >= halfheight - pythonlength) {
+        if (
+          frameCount <= halfheight &&
+          halfheight - frameCount > context.lineWidth / 2
+        ) {
+          //zolty
+          context.strokeStyle = "#FFD700";
+          context.beginPath();
+          context.moveTo(halfwidth + between, frameCount);
+          context.lineTo(
+            halfwidth + between,
+            halfheight + context.lineWidth / 2
+          );
           context.stroke();
 
-          
-          if (halfheight - (frameCount + 1) <= 20) {          
-            setStop(true);
+          //niebieski
+          context.strokeStyle = "#6495ED";
+          context.beginPath();
+          context.moveTo(
+            halfwidth - between,
+            halfheight - context.lineWidth / 2
+          );
+          context.lineTo(
+            halfwidth - between + (pythonlength - (halfheight - frameCount)),
+            halfheight - context.lineWidth / 2
+          );
+          context.stroke();
+
+          //niebieski
+          context.strokeStyle = "#6495ED";
+          context.beginPath();
+          context.moveTo(
+            halfwidth - between,
+            context.canvas.height - frameCount
+          );
+          context.lineTo(
+            halfwidth - between,
+            halfheight - context.lineWidth / 2
+          );
+          context.stroke();
+
+          //zolty
+          context.strokeStyle = "#FFD700";
+          context.beginPath();
+          context.moveTo(
+            halfwidth + between,
+            halfheight + context.lineWidth / 2
+          );
+          context.lineTo(
+            halfwidth + between - (pythonlength - (halfheight - frameCount)),
+            halfheight + context.lineWidth / 2
+          );
+          context.stroke();
+
+          //eyes yellow
+          context.fillStyle = "white";
+          context.beginPath();
+          context.arc(
+            halfwidth +
+              between -
+              (pythonlength - (halfheight - frameCount)) +
+              context.lineWidth / 4,
+
+            halfheight + context.lineWidth / 4,
+            1,
+            0,
+            2 * Math.PI
+          );
+          context.fill();
+
+          //eyes blue
+          context.beginPath();
+          context.arc(
+            halfwidth -
+              between +
+              (pythonlength - (halfheight - frameCount)) -
+              context.lineWidth / 4,
+            halfheight - context.lineWidth / 4,
+            1,
+            0,
+            2 * Math.PI
+          );
+          context.fill();
+
+          if (halfheight - (frameCount + step) <= context.lineWidth / 2) {
+            wait = true;
           }
         }
       } else {
 
         context.strokeStyle = "#6495ED";
         context.beginPath();
-        context.moveTo(halfwidth, frameCount); // Move the pen to (30, 50)
-        context.lineTo(halfwidth , frameCount + pythonlength); // Draw a line to (150, 100)
-        context.stroke(); // Render the path
+        context.moveTo(halfwidth - between, context.canvas.height - frameCount);
+        context.lineTo(
+          halfwidth - between,
+          context.canvas.height - (frameCount + pythonlength)
+        );
+        context.stroke();
 
+        //snakes are falling down
         context.strokeStyle = "#FFD700";
         context.beginPath();
-        context.moveTo(
-          halfwidth,
-          context.canvas.height - frameCount
-        ); // Move the pen to (30, 50)
-        context.lineTo(
-          halfwidth,
-          context.canvas.height - (frameCount + pythonlength)
-        ); // Draw a line to (150, 100)
+        context.moveTo(halfwidth + between, frameCount);
+        context.lineTo(halfwidth + between, frameCount + pythonlength);
+        context.stroke();
+
+        //eyes yellow
+        context.fillStyle = "white";
+        context.beginPath();
+        context.arc(
+          halfwidth + between - context.lineWidth / 4,
+          frameCount + pythonlength - 5,
+          1,
+          0,
+          2 * Math.PI
+        );
+        context.fill();
+
+        //eyes blue
+        context.beginPath();
+        context.arc(
+          halfwidth - between + context.lineWidth / 4,
+          context.canvas.height - (frameCount + pythonlength) + 5,
+          1,
+          0,
+          2 * Math.PI
+        );
+        context.fill();
       }
-      context.stroke(); // Render the path
     }
   };
+
   useEffect(() => {
-    //i.e. value other than null or undefined
     if (canvasRef.current) {
       const canvas = canvasRef.current;
       const ctx = canvas.getContext("2d");
       setContext(ctx);
     }
-  }, []);
+  });
+
   useEffect(() => {
-    let frameCount = 0;
     let animationFrameId;
 
-    // Check if null context has been replaced on component mount
     if (context) {
-      //Our draw came here
       const render = () => {
-        frameCount += 0.4;
-        const halfwidth = context.canvas.width / 2;
-        const halfheight = context.canvas.height / 2;
-        if (frameCount > context.canvas.height) {
-          setStop(false);
+        frameCount += step;
+
+        if (frameCount > context.canvas.height / 2 + 1.5*pythonlength) {
+          wait = false;
           frameCount = 0;
         }
         draw(frameCount);
@@ -138,6 +372,7 @@ const MyParticles = (props) => {
       window.cancelAnimationFrame(animationFrameId);
     };
   }, [draw, context]);
+
   return (
     <canvas
       ref={canvasRef}

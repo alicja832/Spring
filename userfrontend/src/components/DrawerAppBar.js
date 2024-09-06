@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
@@ -15,26 +15,55 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import { Link } from 'react-router-dom';
+import ParentComponent from './ParentComponent';
+import { getLogin } from './api/TokenService'; 
 //import logo from '/logo.svg';
 
-const drawerWidth = 240;
-const navItems = ['Zadania', 'Główna','Zaloguj','Zarejestruj','Wyloguj','Profil'];
-const purposes = ["/tasks","/","/login","/register","/profil","/profil"];
 
-
-export function setData(){
+export default function DrawerAppBar(register, props){ 
+ 
+  const [navItems,setNavItems] = useState(['Zadania', 'Główna','Zaloguj','Zarejestruj']);
+  const [purposes,setPurposes] = useState(["/tasks","/","/login","/register"]);
+  const [ddd,setddd]=useState('');
   
-  navItems.splice(0, 0, 'Profil');
-  purposes.splice(0, 0, "/profil");
-  console.log(navItems);
+  useEffect(() => {
+    
+    console.log("useEffect");
+    
+    if(ddd==='')
+      setddd(register.register);
+    
+    console.log(register);
+    if(getLogin() && !navItems.includes('Profil'))
+      {
+        navItems.unshift('Profil');
+        purposes.unshift("/profil");
+        navItems.push("Wyloguj");
+        purposes.push("/logout");
+        setNavItems(navItems.filter((element) => element!=='Zaloguj'&& element!=='Zarejestruj'));
+        setPurposes(purposes.filter((element) => element!=="/login" && element!=="/register"));
 
-}
-
-export default function DrawerAppBar(props){ 
-
+      }
+    // Fetch student profile data
+    if(register.register==="fff" && !navItems.includes('Profil'))
+    {
+      navItems.unshift('Profil');
+      purposes.unshift("/profil");
+      navItems.push('Wyloguj');
+      purposes.push("/logout");
+      setNavItems(navItems.filter((element) => element!=='Zaloguj'&& element!=='Zarejestruj'));
+      setPurposes(purposes.filter((element) => element!=="/login" && element!=="/register"));    
+    }
+    
+    console.log ("useEffect");
+    console.log(navItems);
+    
+  },[register]);
+  
   const { window } = props;
   const [mobileOpen, setMobileOpen] = React.useState(false);
-
+  const drawerWidth = 240;
+  
   const handleDrawerToggle = () => {
     setMobileOpen((prevState) => !prevState);
   };
@@ -73,7 +102,6 @@ export default function DrawerAppBar(props){
           >
           <MenuIcon />
           </IconButton>
-          
           <Typography
             variant="h6"
             component="div"
@@ -83,7 +111,7 @@ export default function DrawerAppBar(props){
             src={'/logo.svg'} 
             alt="Logo"
             style={{ height: '24px', verticalAlign: 'middle', marginRight: '8px' }}/>
-           Nauka Pythona
+           {register.register}
           </Typography>
           <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
             {navItems.map((item,index) => (
@@ -115,9 +143,9 @@ export default function DrawerAppBar(props){
   );
 }
 
-DrawerAppBar.propTypes = {
-   window: PropTypes.func,
-};
+// DrawerAppBar.propTypes = {
+//    window: PropTypes.func,
+// };
 
 
 

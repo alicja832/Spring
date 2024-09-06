@@ -21,6 +21,7 @@ public interface UserService {
     public long loginStudent(Student student);
     public long loginTeacher(Teacher teacher);
     void updateStudent(int id,int score);
+    void updateUser(String email,String password);
     long deleteUser(long id);
     List<UserEntity> listAll();
     UserEntity findUserByNameAndPassword(String username, String password);

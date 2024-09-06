@@ -1,12 +1,25 @@
 package com.example.demoggggg.controller;
+import com.example.demoggggg.dto.VerificationRequest;
 import com.example.demoggggg.model.*;
 import com.example.demoggggg.service.UserService;
+import com.sun.net.httpserver.Authenticator;
+import jakarta.mail.*;
+import jakarta.mail.internet.*;
+import jakarta.mail.internet.InternetAddress;
+import jakarta.mail.internet.MimeBodyPart;
+import jakarta.mail.internet.MimeMessage;
+import jakarta.mail.internet.MimeMultipart;
+import javafx.util.Pair;
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.ArrayList;
-import java.util.List;
+
+import javax.naming.InitialContext;
+import java.lang.Math;
+import java.sql.SQLException;
+import java.util.*;
 
 //import com.example.demoggggg.jwt.JWTRequest;
 //import com.example.demoggggg.jwt.JWTResponse;
@@ -18,7 +31,6 @@ import java.util.List;
 //import org.springframework.security.core.authority.SimpleGrantedAuthority;
 //import org.springframework.security.core.userdetails.UserDetails;
 //import org.springframework.security.crypto.password.PasswordEncoder;
-//
 //import com.example.demoggggg.model.enums.RoleEnum;
 //import org.springframework.security.authentication.BadCredentialsException;
 //import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -37,37 +49,167 @@ public class UserController {
     private String role;
     private Teacher loginTeacher;
     private Student loginStudent;
-
+    private List<Pair<String,String>> EmailCode;
 //    @Autowired
 //    private MyJwt jwt;
 //    @Autowired
 //    private AuthenticationManager authenticationManager;
 
-
     @PostMapping("/teacher")
-
-    public Teacher add(@RequestBody Teacher teacher){
+    public ResponseEntity<String> add(@RequestBody Teacher teacher){
 
         teacher.setRole("TEACHER");
-        Teacher newTeacher= userService.saveTeacher(teacher);
+        Teacher savedTeacher = userService.findTeacherByEmail(teacher.getEmail());
+        ResponseEntity<String> responseEntity = new ResponseEntity<>(HttpStatus.CREATED);
 
-        userId = newTeacher.getId();
+        if(savedTeacher!=null)
+        {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Użytkownik o podanym adresie email istnieje");
+        }
+        savedTeacher = userService.findTeacherByName(teacher.getName());
+
+        if(savedTeacher!=null)
+        {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Użytkownik o podanym loginie istnieje");
+        }
+
+        loginTeacher = userService.saveTeacher(teacher);
+        userId = loginTeacher.getId();
         role="Teacher";
-        loginTeacher = newTeacher;
 
+        return responseEntity;
+    }
+    @CrossOrigin
+    @PutMapping("/changePassword")
+    public synchronized ResponseEntity<String> changePassword(@RequestBody VerificationRequest request)
+    {
+        userService.updateUser(request.email,request.password);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+    @CrossOrigin
+    @PostMapping("/remindPassword/")
+    public synchronized ResponseEntity<String> getCode(@RequestBody String email)
+    {
+        if(userService.findbyEmail(email) == null)
+        {
+            return new ResponseEntity<String>("Nieprawidlowy adres email",HttpStatus.NOT_FOUND);
+        }
+        Random generator = new Random();
+        int code = 0;
+        for(int i=0; i<6; i++) {
+            code += generator.nextInt()*Math.pow(10,i);
+        }
 
-        return newTeacher;
+        try {
+            var ic = new InitialContext();
+            var snName = "java:comp/env/mail/MyMailSession";
+//provide Mailtrap’s host address
+            String host = "smtp.gmail.com";  // Przykład hosta SMTP Google
+            final String username = "alicja.zosia.k@gmail.com"; // Twoje konto Gmail
+            final String password = "uurc jbbw dqeo uvmp"; // Hasło do konta Gmai
+
+//configure Mailtrap’s SMTP server details
+
+            Properties props = new Properties();
+            props.put("mail.smtp.auth", "true");
+            props.put("mail.smtp.starttls.enable", "true");
+            props.put("mail.smtp.host", host);
+            //provide Mailtrap’s username
+
+//            final String username = “a094ccae2cfdb3”;
+//
+////provide Mailtrap’s password
+//
+//            final String password = “82a851fcf4aa33”;
+//            props.put(“mail.smtp.auth”, “true”);
+            props.put("mail.smtp.port", "587");
+
+//create the Session object
+
+            Session session = Session.getInstance(props,new jakarta.mail.Authenticator() {
+                protected PasswordAuthentication getPasswordAuthentication() {
+                    return new PasswordAuthentication(username, password);
+                }
+            });
+
+            Message message = new MimeMessage(session);
+            message.setFrom(new InternetAddress("alicja.zosia.k@gmail.com"));
+            message.setRecipients(
+                    Message.RecipientType.TO, InternetAddress.parse(email));
+            message.setSubject("Your Passcode");
+
+            String msg = "Twój kod to:\n" +
+                    "\n" +
+                    Integer.toString(code)+
+                    "." +
+                    "\n" +
+                    "Ten email jest odpowiedzią na prośbę o odzyskanie zapomnianego hasła. Możesz zignorować tę wiadomość, jeśli nie złożyłeś takiej prośby.\n" +
+                    "Użyj tego kodu, aby zresetować swoje hasło.\n" +
+                    "Nie odpowiadaj na tę wiadomość.";
+
+            MimeBodyPart mimeBodyPart = new MimeBodyPart();
+            mimeBodyPart.setContent(msg, "text/html; charset=utf-8");
+
+            Multipart multipart = new MimeMultipart();
+            multipart.addBodyPart(mimeBodyPart);
+
+            message.setContent(multipart);
+
+            Transport.send(message);
+            if(EmailCode==null)
+                EmailCode = new ArrayList<>();
+
+            EmailCode.add(new Pair<>(email,Integer.toString(code)));
+        }
+        catch (Exception exception)
+        {
+            System.out.println(exception.toString());
+            return  new ResponseEntity<String>(HttpStatus.CONFLICT);
+        }
+
+        return new ResponseEntity<String>(HttpStatus.ACCEPTED);
     }
 
     @PostMapping("/student")
-    public Student add(@RequestBody Student student){
-        student.setRole("STUDENT");
+    public ResponseEntity<String> add(@RequestBody Student student){
 
+        student.setRole("STUDENT");
+        Student savedStudent = userService.findStudentByEmail(student.getEmail());
+        ResponseEntity<String> responseEntity = new ResponseEntity<>("Zarejestrowano",HttpStatus.CREATED);
+        if(savedStudent!=null)
+        {
+            return new ResponseEntity<>("Użytkownik o podanym emailu istnieje",HttpStatus.CONFLICT);
+        }
+        savedStudent = userService.findStudentByName(student.getName());
+        if(savedStudent!=null)
+        {
+            return new ResponseEntity<>("Użytkownik o podanym loginie istnieje",HttpStatus.CONFLICT);
+        }
         loginStudent = userService.saveStudent(student);
-        userId = student.getId();
+        userId = loginStudent.getId();
         role = "Uczeń";
 
-        return student;
+        return responseEntity;
+    }
+    @CrossOrigin
+    @PostMapping("/CodeVerification")
+    public ResponseEntity<String> codeVerification(@RequestBody VerificationRequest data)
+    {
+        Pair<String,String> pairfounded = EmailCode.stream()
+                .filter(pair -> data.email.equals(pair.getKey()))
+                .findAny()
+                .orElse(null);
+        if(pairfounded == null)
+        {
+            return new ResponseEntity<>("Nieprawidłowy email",HttpStatus.BAD_REQUEST);
+        }
+        if(pairfounded.getValue().equals(data.code))
+        {
+            EmailCode.remove(pairfounded);
+            System.out.println(EmailCode.size());
+            return new ResponseEntity<>(HttpStatus.OK);
+        }
+        return new ResponseEntity<>("Nieprawidłowy kod",HttpStatus.BAD_REQUEST);
     }
 
     @PostMapping("/loginTeacher")
@@ -78,7 +220,7 @@ public class UserController {
         {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("The user doesn't exist");
         }
-        role="Teacher";
+        role = "Teacher";
         loginTeacher = teacher;
         return ResponseEntity.ok("The user was logged");
     }
@@ -231,8 +373,6 @@ public class UserController {
 
         return userService.listAll();
     }
-
-
 
     @GetMapping("/delete/{id}")
     public ResponseEntity<Long> delete(@PathVariable long id){

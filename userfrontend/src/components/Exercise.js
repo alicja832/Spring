@@ -34,6 +34,7 @@ export default function Exercise() {
   const paperStyle = { backgroundColor : "#FDF5E6",top: '4em',padding: '50px 20px', width: 600, margin: "20px auto" ,position: "relative",}
   const classes = useStyles();
   const [exercises, setExercises] = useState([]);
+  const [isExercises,setisExercises] = useState(false);
   const navigate = useNavigate();
 
   const openSolution = (e) => {
@@ -47,6 +48,8 @@ export default function Exercise() {
       .then((result) => {
         console.log('Fetched students:', result); // Dodaj t
         setExercises(result);
+        if(exercises.length!=0)
+          setisExercises(true);
       
       }
       ).catch(error => console.error('Error fetching students:', error));
@@ -55,9 +58,12 @@ export default function Exercise() {
   return (
    <div>
     <MyParticles></MyParticles>
+    <div id = "sthelse">
+    <h2>Home</h2>
+     <p>Nie zamieszczono jeszcze żadnych zadań.</p>
+    </div>
     <div className={classes.container}>
-    
-      {
+      {isExercises&&
        <Paper elevation={3} style={paperStyle}>
        {exercises.map(exercise => (
          <Paper elevation={6} style={{ margin: "10px", padding: "15px", textAlign: "left" }} key={exercise.key.id}>
@@ -75,7 +81,7 @@ export default function Exercise() {
      
            <div>
              <Box display="flex" flexDirection="column" gap={2}>
-               <Button variant="contained" value={exercise.key.id} color="secondary" onClick={openSolution}>
+               <Button variant="contained" value={exercise.key.id} style = {{backgroundColor:'#001f3f'}} onClick={openSolution}>
                  Wykonaj
                </Button>
              </Box>

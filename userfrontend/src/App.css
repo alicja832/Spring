@@ -29,14 +29,15 @@
 }
 
 .toast {
-  position: relative;
-  bottom: 20px;
-  background-color: #240775;
-  color: white;
-  padding: 10px 20px;
-  border-radius: 5px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  z-index: 1000;
+  padding: 8px 16px; /* Add some padding */
+  background-color: #44b0df; /* Light red background for error */
+  color: #132e60; /* Dark red text for error */
+  border: 1px solid #4c9dee; /* Border to make it stand out */
+  border-radius: 4px; /* Rounded corners */
+  min-width: 200px; /* Maximum width */
+  text-align: center; /* Center the text */
+  margin-top: 16px; /* Space above */
+  color:#282c34
 }
 
 
@@ -53,4 +54,13 @@
 {
     position: "relative";
     color:black;
+    text-align: center;
+}
+.paper{
+    top: "4em";
+    padding: "50px 20px";
+    width: 470;
+    margin: "20px auto";
+    gap: "10px";
+    position: "relative";
 }
