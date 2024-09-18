@@ -8,27 +8,26 @@ import { MenuItem } from "@mui/material";
 import { Select, InputLabel, FormControl } from "@mui/material";
 import { setLogin } from "./api/TokenService";
 import MyParticles from "./MyParticles";
-import { Background } from "@tsparticles/engine";
-
 
 const useStyles = makeStyles((theme) => ({}));
 
 export default function Register(props) {
-  
   const paperStyle = {
     top: "4em",
-    padding: "50px 20px",
-    width: 470,
-    margin: "20px auto",
-    gap: "10px",
+    padding: "4% 4%",
+    width: "40%",
+    margin: "1% auto",
+    gap: "1%",
     position: "relative",
-    backgroundColor : "#FDF5E6"
+    backgroundColor: "#FDF5E6",
+    textAlign: "center"
   };
-  
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("");
   const [password, setPassword] = useState("");
+  const [passwordConfirm, setPasswordConfirm] = useState("");
   const [psw, setPsw] = useState(false);
   const [errorMessage, seterrorMessage] = useState(false);
 
@@ -43,8 +42,7 @@ export default function Register(props) {
   const register = (e) => {
     e.preventDefault();
     const student = { name, email, password };
-    if(!email.includes("@"))
-    {
+    if (!email.includes("@")) {
       seterrorMessage("Podano zły adres email");
       seterrorInfoWindowShown(true);
       setTimeout(() => {
@@ -52,47 +50,58 @@ export default function Register(props) {
       }, 3000);
       return;
     }
-      const url =
+    if (password!==passwordConfirm) {
+      seterrorMessage("Podane hasła różnią się");
+      seterrorInfoWindowShown(true);
+      setTimeout(() => {
+        seterrorInfoWindowShown(false);
+      }, 3000);
+      return;
+    }
+    const url =
       role === 1
         ? "http://localhost:8080/user/teacher"
         : "http://localhost:8080/user/student";
 
     fetch(url, {
+      
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(student),
-    })
-      .then((response) => {
+    
+    }).then((response) => {
+      
+      if (!response.ok) {
         
-        if (!response.ok) {
-          const promise1 = Promise.resolve(response.body.getReader().read());
+        const promise1 = Promise.resolve(response.body.getReader().read());
 
-          promise1.then((value) => {
-            const decoder = new TextDecoder('utf-8');
-            const text = decoder.decode(value.value);
-            seterrorMessage(text);
-          })
-          setInfoWindowShown(false);
-          seterrorInfoWindowShown(true);
-          setTimeout(() => {
-            seterrorInfoWindowShown(false);
-          }, 3000);
+        promise1.then((value) => {
+          const decoder = new TextDecoder("utf-8");
+          const text = decoder.decode(value.value);
+          seterrorMessage(text);
+        });
+
+        setInfoWindowShown(false);
+        seterrorInfoWindowShown(true);
+        setTimeout(() => {
+          seterrorInfoWindowShown(false);
+        }, 3000);
+      } else {
         
-        }
-        else
-        {
-          props.changeProperties();
-          setLogin(email);
-          setName("");
-          setEmail("");
-          setPassword("");
-          setRole("");
-          setInfoWindowShown(true);
-          setTimeout(() => {
-            setInfoWindowShown(false);
-          }, 3000);
-        }
-      });
+        props.changeProperties();
+        setLogin(email);
+        setName("");
+        setEmail("");
+        setPassword("");
+        setPasswordConfirm("");
+        setRole("");
+        setInfoWindowShown(true);
+        setTimeout(() => {
+          setInfoWindowShown(false);
+        }, 3000);
+      
+      }
+    });
   };
   function Toast({ message }) {
     return <div className="toast">{message}</div>;
@@ -104,19 +113,34 @@ export default function Register(props) {
       <div id="sthelse">
         <Container>
           <Paper elevation={3} style={paperStyle}>
+            <div style = {{fontSize:"large"  ,marginBottom:"8%"}}>
+              <img
+                src={"/logo.svg"}
+                alt="Logo"
+                style={{
+                  height: "3%",
+                  verticalAlign: "middle",
+                }}
+              />
+              Nauka Pythona
+            </div>
             <form className={classes.root} noValidate autoComplete="off">
               <TextField
                 id="outlined-basic"
-                label="login"
+                label="Nazwa użytkownika"
                 variant="outlined"
                 fullWidth
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                sx={{ marginBottom: "16px" }}
+                sx={{ marginBottom: "16px", 
+                  '&.Mui-focused fieldset': {
+                    borderColor: 'red' // Kolor obramowania, gdy input jest aktywny (z fokusem)
+                  }
+                }}
               />
               <TextField
                 id="outlined-basic"
-                label="email"
+                label="Adres e-mail"
                 variant="outlined"
                 fullWidth
                 value={email}
@@ -125,7 +149,7 @@ export default function Register(props) {
               />
               <FilledInput
                 value={password}
-                placeholder="hasło"
+                placeholder="Hasło"
                 onChange={(e) => setPassword(e.target.value)}
                 type={psw ? "text" : "password"}
                 fullWidth
@@ -142,8 +166,28 @@ export default function Register(props) {
                   </InputAdornment>
                 }
               />
+                <FilledInput
+                value={passwordConfirm}
+                placeholder="Potwierdzenie hasła"
+                onChange={(e) => setPasswordConfirm(e.target.value)}
+                type={psw ? "text" : "password"}
+                fullWidth
+                sx={{ marginBottom: "16px" }}
+                endAdornment={
+                  <InputAdornment position="start">
+                    <IconButton
+                      onClick={handleShowPsw}
+                      onMouseDown={handleHidePsw}
+                      edge="end"
+                    >
+                      {psw ? <VisibilityOffOutlined /> : <VisibilityOutlined />}
+                    </IconButton>
+                  </InputAdornment>
+                }
+              />
+              <div><p>Wybierz, jaką rolę będziesz pełnić:</p></div>
               <FormControl fullWidth>
-                <InputLabel id="role-label">rola</InputLabel>
+                <InputLabel id="role-label">Rola</InputLabel>
                 <Select
                   labelId="role-label"
                   value={role}
@@ -165,7 +209,7 @@ export default function Register(props) {
                 <Box display="flex" flexDirection="column" gap={2}>
                   <Button
                     variant="contained"
-                    style = {{backgroundColor:'#001f3f'}}
+                    style={{ backgroundColor: "#001f3f" }}
                     onClick={register}
                   >
                     Zarejestruj

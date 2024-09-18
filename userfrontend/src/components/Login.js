@@ -17,17 +17,23 @@ const useStyles = makeStyles((theme) => ({}));
 export default function Login() {
   const paperStyle = {
     top: "4em",
-    padding: "50px 20px",
-    width: 470,
-    margin: "20px auto",
+    padding: "4% 4%",
+    width: "40%",
+    margin: "1% auto",
+    gap: "1%",
     position: "relative",
-     backgroundColor : "#FDF5E6",
+    backgroundColor: "#FDF5E6",
+    textAlign: "center"
   };
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("");
   const [password, setPassword] = useState([]);
   const [psw, setPsw] = useState(false);
+  const [errorMessage, seterrorMessage] = useState(false);
+  const [infoWindowShown, setInfoWindowShown] = useState(false);
+  const [errorWindowShown, seterrorInfoWindowShown] = useState(false);
+
   const handleShowPsw = () => setPsw((show) => !show);
   const handleHidePsw = (e) => {
     e.preventDefault();
@@ -48,24 +54,14 @@ export default function Login() {
     hasLoginFailed: false,
     showSuccessMessage: false,
   });
+  function Toast({ message }) {
+    return <div className="toast">{message}</div>;
+  }
 
-  const validate = () => {
-    const errors = {};
-
-    if (!credentials.name) {
-      errors.name = "name required";
-    } else if (credentials.name.length < 4) {
-      errors.name = "Minimum 4 characters";
-    }
-
-    if (!credentials.password) {
-      errors.password = "A password is required";
-    }
-
-    return errors;
-  };
-
+  //czekamy na await - zakonczenie operacji asynchronicznej
   const loginClicked = async (event) => {
+    //bla bla 
+    //seterrorMessage("Podany uzytkoni")
     //   console.log(credentials);
     //   event.preventDefault();
     //   // setCredentials(name,password)
@@ -146,19 +142,34 @@ export default function Login() {
       <div id="sthelse">
         <Container>
           <Paper elevation={3} style={paperStyle}>
+            <div style = {{fontSize:"large",marginBottom:"8%"}}>
+              <img
+                src={"/logo.svg"}
+                alt="Logo"
+                style={{
+                  height: "3%",
+                  verticalAlign: "middle",
+                }}
+              />
+              Nauka Pythona
+            </div>
             <form className={classes.root} noValidate autoComplete="off">
               <TextField
                 id="outlined-basic"
-                label="login"
+                label="Nazwa użytkownika"
                 variant="outlined"
                 fullWidth
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                sx={{ marginBottom: "16px" }}
+                sx={{ marginBottom: "16px", 
+                  '&.Mui-focused fieldset': {
+                    borderColor: 'red' // Kolor obramowania, gdy input jest aktywny (z fokusem)
+                  }
+                }}
               />
               <TextField
                 id="outlined-basic"
-                label="email"
+                label="Adres e-mail"
                 variant="outlined"
                 fullWidth
                 value={email}
@@ -167,12 +178,12 @@ export default function Login() {
               />
               <FilledInput
                 value={password}
-                placeholder="hasło"
+                placeholder="Hasło"
                 onChange={(e) => setPassword(e.target.value)}
                 type={psw ? "text" : "password"}
                 fullWidth
                 sx={{ marginBottom: "16px" }}
-                endAdornment={
+                endAdornment={ 
                   <InputAdornment position="start">
                     <IconButton
                       onClick={handleShowPsw}
@@ -184,14 +195,15 @@ export default function Login() {
                   </InputAdornment>
                 }
               />
+              <div><p>Wybierz, jaką rolę pełnisz:</p></div>
               <FormControl fullWidth>
-                <InputLabel id="role-label">rola</InputLabel>
+                <InputLabel id="role-label">Rola</InputLabel>
                 <Select
                   labelId="role-label"
                   value={role}
+                  sx={{ marginBottom: "16px" }}
                   // fullWidth
                   onChange={(e) => setRole(e.target.value)}
-                  sx={{ marginBottom: "16px" }}
                 >
                   <MenuItem value={0}>Uczeń</MenuItem>
                   <MenuItem value={1}>Nauczyciel</MenuItem>
@@ -202,19 +214,17 @@ export default function Login() {
                   display: "flex",
                   justifyContent: "center",
                   alignItems: "center",
-                  textDecoration: "none",
                 }}
               >
-                <Button
-                  style = {{backgroundColor:'#001f3f'}}
-                  variant="contained"
-                  color="primary"
-                  component={Link}
-                  to={"/password"}
-                  sx={{ textAlign: "center" ,marginBottom: '16px'}}
-                >
-                  Zapomniałeś hasła?  
-                </Button>
+                <Box display="flex" flexDirection="column" gap={2}>
+                  <Button
+                    variant="contained"
+                    style={{ backgroundColor: "#001f3f" }}
+                    onClick={loginClicked}
+                  >
+                    Zaloguj
+                  </Button>
+                </Box>
               </div>
               <div
                 style={{
@@ -224,14 +234,8 @@ export default function Login() {
                 }}
               >
                 <Box display="flex" flexDirection="column" gap={2}>
-                  <Button
-                    style = {{backgroundColor:'#001f3f'}}
-                    variant="contained"
-                    color="primary"
-                    onClick={loginClicked}
-                  >
-                    Zaloguj
-                  </Button>
+                  {infoWindowShown && <Toast message="Zalogowano!" />}
+                  {errorWindowShown && <Toast message={errorMessage} />}
                 </Box>
               </div>
             </form>

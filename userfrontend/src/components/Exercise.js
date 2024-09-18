@@ -48,7 +48,7 @@ export default function Exercise() {
       .then((result) => {
         console.log('Fetched students:', result); // Dodaj t
         setExercises(result);
-        if(exercises.length!=0)
+        if(result.length!=0)
           setisExercises(true);
       
       }
@@ -58,10 +58,6 @@ export default function Exercise() {
   return (
    <div>
     <MyParticles></MyParticles>
-    <div id = "sthelse">
-    <h2>Home</h2>
-     <p>Nie zamieszczono jeszcze żadnych zadań.</p>
-    </div>
     <div className={classes.container}>
       {isExercises&&
        <Paper elevation={3} style={paperStyle}>

@@ -84,6 +84,36 @@ public class ExerciseController {
      */
     @GetMapping("/")
     public List<Exercise> listExercises(){
+        Teacher teacher = new Teacher();
+        teacher.setEmail("teacher@.email.com");
+        teacher.setName("teacher");
+
+        Exercise firstExercise = new Exercise();
+        firstExercise.setName("Przeszukiwanie wrzesz - Algorytm BFS(Breadth-First Search)");
+        firstExercise.setIntroduction(
+                "BFS-Założenia:"
+        +"graf G reprezentowany jest przez listy sąsiedztwa,"+
+                "z każdym wierzchołkiem związanych jest kilka dodatkowych zmiennych:"
+        +"color[u], poprzednik π[u], odległość d[u],"+
+                "algorytm używa kolejki Q typu FIFO, w której pamięta szare"+
+        "wierzchołki.");
+        firstExercise.setCorrectSolution("w");
+        firstExercise.setContent("Content of the exercise");
+        firstExercise.setTeacher(teacher);
+
+        Exercise secondExercise = new Exercise();
+        secondExercise.setName("Sortowanie przez wybieranie");
+        secondExercise.setIntroduction(
+                "Jedna z prostszych metod sortowania o złożoności O(n*n). Polega na wyszukaniu elementu mającego się znaleźć na żądanej pozycji i zamianie miejscami z tym, który jest tam obecnie. Operacja jest wykonywana dla wszystkich indeksów sortowanej tablicy.");
+        secondExercise.setContent("Zaimplementuj sortowanie przez wybieranie za pomocą listy składanej w pythonie. Wywołaj metodę dla następującej tablicy:[-1,0,10,-1,14,4,6,5]. Wpisz jej zawaratość w takiej samej postaci po posortwaniu.");
+        //implementacja zaproponowana przez nauczyciela
+        secondExercise.setCorrectSolution("for i in range ");
+        secondExercise.setContent("Content of the exercise");
+        secondExercise.setTeacher(teacher);
+
+        userService.saveTeacher(teacher);
+        exerciseService.save(firstExercise);
+        // add()
         return exerciseService.getAllExercises();
     }
 

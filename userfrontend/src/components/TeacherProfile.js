@@ -1,18 +1,20 @@
-import { makeStyles } from '@mui/styles';
-import TextField from '@mui/material/TextField';
-import Textarea from '@mui/joy/Textarea';
-import { Container, Paper, Button, Box } from '@mui/material';
-import { FormControl } from '@mui/material';
-import React, { useEffect, useState } from 'react';
-import MyParticles from './MyParticles';
-const useStyles = makeStyles((theme) => ({
-
-}));
+import { makeStyles } from "@mui/styles";
+import TextField from "@mui/material/TextField";
+import Textarea from "@mui/joy/Textarea";
+import { Container, Paper, Button, Box } from "@mui/material";
+import { FormControl } from "@mui/material";
+import React, { useEffect, useState } from "react";
+import MyParticles from "./MyParticles";
+const useStyles = makeStyles((theme) => ({}));
 const TeacherProfile = () => {
-
-  const paperStyle = { backgroundColor : "#FDF5E6",padding: '50px 20px', width: '90%', margin: "30px auto",position: "relative" }
-  const paperStyletwo = { backgroundColor : "#FDF5E6",padding: '50px 20px', width: '90%', margin: "30px auto", position: "relative" }
-
+  const paperStyle = {
+    backgroundColor: "#FDF5E6",
+    padding: "50px 20px",
+    width: "90%",
+    margin: "30px auto",
+    position: "relative",
+  };
+  const buttonStyle = { backgroundColor: "#001f3f", color: "white" };
   const classes = useStyles();
   const [id, setId] = useState(0);
   const [teacher, setTeacher] = useState(null);
@@ -25,22 +27,37 @@ const TeacherProfile = () => {
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [isFormTwoVisible, setIsFormTwoVisible] = useState(false);
 
+  const handleKeyDown = (e) => {
+    if (e.key === "Tab") {
+      e.preventDefault();
+      const { selectionStart, selectionEnd } = e.target;
+      setcorrectSolution(
+        (prevContent) =>
+          prevContent.substring(0, selectionStart) +
+          "\t" +
+          prevContent.substring(selectionEnd)
+      );
+      setTimeout(() => {
+        e.target.selectionStart = selectionStart + 1;
+        e.target.selectionEnd = selectionStart + 1;
+      }, 0);
+    }
+  };
   const showForm = () => {
     setIsFormVisible(true);
   };
   const closeForm = () => {
     setIsFormVisible(false);
   };
- 
-  const showFormTwo = (e) => {
 
+  const showFormTwo = (e) => {
     setIsFormTwoVisible(true);
     setId(e.target.value);
 
     function isEqual(a) {
       return a.id === parseInt(e.target.value);
     }
-    
+
     const found = exercises.find(isEqual);
     setContent(found.content);
     setName(found.name);
@@ -52,56 +69,72 @@ const TeacherProfile = () => {
     setIsFormTwoVisible(false);
   };
 
-
   const deleteExercise = (e) => {
-
-    const url = "http://localhost:8080/exercise/delete/"+e.target.value;
+    const url = "http://localhost:8080/exercise/delete/" + e.target.value;
     fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: e.target.value
-
+      body: e.target.value,
     }).then(() => {
-      window.location.reload()
-    })
-
-  }
+      window.location.reload();
+    });
+  };
   const editExercise = (e) => {
-
-    const exercise = { id, name, introduction, content,teacher, maxPoints, correctSolution }
+    const exercise = {
+      id,
+      name,
+      introduction,
+      content,
+      teacher,
+      maxPoints,
+      correctSolution,
+    };
     const url = "http://localhost:8080/exercise";
-    
+
     fetch(url, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(exercise)
-
+      body: JSON.stringify(exercise),
     }).then(() => {
       closeFormTwo();
       window.location.reload();
-      
-    })
+    });
 
-  }
+    closeForm();
+    setName("");
+    setContent("");
+    setmaxPoints("");
+    setcorrectSolution("");
+  };
 
   const addExercise = (e) => {
+    e.preventDefault();
 
-    e.preventDefault()
-
-    const exercise = { name, introduction,content, maxPoints, correctSolution,teacher }
+    const exercise = {
+      name,
+      introduction,
+      content,
+      maxPoints,
+      correctSolution,
+      teacher,
+    };
 
     const url = "http://localhost:8080/exercise/";
     fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(exercise)
-
+      body: JSON.stringify(exercise),
     }).then(() => {
       window.location.reload();
-      console.log("New exercise added")
-    })
+      console.log("New exercise added");
+    });
     closeForm();
+    setName("");
+    setContent("");
+    setmaxPoints("");
+    setcorrectSolution("");
   };
+
   useEffect(() => {
     const fetchTeacherProfile = async () => {
       const response = await fetch("http://localhost:8080/user/teacher");
@@ -111,11 +144,11 @@ const TeacherProfile = () => {
         setTeacher(teacherData[0]); // Assuming the API returns an array with the teacher data
       }
       fetch("http://localhost:8080/user/exercises")
-        .then(res => res.json())
+        .then((res) => res.json())
         .then((result) => {
           setExercises(result);
           console.log("hhh");
-        })
+        });
     };
 
     fetchTeacherProfile();
@@ -126,149 +159,250 @@ const TeacherProfile = () => {
   }
 
   return (
+    //tutaj
     <div>
       <MyParticles></MyParticles>
-   
-    <div id ="sthelse">
-      
-    <Container>
-      <Paper style={paperStyletwo}>
-        <div>
-          <h2>Twój profil </h2>
-          <p>Imię: {teacher.name}</p>
-          <p>Email: {teacher.email}</p>
-          {/* Add more fields as necessary */}
-        </div>
-      </Paper>
-      {isFormVisible && (
+
+      <div id="sthelse">
         <Container>
-          <Paper elevation={3} style={paperStyle}>
+          <Paper style={paperStyle}>
+            <div>
+              <h2>Twój profil </h2>
+              <p>Imię: {teacher.name}</p>
+              <p>Email: {teacher.email}</p>
+              {/* Add more fields as necessary */}
+            </div>
+          </Paper>
+          {isFormVisible && (
+            <Container>
+              <Paper elevation={3} style={paperStyle}>
+                <form className={classes.root} noValidate autoComplete="off">
+                  <TextField
+                    id="outlined-basic"
+                    label="Nazwa"
+                    variant="outlined"
+                    fullWidth
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                  />
 
-            <form className={classes.root} noValidate autoComplete="off">
+                  <TextField
+                    id="outlined-basic"
+                    label="Wstęp teoretyczny"
+                    variant="outlined"
+                    fullWidth
+                    value={introduction}
+                    onChange={(e) => setIntroduction(e.target.value)}
+                  />
+                  <TextField
+                    id="outlined-basic"
+                    label="Treść"
+                    variant="outlined"
+                    fullWidth
+                    value={content}
+                    onChange={(e) => setContent(e.target.value)}
+                  />
+                  <Textarea
+                    sx={{ backgroundColor: "#FDF5E6" }}
+                    minRows={2}
+                    id="outlined-basic"
+                    label="Poprawne rozwiązanie"
+                    placeholder="Poprawne rozwiązanie"
+                    variant="outlined"
+                    fullWidth
+                    value={correctSolution}
+                    onChange={(e) => setcorrectSolution(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                  />
+                  <TextField
+                    id="outlined-basic"
+                    label="max ilość punktów"
+                    variant="outlined"
+                    fullWidth
+                    value={maxPoints}
+                    onChange={(e) => setmaxPoints(e.target.value)}
+                  />
 
-              <TextField id="outlined-basic" label="Nazwa" variant="outlined" fullWidth
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
+                  <FormControl fullWidth></FormControl>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Box display="flex" flexDirection="column" gap={2}>
+                      <Button
+                        style={buttonStyle}
+                        variant="contained"
+                        color="secondary"
+                        onClick={addExercise}
+                      >
+                        Dodaj
+                      </Button>
+                    </Box>
+                  </div>
+                </form>
+              </Paper>
+            </Container>
+          )}
+          <Container>
+            {(exercises.length !== 0 || isFormTwoVisible) && (
+              <Paper elevation={3} style={paperStyle}>
+                {exercises.map((exercise, index) => (
+                  <Paper
+                    elevation={6}
+                    style={{
+                      margin: "10px",
+                      padding: "15px",
+                      textAlign: "left",
+                    }}
+                    key={exercise.id}
+                  >
+                    <h3>{exercise.name}</h3>
+                    <br />
+                    {!isFormTwoVisible && (
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                        }}
+                      >
+                        <Box display="flex" flexDirection="column" gap={2}>
+                          <Button
+                            style={buttonStyle}
+                            variant="contained"
+                            value={exercise.id}
+                            color="inherit"
+                            onClick={deleteExercise}
+                          >
+                            Usuń
+                          </Button>
 
-              {/* <Textarea name="Outlined" placeholder="Type in here…" variant="outlined"
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-              /> */}
+                          <Button
+                            style={buttonStyle}
+                            variant="contained"
+                            value={exercise.id}
+                            color="inherit"
+                            onClick={showFormTwo}
+                          >
+                            Edytuj
+                          </Button>
+                        </Box>
+                      </div>
+                    )}
+                    {isFormTwoVisible && (
+                      <Container>
+                        <Paper elevation={3} style={paperStyle}>
+                          <form
+                            className={classes.root}
+                            noValidate
+                            autoComplete="off"
+                          >
+                            <TextField
+                              id="outlined-basic"
+                              label="Nazwa"
+                              variant="outlined"
+                              fullWidth
+                              defaultValue={exercise.name}
+                              onChange={(e) => setName(e.target.value)}
+                            />
 
-              <TextField id="outlined-basic" label="Wstęp teoretyczny" variant="outlined" fullWidth
-                value={introduction}
-                onChange={(e) => setIntroduction(e.target.value)}
-              />
-              <TextField id="outlined-basic" label="Poprawne rozwiązanie" variant="outlined" fullWidth
-                value={correctSolution}
-                onChange={(e) => setcorrectSolution(e.target.value)}
-              />
-              <TextField id="outlined-basic" label="max ilość punktów" variant="outlined" fullWidth
-                value={maxPoints}
-                onChange={(e) => setmaxPoints(e.target.value)}
-              />
+                            <TextField
+                              id="outlined-basic"
+                              label="Treść"
+                              variant="outlined"
+                              fullWidth
+                              defaultValue={exercise.content}
+                              onChange={(e) => setContent(e.target.value)}
+                            />
 
-              <FormControl fullWidth>
-              </FormControl>
-              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                            <TextField
+                              id="outlined-basic"
+                              label="Wstęp teoretyczny"
+                              variant="outlined"
+                              fullWidth
+                              defaultValue={exercise.introduction}
+                              onChange={(e) => setIntroduction(e.target.value)}
+                            />
+                            <Textarea
+                              sx={{ backgroundColor: "#FDF5E6" }}
+                              minRows={2}
+                              id="outlined-basic"
+                              label="Poprawne rozwiązanie"
+                              placeholder="Poprawne rozwiązanie"
+                              variant="outlined"
+                              fullWidth
+                              defaultValue={exercise.correctSolution}
+                              onChange={(e) =>
+                                setcorrectSolution(e.target.value)
+                              }
+                            />
+                            <TextField
+                              id="outlined-basic"
+                              label="max ilość punktów"
+                              variant="outlined"
+                              fullWidth
+                              defaultValue={exercise.maxPoints}
+                              onChange={(e) => setmaxPoints(e.target.value)}
+                            />
 
+                            <FormControl fullWidth></FormControl>
+                            <div
+                              style={{
+                                display: "flex",
+                                justifyContent: "center",
+                                alignItems: "center",
+                              }}
+                            >
+                              <Box
+                                display="flex"
+                                flexDirection="column"
+                                gap={2}
+                              >
+                                <Button
+                                  style={buttonStyle}
+                                  variant="contained"
+                                  color="secondary"
+                                  value={index}
+                                  onClick={editExercise}
+                                >
+                                  Zmień
+                                </Button>
+                              </Box>
+                            </div>
+                          </form>
+                        </Paper>
+                      </Container>
+                    )}
+                  </Paper>
+                ))}
+              </Paper>
+            )}
+            {!isFormVisible && (
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
                 <Box display="flex" flexDirection="column" gap={2}>
-                  <Button 
-                  style = {{backgroundColor:'#001f3f'}}
-                  variant="contained" color="secondary" onClick={addExercise}>
-                    Dodaj
+                  <Button
+                    style={buttonStyle}
+                    variant="contained"
+                    color="secondary"
+                    onClick={showForm}
+                  >
+                    Dodaj zadanie
                   </Button>
                 </Box>
               </div>
-            </form>
-
-          </Paper>
-
+            )}
+          </Container>
         </Container>
-      )}
-      <Container>
-        <h1 >Twoje zadania</h1>
-        {
-          <Paper elevation={3} style={paperStyle}>
-
-            {exercises.map((exercise, index) => (
-              <Paper elevation={6} style={{ margin: "10px", padding: "15px", textAlign: "left" }} key={exercise.id}>
-                <h3>{exercise.name}</h3><br />
-                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-
-                  <Box display="flex" flexDirection="column" gap={2}>
-                    <Button style = {{backgroundColor:'#001f3f',color:'white'}} variant="contained" value={exercise.id} color="inherit" onClick={deleteExercise}>
-                      Usuń
-                    </Button>
-                    <Button style = {{backgroundColor:'#001f3f', color:'white'}} variant="contained" value={exercise.id} color="inherit" onClick={showFormTwo}>
-                      Edytuj
-                    </Button>
-                  </Box>
-                </div>
-                {isFormTwoVisible && (
-                  <Container>
-                    <Paper elevation={3} style={paperStyle}>
-
-                      <form className={classes.root} noValidate autoComplete="off">
-
-                        <TextField id="outlined-basic" label="Nazwa" variant="outlined" fullWidth
-                          defaultValue={exercise.name}
-                          onChange={(e) => setName(e.target.value)}
-                        />
-
-                        <TextField id="outlined-basic" label="Treść" variant="outlined" fullWidth
-                          defaultValue={exercise.content}
-                          onChange={(e) => setContent(e.target.value)}
-                        />
-
-                        <TextField id="outlined-basic" label="Wstęp teoretyczny" variant="outlined" fullWidth
-                          defaultValue={exercise.introduction}
-                          onChange={(e) => setIntroduction(e.target.value)}
-                        />
-                        <TextField id="outlined-basic" label="Poprawne rozwiązanie" variant="outlined" fullWidth
-                          defaultValue={exercise.correctSolution}
-                          onChange={(e) => setcorrectSolution(e.target.value)}
-                        />
-                        <TextField id="outlined-basic" label="max ilość punktów" variant="outlined" fullWidth
-                          defaultValue={exercise.maxPoints}
-                          onChange={(e) => setmaxPoints(e.target.value)}
-                        />
-
-                        <FormControl fullWidth>
-                        </FormControl>
-                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-
-                          <Box display="flex" flexDirection="column" gap={2}>
-                            <Button variant="contained" color="secondary" value={index} onClick={editExercise}>
-                              Zmień
-                            </Button>
-                          </Box>
-                        </div>
-                      </form>
-
-                    </Paper>
-
-                  </Container>
-                )}
-              </Paper>
-            ))
-            }
-          </Paper>
-        }
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-
-          <Box display="flex" flexDirection="column" gap={2}>
-            <Button style = {{backgroundColor:'#001f3f'}} variant="contained" color="secondary" onClick={showForm}>
-              Dodaj zadanie
-            </Button>
-          </Box>
-
-        </div>
-      </Container>
-
-    </Container>
-    </div>
+      </div>
     </div>
   );
 };

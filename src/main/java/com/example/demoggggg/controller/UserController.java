@@ -101,9 +101,7 @@ public class UserController {
         }
 
         try {
-            var ic = new InitialContext();
-            var snName = "java:comp/env/mail/MyMailSession";
-//provide Mailtrap’s host address
+
             String host = "smtp.gmail.com";  // Przykład hosta SMTP Google
             final String username = "alicja.zosia.k@gmail.com"; // Twoje konto Gmail
             final String password = "uurc jbbw dqeo uvmp"; // Hasło do konta Gmai
@@ -140,7 +138,7 @@ public class UserController {
 
             String msg = "Twój kod to:\n" +
                     "\n" +
-                    Integer.toString(code)+
+                    code +
                     "." +
                     "\n" +
                     "Ten email jest odpowiedzią na prośbę o odzyskanie zapomnianego hasła. Możesz zignorować tę wiadomość, jeśli nie złożyłeś takiej prośby.\n" +

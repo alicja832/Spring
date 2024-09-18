@@ -5,11 +5,14 @@ import com.example.demoggggg.model.Solution;
 import com.example.demoggggg.model.Student;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.python.util.PythonInterpreter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.support.ScheduledTaskObservationDocumentation;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import java.io.StringWriter;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -29,9 +32,13 @@ class ExerciseControllerTest {
     @Test
     void test_getresponse()
     {
-        String code = "\ndef fun(a):\n\tprint(a)\nfun(1)\n";
-        String getresponse = exerciseController.getresponse(code);
-        assertEquals("1\n", getresponse);
+        String code = "\nclass Car:\n\tdef fun(self):\n\t\tprint('1')\nCar().fun()\n";
+        PythonInterpreter pythonInterpreter = new PythonInterpreter();
+        StringWriter writer = new StringWriter();
+        pythonInterpreter.setOut(writer);
+        pythonInterpreter.exec( code);
+       // String getresponse = exerciseController.getresponse(code);
+        assertEquals("1\n", writer.toString());
     }
     @Test
     void test_update_exercise()
