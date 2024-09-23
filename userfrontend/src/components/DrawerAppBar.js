@@ -113,10 +113,10 @@ export default function DrawerAppBar(register, props) {
       <AppBar
         component="nav"
         sx={{
-          paddingTop: "10ox",
-          paddingBottom: "10px",
+          // paddingTop: "10ox",
+          // paddingBottom: "10px",
           backgroundColor: "#001f3f",
-          height: "8vh",
+          // height: "8vh",
           textShadow: "1px 1px 2px white",
         }}
       >
@@ -154,10 +154,12 @@ export default function DrawerAppBar(register, props) {
                 key={item}
                 component={Link}
                 to={purposes[index]}
-                sx={{ color: "#fff" }}
+                sx={{ color: "#fff",  fontSize: "1.075em" }}
               >
+                <Font family="sans-serif">
                 {item}
                 {item === profile && <AccountBoxIcon sx={{ margin: "2px" }} />}
+                </Font>
               </Button>
             ))}
           </Box>
@@ -176,7 +178,7 @@ export default function DrawerAppBar(register, props) {
             display: { xs: "block", sm: "none" },
             "& .MuiDrawer-paper": {
               boxSizing: "border-box",
-              width: drawerWidth,
+              width: "100%",
             },
           }}
         >

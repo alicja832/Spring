@@ -83,53 +83,56 @@ public class ExerciseController {
      * all exercises from database
      */
     @GetMapping("/")
-    public List<Exercise> listExercises(){
+    public List<Pair<Exercise,Boolean>> listExercises(){
+
+        if(exerciseService.getAllExercises().isEmpty())
+            setExercises();
+        List<Pair<Exercise,Boolean>> listExercise = new ArrayList<>();
+        for(Exercise e:exerciseService.getAllExercises())
+        {
+            listExercise.add(new Pair<>(e,false));
+        }
+        return listExercise;
+    }
+    private void setExercises()
+    {
         Teacher teacher = new Teacher();
-        teacher.setEmail("teacher@.email.com");
-        teacher.setName("teacher");
-
-        Exercise firstExercise = new Exercise();
-        firstExercise.setName("Przeszukiwanie wrzesz - Algorytm BFS(Breadth-First Search)");
-        firstExercise.setIntroduction(
-                "BFS-Założenia:"
-        +"graf G reprezentowany jest przez listy sąsiedztwa,"+
-                "z każdym wierzchołkiem związanych jest kilka dodatkowych zmiennych:"
-        +"color[u], poprzednik π[u], odległość d[u],"+
-                "algorytm używa kolejki Q typu FIFO, w której pamięta szare"+
-        "wierzchołki.");
-        firstExercise.setCorrectSolution("w");
-        firstExercise.setContent("Content of the exercise");
-        firstExercise.setTeacher(teacher);
-
+        teacher.setEmail("alicja.zosia.k@gmail.com");
+        teacher.setName("FirstTeacher");
+        teacher.setPassword("FirstTeacher");
+        teacher.setRole("Teacher");
         Exercise secondExercise = new Exercise();
         secondExercise.setName("Sortowanie przez wybieranie");
         secondExercise.setIntroduction(
-                "Jedna z prostszych metod sortowania o złożoności O(n*n). Polega na wyszukaniu elementu mającego się znaleźć na żądanej pozycji i zamianie miejscami z tym, który jest tam obecnie. Operacja jest wykonywana dla wszystkich indeksów sortowanej tablicy.");
-        secondExercise.setContent("Zaimplementuj sortowanie przez wybieranie za pomocą listy składanej w pythonie. Wywołaj metodę dla następującej tablicy:[-1,0,10,-1,14,4,6,5]. Wpisz jej zawaratość w takiej samej postaci po posortwaniu.");
+                "Jedna z prostszych metod sortowania o złożoności O(n*n).Polega na wyszukaniu elementu mającego się znaleźć na żądanej pozycji " +
+                        "i zamianie miejscami z tym, który jest tam obecnie. Operacja jest wykonywana dla wszystkich indeksów sortowanej tablicy.");
+        secondExercise.setContent("Zaimplementuj sortowanie przez wybieranie w pythonie." +
+                " Wywołaj metodę dla następującej tablicy:[-1,0,10,-1,14,4,6,5]. Wypisz jej zawaratość w takiej samej postaci po posortwaniu.");
         //implementacja zaproponowana przez nauczyciela
-        secondExercise.setCorrectSolution("for i in range ");
-        secondExercise.setContent("Content of the exercise");
+        secondExercise.setCorrectSolution("A = [-1,0,10,-1,14,4,6,5]\nn=len(A)\nfor i in range(n):\n\tmin=i\n\tfor j in range(i,n):\n\t\tif(A[j]<A[min]):\n\t\t\tmin = j\n\ttmp=A[i]\n\tA[i]=A[min]\n\tA[min]=tmp\nprint(A)");
+        secondExercise.setCorrectOutput(exerciseService.getOut("\nA = [-1,0,10,-1,14,4,6,5]\nn=len(A)\nfor i in range(n):\n\tmin=i\n\tfor j in range(i,n):\n\t\tif(A[j]<A[min]):\n\t\t\tmin = j\n\ttmp=A[i]\n\tA[i]=A[min]\n\tA[min]=tmp\nprint(A)\n"));
+        secondExercise.setMaxPoints(5);
+        if(userService.findTeacherByEmail("alicja.zosia.k@gmail.com")==null)
+        {
+            userService.saveTeacher(teacher);
+        }
         secondExercise.setTeacher(teacher);
-
-        userService.saveTeacher(teacher);
-        exerciseService.save(firstExercise);
-        // add()
-        return exerciseService.getAllExercises();
+        System.out.println(secondExercise.getCorrectOutput());
+        exerciseService.save(secondExercise);
     }
-
     @GetMapping("/{email}")
     public List<Pair<Exercise,Boolean>> listExercises(@PathVariable String email){
 
+        if(exerciseService.getAllExercises().isEmpty())
+            setExercises();
         List<Solution> solutions;
         Student student = userService.findStudentByEmail(email);
-
         if(student!=null)
         {
             solutions = exerciseService.findStudentSolution(student);
         }
         else {
-
-            solutions = new ArrayList<Solution>();
+            solutions = new ArrayList<>();
         }
 
         List<Exercise> list = exerciseService.getAllExercises();
@@ -177,8 +180,8 @@ public class ExerciseController {
         List<Solution> solutions = exerciseService.findStudentSolution(userService.findStudentByName(name));
 
         for(Solution solution:solutions) {
-            System.out.println(solution.getScore());
-            Map<String,String> map = new HashMap<String,String>();
+
+            Map<String,String> map = new HashMap<>();
             Exercise exercise=solution.getExercise();
             if(exercise!=null){
                 map.put("id", Integer.toString(solution.getId()));
@@ -213,12 +216,9 @@ public class ExerciseController {
 
             return new ResponseEntity<>(solution,HttpStatus.CREATED);
         } else {
-
             exerciseService.save(solution);
             loginStudent.addSolution(solution);
             loginStudent.addPoints(solution.getScore());
-            System.out.println("Dodawanie rozwiazan");
-            System.out.println(loginStudent.getSolutions().toString());
         }
 
         return new ResponseEntity<>(solution,HttpStatus.CREATED);

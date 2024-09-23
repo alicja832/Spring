@@ -35,7 +35,7 @@ public class ExerciseServiceImpl implements ExerciseService {
 
         if(solution.getOutput()==null)
         {
-            solution.setOutput(this.getOut(solution.getSolutionContent()));
+            solution.setOutput(getOut(solution.getSolutionContent()));
         }
         return solutionRepository.save(solution);
     }

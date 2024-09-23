@@ -6,7 +6,7 @@ import { FilledInput, IconButton, InputAdornment } from "@mui/material";
 import { VisibilityOffOutlined, VisibilityOutlined } from "@mui/icons-material";
 import { MenuItem } from "@mui/material";
 import { Select, InputLabel, FormControl } from "@mui/material";
-import { setLogin } from "./api/TokenService";
+import { setLogin,setRole } from "./api/TokenService";
 import MyParticles from "./MyParticles";
 
 const useStyles = makeStyles((theme) => ({}));
@@ -42,7 +42,7 @@ export default function Register(props) {
   const register = (e) => {
     e.preventDefault();
     const student = { name, email, password };
-    if (!email.includes("@")) {
+    if (!email.includes("@.")) {
       seterrorMessage("Podano zły adres email");
       seterrorInfoWindowShown(true);
       setTimeout(() => {
@@ -88,6 +88,10 @@ export default function Register(props) {
         }, 3000);
       } else {
         
+        const url =
+        role === 1
+        ? setRole("Teacher")
+        : setRole("Student");
         props.changeProperties();
         setLogin(email);
         setName("");

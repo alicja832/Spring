@@ -3,6 +3,8 @@ package com.example.demoggggg.controller;
 import com.example.demoggggg.model.Exercise;
 import com.example.demoggggg.model.Solution;
 import com.example.demoggggg.model.Student;
+import com.example.demoggggg.service.ExerciseService;
+import javafx.util.Pair;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.python.util.PythonInterpreter;
@@ -13,6 +15,7 @@ import org.springframework.scheduling.support.ScheduledTaskObservationDocumentat
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.io.StringWriter;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -57,6 +60,14 @@ class ExerciseControllerTest {
 
         assertEquals("b",exercise.getName());
         assertEquals("b",exercise.getIntroduction());
+    }
+    @Test
+    void test_setExercises()
+    {
+
+        List<Pair<Exercise,Boolean>> list = exerciseController.listExercises();
+        assertEquals("[-1, -1, 0, 4, 5, 6, 10, 14]\n",list.get(0).getKey().getCorrectOutput());
+
     }
     @Test
     void test_update_solution()

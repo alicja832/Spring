@@ -3,7 +3,7 @@ import { makeStyles } from '@mui/styles';
 import { useNavigate } from 'react-router-dom';
 import { Paper, Button, Box } from '@mui/material';
 import CheckIcon from '@mui/icons-material/Check';
-import {getLogin} from './api/TokenService';
+import {getLogin,getRole} from './api/TokenService';
 import MyParticles from './MyParticles';
 const useStyles = makeStyles({
   
@@ -31,6 +31,7 @@ const useStyles = makeStyles({
 });
 
 export default function Exercise() {
+  
   const paperStyle = { backgroundColor : "#FDF5E6",top: '4em',padding: '50px 20px', width: 600, margin: "20px auto" ,position: "relative",}
   const classes = useStyles();
   const [exercises, setExercises] = useState([]);
@@ -43,16 +44,34 @@ export default function Exercise() {
 
 
   useEffect(() => {
-    fetch("http://localhost:8080/exercise/"+getLogin())
+    let role = getRole();
+    if(role === "Student")
+    {
+      fetch("http://localhost:8080/exercise/"+getLogin())
+        .then(res => res.json())
+        .then((result) => {
+          console.log('Fetched students:', result); // Dodaj t
+          setExercises(result);
+          if(result.length!==0)
+            setisExercises(true);
+        
+        }
+        ).catch(error => console.error('Error:', error));
+    }
+    else
+    {
+     console.log("Ttssskxyyt");
+      fetch("http://localhost:8080/exercise/")
       .then(res => res.json())
       .then((result) => {
         console.log('Fetched students:', result); // Dodaj t
         setExercises(result);
-        if(result.length!=0)
+        if(result.length!==0)
           setisExercises(true);
       
       }
-      ).catch(error => console.error('Error fetching students:', error));
+      ).catch(error => console.error('Error:', error));
+    }
   }, [])
 
   return (

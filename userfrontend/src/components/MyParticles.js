@@ -320,7 +320,7 @@ const MyParticles = (props) => {
     if (context.canvas) {
 
       setOdlX(context.canvas.width/6);
-      setOdlY(context.canvas.height/10);
+      setOdlY(context.canvas.height/8);
       
       const render = () => {
         frameCount += step;
