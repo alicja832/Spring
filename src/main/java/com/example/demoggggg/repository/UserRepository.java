@@ -1,5 +1,6 @@
 package com.example.demoggggg.repository;
 
+import com.example.demoggggg.model.Student;
 import com.example.demoggggg.model.Teacher;
 import com.example.demoggggg.model.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -21,4 +22,5 @@ public interface UserRepository extends JpaRepository<UserEntity,Long> {
     @Modifying
     @Query(value = "update users set password=:password where email=:email", nativeQuery = true)
     void updateByEmail(String email,String password);
+
 }

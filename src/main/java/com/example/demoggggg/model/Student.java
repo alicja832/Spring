@@ -97,7 +97,7 @@ public class Student  extends UserEntity{
         Student student = (Student) o;
         return this.id == student.id;
     }
-    public void addPoints(@RequestBody int score){
+    public void addPoints(int score){
         this.score+=score;
     }
 

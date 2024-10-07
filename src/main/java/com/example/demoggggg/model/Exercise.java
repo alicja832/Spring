@@ -29,22 +29,10 @@ public class Exercise implements Serializable {
     @Column(name="correctoutput", updatable=true)
     private String correctOutput = null;
 
-//    @OneToMany
-//    @JoinColumn(name = "exercise_id")
-//    private List<Solution> solutions = null;
     @ManyToOne
     @JoinColumn(name="teacher_id", nullable=false)
     @JsonIgnore
     private Teacher teacher;
-
-//    public List<Solution> getSolutions() {
-//        return solutions;
-//    }
-//
-//    public void setSolutions(List<Solution> solutions) {
-//        this.solutions = solutions;
-//    }
-
 
 
     public Teacher getTeacher() {
@@ -97,12 +85,6 @@ public class Exercise implements Serializable {
         this.maxPoints = maxPoints;
     }
 
-//    public void addSolution(Solution solution) {
-//        if (solutions == null) {
-//            solutions = new ArrayList<>();
-//        }
-//        solutions.add(solution);
-//    }
     public int getId() {
         return id;
     }

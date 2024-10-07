@@ -1,16 +1,12 @@
 package com.example.demoggggg.service;
-
 import com.example.demoggggg.model.Exercise;
 import com.example.demoggggg.model.Solution;
 import com.example.demoggggg.model.Student;
-import com.example.demoggggg.model.UserEntity;
 import com.example.demoggggg.repository.ExerciseRepository;
 import com.example.demoggggg.repository.SolutionRepository;
-import org.python.core.PyObject;
 import org.python.util.PythonInterpreter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.io.StringWriter;
 import java.security.interfaces.EdECKey;
 import java.util.ArrayList;
@@ -52,10 +48,10 @@ public class ExerciseServiceImpl implements ExerciseService {
     @Override
     public String getOut(String text) {
 
+        if(text.charAt(0)=='\"' || text.charAt(text.length()-1)=='\n')
+                text = text.substring(1,text.length()-1);
         StringWriter output = new StringWriter();
         interpreter = new PythonInterpreter();
-
-        text = text.substring(1,text.length()-1);
         interpreter.setOut(output);
 
         try {

@@ -1,4 +1,0 @@
-{
-    "appService.defaultWebAppToDeploy": "undefined/subscriptions/4e769c6b-1e2f-4be8-8ed7-3073e9bfb7cd/resourceGroups/webaappsss/providers/Microsoft.Web/sites/webaappsss",
-    "appService.deploySubpath": "."
-}

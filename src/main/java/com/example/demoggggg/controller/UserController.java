@@ -45,10 +45,6 @@ public class UserController {
 
     @Autowired
     private UserService userService;
-    private long userId;
-    private String role;
-    private Teacher loginTeacher;
-    private Student loginStudent;
     private List<Pair<String,String>> EmailCode;
 //    @Autowired
 //    private MyJwt jwt;
@@ -72,15 +68,32 @@ public class UserController {
         {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Użytkownik o podanym loginie istnieje");
         }
+        userService.saveTeacher(teacher);
+        return responseEntity;
+    }
 
-        loginTeacher = userService.saveTeacher(teacher);
-        userId = loginTeacher.getId();
-        role="Teacher";
+    @PostMapping("/student")
+    public ResponseEntity<String> add(@RequestBody Student student){
 
+        student.setRole("STUDENT");
+        Student savedStudent = userService.findStudentByEmail(student.getEmail());
+        ResponseEntity<String> responseEntity = new ResponseEntity<>(HttpStatus.CREATED);
+
+        if(savedStudent!=null)
+        {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Użytkownik o podanym adresie email istnieje");
+        }
+        savedStudent = userService.findStudentByEmail(student.getName());
+
+        if(savedStudent!=null)
+        {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Użytkownik o podanym loginie istnieje");
+        }
+        userService.saveStudent(student);
         return responseEntity;
     }
     @CrossOrigin
-    @PutMapping("/changePassword")
+    @PutMapping("/changePassword/")
     public synchronized ResponseEntity<String> changePassword(@RequestBody VerificationRequest request)
     {
         userService.updateUser(request.email,request.password);
@@ -102,27 +115,15 @@ public class UserController {
 
         try {
 
-            String host = "smtp.gmail.com";  // Przykład hosta SMTP Google
-            final String username = "alicja.zosia.k@gmail.com"; // Twoje konto Gmail
-            final String password = "uurc jbbw dqeo uvmp"; // Hasło do konta Gmai
-
-//configure Mailtrap’s SMTP server details
+            String host = "smtp.gmail.com";  
+            final String username = "alicja.zosia.k@gmail.com"; 
+            final String password = "uurc jbbw dqeo uvmp"; 
 
             Properties props = new Properties();
             props.put("mail.smtp.auth", "true");
             props.put("mail.smtp.starttls.enable", "true");
             props.put("mail.smtp.host", host);
-            //provide Mailtrap’s username
-
-//            final String username = “a094ccae2cfdb3”;
-//
-////provide Mailtrap’s password
-//
-//            final String password = “82a851fcf4aa33”;
-//            props.put(“mail.smtp.auth”, “true”);
             props.put("mail.smtp.port", "587");
-
-//create the Session object
 
             Session session = Session.getInstance(props,new jakarta.mail.Authenticator() {
                 protected PasswordAuthentication getPasswordAuthentication() {
@@ -161,34 +162,12 @@ public class UserController {
         }
         catch (Exception exception)
         {
-            System.out.println(exception.toString());
             return  new ResponseEntity<String>(HttpStatus.CONFLICT);
         }
 
         return new ResponseEntity<String>(HttpStatus.ACCEPTED);
     }
 
-    @PostMapping("/student")
-    public ResponseEntity<String> add(@RequestBody Student student){
-
-        student.setRole("STUDENT");
-        Student savedStudent = userService.findStudentByEmail(student.getEmail());
-        ResponseEntity<String> responseEntity = new ResponseEntity<>("Zarejestrowano",HttpStatus.CREATED);
-        if(savedStudent!=null)
-        {
-            return new ResponseEntity<>("Użytkownik o podanym emailu istnieje",HttpStatus.CONFLICT);
-        }
-        savedStudent = userService.findStudentByName(student.getName());
-        if(savedStudent!=null)
-        {
-            return new ResponseEntity<>("Użytkownik o podanym loginie istnieje",HttpStatus.CONFLICT);
-        }
-        loginStudent = userService.saveStudent(student);
-        userId = loginStudent.getId();
-        role = "Uczeń";
-
-        return responseEntity;
-    }
     @CrossOrigin
     @PostMapping("/CodeVerification")
     public ResponseEntity<String> codeVerification(@RequestBody VerificationRequest data)
@@ -209,111 +188,26 @@ public class UserController {
         }
         return new ResponseEntity<>("Nieprawidłowy kod",HttpStatus.BAD_REQUEST);
     }
-
-    @PostMapping("/loginTeacher")
-    public ResponseEntity<String> login(@RequestBody Teacher teacher)  {
-
-        userId = userService.loginTeacher(teacher);
-        if (userId == -1)
-        {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("The user doesn't exist");
-        }
-        role = "Teacher";
-        loginTeacher = teacher;
-        return ResponseEntity.ok("The user was logged");
-    }
-
-    @PostMapping("/loginStudent")
-    public  ResponseEntity<String> login(@RequestBody Student student){
-
-        userId = userService.loginStudent(student);
-        if (userId == -1)
-        {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("The user doesn't exist");
-        }
-        role = "Uczeń";
-        loginStudent = student;
-        return ResponseEntity.ok("The user was logged");
-    }
-
-    @GetMapping("/role")
-    public ResponseEntity<String> getRole()
+    @CrossOrigin(origins = "http://localhost:3000/ranking")
+    @GetMapping("/ranking")
+    public List<Student> getStudentRanking()
     {
-        //narazie głupi sposób
-        return ResponseEntity.ok(role);
-
+        List<Student> list = userService.listStudents();
+        list.sort((Student a,Student b)->a.getScore()-b.getScore());
+        System.out.println(list);
+        return list;
     }
-    @GetMapping("/student")
-    public List<Student> getStudent()
-    {
-        System.out.println(loginStudent.toString());
-        Student tmp = new Student();
-        tmp.setScore(loginStudent.getScore());
-        tmp.setEmail(loginStudent.getEmail());
-        tmp.setPassword(loginStudent.getPassword());
-        tmp.setName(loginStudent.getName());
-        //narazie głupi sposób
-        if (loginStudent == null)
-            return null;
-        return List.of(tmp);
+    @GetMapping("/exercises/{email}")
+    public List<Exercise> getExercises(@PathVariable String email){
 
-    }
-    @GetMapping("/teacher")
-    public List<Teacher> getTeacher()
-    {
-        //narazie głupi sposób
-        if (loginTeacher == null)
-            return null;
-        List<Teacher> teachers = List.of(loginTeacher);
-        return teachers;
-
-    }
-
-    public void addExercise(@RequestBody Exercise exercise)  {
-        if(loginTeacher!=null)
-            loginTeacher.AddExc(exercise);
-    }
-    public void deleteExercise(@RequestBody Exercise exercise)  {
-        loginTeacher.getExercises().remove(exercise);
-    }
-
-//    @PostMapping("/solution")
-//    public Solution addSolution(@RequestBody Solution solution){
-//
-//
-//            if (loginStudent.getSolutions().contains(solution)) {
-//                int ind = loginStudent.getSolutions().indexOf(solution);
-//                int score = loginStudent.getSolutions().get(ind).getScore();
-//                loginStudent.getSolutions().remove(solution);
-//                loginStudent.setScore(loginStudent.getScore() - score);
-//                loginStudent.getSolutions().add(solution);
-//                loginStudent.setScore(solution.getScore());
-//                return solution;
-//            } else {
-//                loginStudent.getSolutions().add(solution);
-//                loginStudent.setScore(solution.getScore());
-//            }
-//
-//        return userService.saveSolution(solution);
-//
-//    }
-
-    @GetMapping("/exercises")
-    public List<Exercise> getExercises(){
-
-        if( loginTeacher!=null) {
+        Teacher loginTeacher = userService.findTeacherByEmail(email);
+        if(loginTeacher!=null) {
             loginTeacher = userService.findTeacherByName(loginTeacher.getName());
             System.out.printf(loginTeacher.getExercises().toString());
             return loginTeacher.getExercises();
 
         }
         return new ArrayList<>();
-    }
-
-    @GetMapping("/logout")
-    public void logout(){
-        loginStudent = null;
-        loginTeacher = null;
     }
     /**
      * Narazie niech bedzie tak
@@ -354,16 +248,17 @@ public class UserController {
 //        System.out.println("OK");
 //        return new JWTResponse(token);
 //    }
-    @GetMapping("/teacher/{name}")
-    public Teacher get(@PathVariable String name){
 
-        return userService.findTeacherByName(name);
+    @GetMapping("/teacher/{email}")
+    public List<Teacher> getTeacher(@PathVariable String email){
+
+        return List.of(userService.findTeacherByEmail(email));
     }
 
-    @GetMapping("/student/{name}")
-    public Student getStudent(@PathVariable String name){
+    @GetMapping("/student/{email}")
+    public List<Student> getStudent(@PathVariable String email){
 
-        return userService.findStudentByName(name);
+        return List.of(userService.findStudentByEmail(email));
 
     }
     @GetMapping("/users")

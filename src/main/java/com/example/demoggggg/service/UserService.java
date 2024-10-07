@@ -23,6 +23,7 @@ public interface UserService {
     void updateStudent(int id,int score);
     void updateUser(String email,String password);
     long deleteUser(long id);
+    List<Student> listStudents();
     List<UserEntity> listAll();
     UserEntity findUserByNameAndPassword(String username, String password);
     UserEntity findByName(String name);

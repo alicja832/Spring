@@ -12,7 +12,6 @@ import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -35,6 +34,7 @@ public class ExerciseController {
      */
     @PostMapping("/")
     public ResponseEntity<Exercise> add(@RequestBody ExerciseDto exercise){
+
 
         Exercise savedExercise = new Exercise();
 
@@ -110,9 +110,9 @@ public class ExerciseController {
                 " Wywołaj metodę dla następującej tablicy:[-1,0,10,-1,14,4,6,5]. Wypisz jej zawaratość w takiej samej postaci po posortwaniu.");
         //implementacja zaproponowana przez nauczyciela
         secondExercise.setCorrectSolution("A = [-1,0,10,-1,14,4,6,5]\nn=len(A)\nfor i in range(n):\n\tmin=i\n\tfor j in range(i,n):\n\t\tif(A[j]<A[min]):\n\t\t\tmin = j\n\ttmp=A[i]\n\tA[i]=A[min]\n\tA[min]=tmp\nprint(A)");
-        secondExercise.setCorrectOutput(exerciseService.getOut("\nA = [-1,0,10,-1,14,4,6,5]\nn=len(A)\nfor i in range(n):\n\tmin=i\n\tfor j in range(i,n):\n\t\tif(A[j]<A[min]):\n\t\t\tmin = j\n\ttmp=A[i]\n\tA[i]=A[min]\n\tA[min]=tmp\nprint(A)\n"));
+        secondExercise.setCorrectOutput(exerciseService.getOut("A = [-1,0,10,-1,14,4,6,5]\nn=len(A)\nfor i in range(n):\n\tmin=i\n\tfor j in range(i,n):\n\t\tif(A[j]<A[min]):\n\t\t\tmin = j\n\ttmp=A[i]\n\tA[i]=A[min]\n\tA[min]=tmp\nprint(A)"));
         secondExercise.setMaxPoints(5);
-        if(userService.findTeacherByEmail("alicja.zosia.k@gmail.com")==null)
+        if(userService.findTeacherByEmail("alicja.zosia.k@gmail.com") == null)
         {
             userService.saveTeacher(teacher);
         }
@@ -198,14 +198,16 @@ public class ExerciseController {
 
 
         Student loginStudent = userService.findStudentByEmail(solution.getStudentEmail());
-
         if(solution.getScore()==0)
         {
             this.checkSolution(solution);
         }
+        if(solution.getOutput()==null)
+        {
+            solution.setOutput(getresponse(solution.getSolutionContent()));
+        }
         if (loginStudent.getSolutions().contains(solution)) {
 
-            System.out.println(loginStudent.getEmail());
             int ind = loginStudent.getSolutions().indexOf(solution);
             int score = loginStudent.getSolutions().get(ind).getScore();
 
@@ -215,7 +217,9 @@ public class ExerciseController {
             loginStudent.addPoints(solution.getScore());
 
             return new ResponseEntity<>(solution,HttpStatus.CREATED);
+
         } else {
+
             exerciseService.save(solution);
             loginStudent.addSolution(solution);
             loginStudent.addPoints(solution.getScore());
@@ -242,10 +246,12 @@ public class ExerciseController {
      */
     @PutMapping("/solution")
     public void updateSolution(@RequestBody Solution solution){
+
         int oldScore = exerciseService.findSolutionById(solution.getId()).getScore();
         exerciseService.updateSolution(solution.getId(),solution);
         Student student = userService.findStudentByEmail(solution.getStudentEmail());
         student.setScore(student.getScore()-oldScore+solution.getScore());
+
     }
 
     /**
