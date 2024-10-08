@@ -21,7 +21,6 @@ import java.util.function.Predicate;
 
 @RestController
 @RequestMapping("/exercise")
-@CrossOrigin(origins = "http://localhost:3000")
 public class ExerciseController {
     @Autowired
     private ExerciseService exerciseService;
