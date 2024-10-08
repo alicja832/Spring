@@ -40,7 +40,6 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/user")
-@CrossOrigin(origins = "http://localhost:3000")
 public class UserController {
 
     @Autowired
@@ -92,14 +91,14 @@ public class UserController {
         userService.saveStudent(student);
         return responseEntity;
     }
-    @CrossOrigin
+ 
     @PutMapping("/changePassword/")
     public synchronized ResponseEntity<String> changePassword(@RequestBody VerificationRequest request)
     {
         userService.updateUser(request.email,request.password);
         return new ResponseEntity<>(HttpStatus.OK);
     }
-    @CrossOrigin
+  
     @PostMapping("/remindPassword/")
     public synchronized ResponseEntity<String> getCode(@RequestBody String email)
     {
@@ -168,7 +167,7 @@ public class UserController {
         return new ResponseEntity<String>(HttpStatus.ACCEPTED);
     }
 
-    @CrossOrigin
+
     @PostMapping("/CodeVerification")
     public ResponseEntity<String> codeVerification(@RequestBody VerificationRequest data)
     {
@@ -188,7 +187,7 @@ public class UserController {
         }
         return new ResponseEntity<>("Nieprawidłowy kod",HttpStatus.BAD_REQUEST);
     }
-    @CrossOrigin(origins = "http://localhost:3000/ranking")
+  
     @GetMapping("/ranking")
     public List<Student> getStudentRanking()
     {
