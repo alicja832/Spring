@@ -1,6 +1,4 @@
 .idea
-target/classes
-userfrontend/node_modules
-node_modules/.cache/
-.jython_cache
+target/*
+.jython_cache/*
 
