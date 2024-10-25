@@ -7,7 +7,7 @@
 #### mvn clean
 #### mvn compile
 #### mvn package -DskipTests
-#### java -jar target/app.jar
+#### java -jar target/app-1.0.0.jar
 ###### it is all
 
 #### if you do not have mvn or jvm on your computer, you can use docker:
