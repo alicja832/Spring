@@ -180,6 +180,7 @@ public class ExerciseController {
     @PostMapping("/interpreter")
     public String getresponse(@RequestBody String text){
         String str = exerciseService.getOut(text);
+        System.out.println("Caman");
         System.out.println(str);
         return str;
     }

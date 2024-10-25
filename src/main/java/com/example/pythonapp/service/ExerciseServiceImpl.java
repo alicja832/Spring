@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
-
+import java.io.PrintWriter;
 @Service
 public class ExerciseServiceImpl implements ExerciseService {
 
@@ -74,14 +74,18 @@ public class ExerciseServiceImpl implements ExerciseService {
         }
         catch(Exception e)
         {
-            e.printStackTrace();
+        
+            e.printStackTrace(new PrintWriter(output));
+            String pythonError = output.toString();
+            int end = pythonError.indexOf("at");
+            return pythonError.substring(0,end);
         }
 
         return output.toString();
     }
 
     @Override
-    public Exercise findExerciseById(long id)
+    public Exercise findExerciseById(long id)   
     {
         return exerciseRepository.findById(id);
     }
