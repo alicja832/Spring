@@ -12,15 +12,8 @@ import java.util.List;
 @Entity
 @Table(name = "student")
 public class Student  extends UserEntity{
-//    @Id
-//    @GeneratedValue(strategy= GenerationType.IDENTITY)
-//    @Column(unique = true, name = "id",nullable = false)
-//    private int id;
-//    private String name;
-//
-//    @Column(unique = true)
-//    private String email;
-//    private String password;
+
+    @Column(name = "score", nullable = false, unique = true)
     private int score=0;
 
     @OneToMany(fetch = FetchType.EAGER)
@@ -33,12 +26,12 @@ public class Student  extends UserEntity{
         solutions = new ArrayList<>();
     }
     public List<Solution> getSolutions() {
+        
         return solutions;
     }
     public void updateSolution(Solution solution)
     {
-
-        solutions.set( solutions.indexOf(solution),solution);
+        solutions.set(solutions.indexOf(solution),solution);
     }
     public void setSolutions(List<Solution> solutions) {
         this.solutions = solutions;
@@ -47,30 +40,6 @@ public class Student  extends UserEntity{
     {
         solutions.add(solution);
     }
-//    public int getId() {
-//        return id;
-//    }
-//
-//    public void setId(int id) {
-//        this.id = id;
-//    }
-//
-//    public String getName() {
-//        return name;
-//    }
-//
-//    public void setName(String name) {
-//        this.name = name;
-//    }
-//
-//    public String getEmail() {
-//        return email;
-//    }
-//
-//    public void setEmail(String email) {
-//        this.email = email;
-//    }
-
     public int getScore() {
         return score;
     }
@@ -78,15 +47,6 @@ public class Student  extends UserEntity{
     public void setScore(int score) {
         this.score = score;
     }
-
-//    public String getPassword() {
-//        return password;
-//    }
-//
-//    public void setPassword(String password) {
-//        this.password = password;
-//    }
-
     public boolean equals(Object o) {
         if (this == o)
             return true;

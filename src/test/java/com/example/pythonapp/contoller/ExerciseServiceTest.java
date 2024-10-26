@@ -16,6 +16,7 @@ public class ExerciseServiceTest {
     ExerciseController exerciseservice;
     @Test
     void pythonInterpeterTest() {
+
         Assertions.assertEquals( "a\n",exerciseservice.getresponse("print('a')"));
         Assertions.assertEquals( "[-1, -1, 0, 4, 5, 6, 10, 14]\n",exerciseservice.getresponse("A = [-1,0,10,-1,14,4,6,5]\nn=len(A)\nfor i in range(n):\n\tmin=i\n\tfor j in range(i,n):\n\t\tif(A[j]<A[min]):\n\t\t\tmin = j\n\ttmp=A[i]\n\tA[i]=A[min]\n\tA[min]=tmp\nprint(A)"));
         Assertions.assertEquals( 1,exerciseservice.listExercises().size());

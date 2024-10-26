@@ -14,6 +14,12 @@ import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.naming.InitialContext;
@@ -21,21 +27,21 @@ import java.lang.Math;
 import java.sql.SQLException;
 import java.util.*;
 
-//import com.example.demoggggg.jwt.JWTRequest;
-//import com.example.demoggggg.jwt.JWTResponse;
-//import com.example.demoggggg.jwt.MyJwt;
-//
-//import com.example.demoggggg.config.SecurityConfiguration.*;
-//
-//import org.springframework.security.core.Authentication;
-//import org.springframework.security.core.authority.SimpleGrantedAuthority;
-//import org.springframework.security.core.userdetails.UserDetails;
-//import org.springframework.security.crypto.password.PasswordEncoder;
-//import com.example.demoggggg.model.enums.RoleEnum;
-//import org.springframework.security.authentication.BadCredentialsException;
-//import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-//import org.springframework.security.authentication.AuthenticationManager;
-//import org.springframework.security.core.userdetails.User;
+import com.example.pythonapp.jwt.JWTRequest;
+import com.example.pythonapp.jwt.JWTResponse;
+import com.example.pythonapp.jwt.JwtToken;
+
+import com.example.pythonapp.config.SecurityConfiguration.*;
+
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import com.example.pythonapp.model.enums.RoleEnum;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.userdetails.User;
 
 
 @RestController
@@ -46,10 +52,11 @@ public class UserController {
     @Autowired
     private UserService userService;
     private List<Pair<String,String>> EmailCode;
-//    @Autowired
-//    private MyJwt jwt;
-//    @Autowired
-//    private AuthenticationManager authenticationManager;
+    @Autowired
+    private JwtToken jwt;
+    @Autowired
+    private AuthenticationManager authenticationManager;
+    private BCryptPasswordEncoder encoder=new BCryptPasswordEncoder();
 
     @CrossOrigin(origins = "http://localhost:3000/register")
     @PostMapping("/teacher")
@@ -77,6 +84,10 @@ public class UserController {
     public ResponseEntity<String> add(@RequestBody Student student){
 
         student.setRole("STUDENT");
+        String xd =  encoder.encode(student.getPassword());
+        System.out.println(xd);
+        student.setPassword(xd);
+
         Student savedStudent = userService.findStudentByEmail(student.getEmail());
         ResponseEntity<String> responseEntity = new ResponseEntity<>(HttpStatus.CREATED);
 
@@ -215,40 +226,37 @@ public class UserController {
      * @return
      * @throws Exception
      */
-//    @PostMapping("/authenticate")
-//    public JWTResponse authenticate(@RequestBody UserEntity userEntity)throws Exception{
-//        String token = null;
-//
-//
-//
-//        String password = userEntity.getPassword();
-//        String name = userEntity.getName();
-//        System.out.println(name);
-//        System.out.println(password);
-//        UserEntity entity = userService.findUserByNameAndPassword(name,password);
-//        if(entity!=null)
-//            System.out.println(entity.getRole());
-//        UserDetails userDetails=new User(name,password,List.of(new SimpleGrantedAuthority("ROLE_" +entity.getRole()))) ;
-//        token = jwt.generateToken(userDetails);
-//
-//        try {
-//            System.out.println(userDetails.getAuthorities());
-//            Authentication authentication = authenticationManager.authenticate(
-//                    new UsernamePasswordAuthenticationToken(userEntity.getName(), userEntity.getPassword())
-//            );
-//
-//            System.out.println("Authentication successful: " + authentication.getName());
-//        }
-//        catch (BadCredentialsException e) {
-//            throw new Exception("INVALID_CREDENTIALS", e);
-//        }
-//        catch(Exception ex)
-//        {
-//            System.out.println(ex.getMessage());
-//        }
-//        System.out.println("OK");
-//        return new JWTResponse(token);
-//    }
+   @PostMapping("/authenticate")
+   public JWTResponse authenticate(@RequestBody UserEntity userEntity)throws Exception{
+       String token = null;
+       String password = userEntity.getPassword();
+       String name = userEntity.getName();
+       System.out.println(name);
+       System.out.println(password);
+       UserEntity entity = userService.findByName(name);
+       if(entity!=null)
+           System.out.println(entity.getRole());
+           UserDetails userDetails=new User(name,password,List.of(new SimpleGrantedAuthority("ROLE_" +entity.getRole()))) ;
+           token = jwt.generateToken(userDetails);
+
+       try {
+           System.out.println(userDetails.getAuthorities());
+           Authentication authentication = authenticationManager.authenticate(
+                   new UsernamePasswordAuthenticationToken(userEntity.getName(), userEntity.getPassword())
+           );
+
+           System.out.println("Authentication successful: " + authentication.getName());
+       }
+       catch (BadCredentialsException e) {
+           throw new Exception("INVALID_CREDENTIALS", e);
+       }
+       catch(Exception ex)
+       {
+           System.out.println(ex.getMessage());
+       }
+       System.out.println("OK");
+       return new JWTResponse(token);
+   }
 
     @GetMapping("/teacher/{email}")
     public List<Teacher> getTeacher(@PathVariable String email){

@@ -10,7 +10,7 @@ import java.util.List;
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
 @Table(name = "users")
-public class UserEntity{
+public class UserEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -56,11 +56,11 @@ public class UserEntity{
     public void setName(String name) {
         this.name = name;
     }
-
+   
     public String getPassword() {
         return password;
     }
-
+  
     public void setPassword(String password) {
         this.password = password;
     }
