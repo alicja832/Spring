@@ -13,7 +13,7 @@ import java.util.List;
 @Table(name = "student")
 public class Student  extends UserEntity{
 
-    @Column(name = "score", nullable = false, unique = true)
+    @Column(name = "score", nullable = false)
     private int score=0;
 
     @OneToMany(fetch = FetchType.EAGER)
@@ -23,6 +23,14 @@ public class Student  extends UserEntity{
 
     public Student()
     {
+        solutions = new ArrayList<>();
+    }
+    public Student(UserEntity userEntity)
+    {
+        name = userEntity.name;
+        email = userEntity.email;
+        password = userEntity.password;
+        role = userEntity.role;
         solutions = new ArrayList<>();
     }
     public List<Solution> getSolutions() {

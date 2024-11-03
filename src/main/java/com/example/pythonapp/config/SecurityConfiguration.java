@@ -1,5 +1,6 @@
 package com.example.pythonapp.config;
 import com.example.pythonapp.details.*;
+import jakarta.servlet.Filter;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ import org.springframework.security.config.annotation.ObjectPostProcessor;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.configuration.ObjectPostProcessorConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
@@ -31,46 +33,53 @@ import  org.springframework.security.config.annotation.web.configurers.AbstractH
 import org.springframework.security.config.annotation.web.configurers.AnonymousConfigurer;
 import static org.springframework.security.config.Customizer.withDefaults;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+
 @Configuration
 @EnableWebSecurity
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfiguration {
 
     @Autowired
     private AppUserDetailsService appUserDetailsService;
     private final JwtFilter jwtFilter;
+    private final DaoAuthenticationProvider authProvider;
     
     @Autowired
     public SecurityConfiguration(JwtFilter jwtFilter) {
 
         this.jwtFilter = jwtFilter;
-
+        authProvider = new DaoAuthenticationProvider();
     }
     
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-                 http
-                .formLogin(AbstractHttpConfigurer::disable)
-                .httpBasic(AbstractHttpConfigurer::disable)
-                .anonymous(AnonymousConfigurer<HttpSecurity>::disable)
+              return http
+                      .csrf(AbstractHttpConfigurer::disable)
+
                 .authorizeHttpRequests(authorizationManagerRequestMatcherRegistry ->
                         authorizationManagerRequestMatcherRegistry
+                                .requestMatchers("exercise/one/**").permitAll()
                                 .requestMatchers("user/student").permitAll()
+                                .requestMatchers("user/").permitAll()
                                 .requestMatchers("user/teacher").permitAll()
+                                .requestMatchers(HttpMethod.GET,  "exercise/solution/{id}").permitAll()
+                                .requestMatchers("exercise/interpreter").permitAll()
+                                .requestMatchers("exercise/check").permitAll()
+                                .requestMatchers(HttpMethod.GET,"exercise/").permitAll()
                                 .requestMatchers("user/authenticate").permitAll()
                                 .anyRequest().authenticated())
-//                .httpBasic(Customizer.withDefaults())
+                      .authenticationProvider(authProvider)
+                      .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement(sess -> sess
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // Bezstanowe sesje
-                )
-                         .csrf(AbstractHttpConfigurer::disable);
-            return http.build();
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS) 
+                ).build();
     }
 
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
 
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        System.out.println(appUserDetailsService.toString());
+
         authProvider.setUserDetailsService(appUserDetailsService);
         System.out.println("Problem");
         authProvider.setPasswordEncoder(passwordEncoder());
@@ -88,8 +97,5 @@ public class SecurityConfiguration {
         return new BCryptPasswordEncoder();
     }
 
-    public void configure(@NotNull HttpSecurity http) throws Exception {
-        http.addFilter(jwtFilter);
 
-    }
 }

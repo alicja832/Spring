@@ -12,7 +12,6 @@ import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,20 +19,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
-
+@CrossOrigin(origins = "http://localhost:3000/", maxAge=360000)
 @RestController
-@CrossOrigin(origins = "http://localhost:3000")
 @RequestMapping("/exercise")
 public class ExerciseController {
     @Autowired
     private ExerciseService exerciseService;
     @Autowired
     private UserService userService;
+    
     /**
      * add new exercise
      * @param exercise
      * @return
      */
+    
     @PostMapping("/")
     public ResponseEntity<Exercise> add(@RequestBody ExerciseDto exercise){
 
@@ -71,8 +71,9 @@ public class ExerciseController {
     @DeleteMapping("/{id}")
     public void delete(@PathVariable int id){
 
-        exerciseService.findExerciseById(id).getTeacher().removeExercise(exerciseService.findExerciseById(id));
+	    Exercise exercise = exerciseService.findExerciseById(id);
         exerciseService.delete(id);
+        exercise.getTeacher().removeExercise(exercise);
     }
     /**
      *
@@ -89,12 +90,12 @@ public class ExerciseController {
         Exercise newExercise = exerciseService.findExerciseById(exercise.getId());
         teacher.updateExercise(newExercise);
     }
+
     /**
      * get all exercises
      * @return
      * all exercises from database
      */
-    @CrossOrigin(origins = "http://localhost:3000/tasks")
     @GetMapping("/")
     public List<Pair<Exercise,Boolean>> listExercises(){
 
@@ -128,10 +129,15 @@ public class ExerciseController {
         {
             userService.saveTeacher(teacher);
         }
+        else
+        {
+            teacher = userService.findTeacherByEmail("alicja.zosia.k@gmail.com");
+        }
         secondExercise.setTeacher(teacher);
         System.out.println(secondExercise.getCorrectOutput());
         exerciseService.save(secondExercise);
     }
+    
     @GetMapping("/{email}")
     public List<Pair<Exercise,Boolean>> listExercises(@PathVariable String email){
 
@@ -169,6 +175,7 @@ public class ExerciseController {
      */
     @GetMapping("/one/{id}")
     public List<Exercise> FindById(@PathVariable int id) {
+
         List<Exercise> exercises = List.of(exerciseService.findExerciseById(id));
         return exercises;
     }
@@ -180,8 +187,6 @@ public class ExerciseController {
     @PostMapping("/interpreter")
     public String getresponse(@RequestBody String text){
         String str = exerciseService.getOut(text);
-        System.out.println("Caman");
-        System.out.println(str);
         return str;
     }
     /**
@@ -207,6 +212,9 @@ public class ExerciseController {
 
         return excercisesAndScores;
     }
+      /**
+     * add one's solutions with name exercise and score
+     **/
     @PostMapping("/solution")
     public ResponseEntity<Solution> addSolution(@RequestBody Solution solution){
 
@@ -220,24 +228,12 @@ public class ExerciseController {
         {
             solution.setOutput(getresponse(solution.getSolutionContent()));
         }
-        if (loginStudent.getSolutions().contains(solution)) {
 
-            int ind = loginStudent.getSolutions().indexOf(solution);
-            int score = loginStudent.getSolutions().get(ind).getScore();
-
-            loginStudent.getSolutions().remove(solution);
-            loginStudent.setScore(loginStudent.getScore() - score);
-            loginStudent.getSolutions().add(solution);
-            loginStudent.addPoints(solution.getScore());
-
-            return new ResponseEntity<>(solution,HttpStatus.CREATED);
-
-        } else {
 
             exerciseService.save(solution);
             loginStudent.addSolution(solution);
             loginStudent.addPoints(solution.getScore());
-        }
+        
 
         return new ResponseEntity<>(solution,HttpStatus.CREATED);
 

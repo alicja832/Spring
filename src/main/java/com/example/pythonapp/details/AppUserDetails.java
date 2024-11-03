@@ -7,7 +7,7 @@ import java.util.Collection;
 import java.util.List;
 
 public class AppUserDetails implements UserDetails {
-    private UserEntity user;
+    final private UserEntity user;
 
     public AppUserDetails(UserEntity user) {
         this.user = user;
@@ -15,7 +15,12 @@ public class AppUserDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of();
+        return List.of(new GrantedAuthority() {
+            @Override
+            public String getAuthority() {
+                return "ROLE_" + user.getRole();
+            }
+        });
     }
 
     @Override
@@ -30,21 +35,21 @@ public class AppUserDetails implements UserDetails {
 
     @Override
     public boolean isAccountNonExpired() {
-        return UserDetails.super.isAccountNonExpired();
+        return true;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return UserDetails.super.isAccountNonLocked();
+        return true;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return UserDetails.super.isCredentialsNonExpired();
+        return true;
     }
 
     @Override
     public boolean isEnabled() {
-        return UserDetails.super.isEnabled();
+        return true;
     }
 }

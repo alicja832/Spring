@@ -53,7 +53,7 @@ public class UserServiceImpl implements UserService {
         studentRepository.updateById(id,score);
     }
     @Override
-    public UserEntity findbyEmail(String email)
+    public UserEntity findByEmail(String email)
     {
         return userRepository.findByEmail(email);
     }

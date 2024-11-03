@@ -18,7 +18,7 @@ public interface UserService {
     Teacher findById(long id);
     Solution saveSolution(Solution solution);
     Student findbyId(long id);
-    UserEntity findbyEmail(String email);
+    UserEntity findByEmail(String email);
     Teacher findTeacherByEmail(String email);
     Student findStudentByEmail(String email);
     Teacher findTeacherByName(String name);

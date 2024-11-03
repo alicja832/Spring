@@ -14,6 +14,7 @@ import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -21,18 +22,14 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-
 import javax.naming.InitialContext;
 import java.lang.Math;
 import java.sql.SQLException;
 import java.util.*;
-
 import com.example.pythonapp.jwt.JWTRequest;
 import com.example.pythonapp.jwt.JWTResponse;
 import com.example.pythonapp.jwt.JwtToken;
-
 import com.example.pythonapp.config.SecurityConfiguration.*;
-
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -45,7 +42,7 @@ import org.springframework.security.core.userdetails.User;
 
 
 @RestController
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "http://localhost:3000",maxAge=360000)
 @RequestMapping("/user")
 public class UserController {
 
@@ -56,37 +53,43 @@ public class UserController {
     private JwtToken jwt;
     @Autowired
     private AuthenticationManager authenticationManager;
-    private BCryptPasswordEncoder encoder=new BCryptPasswordEncoder();
+    private final BCryptPasswordEncoder encoder=new BCryptPasswordEncoder();
 
-    @CrossOrigin(origins = "http://localhost:3000/register")
-    @PostMapping("/teacher")
-    public ResponseEntity<String> add(@RequestBody Teacher teacher){
+  
+    @PostMapping("/")
+    public ResponseEntity<String> add(@RequestBody UserEntity userEntity){
 
-        teacher.setRole("TEACHER");
-        Teacher savedTeacher = userService.findTeacherByEmail(teacher.getEmail());
+
+        userEntity.setPassword( encoder.encode(userEntity.getPassword()));
+        UserEntity savedUser = userService.findByEmail(userEntity.getEmail());
         ResponseEntity<String> responseEntity = new ResponseEntity<>(HttpStatus.CREATED);
 
-        if(savedTeacher!=null)
+        if(savedUser!=null)
         {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Użytkownik o podanym adresie email istnieje");
         }
-        savedTeacher = userService.findTeacherByName(teacher.getName());
+        savedUser = userService.findByName(userEntity.getName());
 
-        if(savedTeacher!=null)
+        if(savedUser!=null)
         {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Użytkownik o podanym loginie istnieje");
         }
-        userService.saveTeacher(teacher);
+        if(userEntity.getRole().equals("TEACHER")) {
+            Teacher teacher = new Teacher(userEntity);
+            userService.saveTeacher(teacher);
+        }
+        if(userEntity.getRole().equals("STUDENT")) {
+            Teacher teacher = new Teacher(userEntity);
+                userService.saveTeacher(teacher);
+        }
         return responseEntity;
     }
-    @CrossOrigin(origins = "http://localhost:3000/register")
+ 
     @PostMapping("/student")
     public ResponseEntity<String> add(@RequestBody Student student){
 
         student.setRole("STUDENT");
-        String xd =  encoder.encode(student.getPassword());
-        System.out.println(xd);
-        student.setPassword(xd);
+        student.setPassword( encoder.encode(student.getPassword()));
 
         Student savedStudent = userService.findStudentByEmail(student.getEmail());
         ResponseEntity<String> responseEntity = new ResponseEntity<>(HttpStatus.CREATED);
@@ -111,11 +114,12 @@ public class UserController {
         userService.updateUser(request.email,request.password);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+    
   
     @PostMapping("/remindPassword/")
     public synchronized ResponseEntity<String> getCode(@RequestBody String email)
     {
-        if(userService.findbyEmail(email) == null)
+        if(userService.findByEmail(email) == null)
         {
             return new ResponseEntity<String>("Nieprawidlowy adres email",HttpStatus.NOT_FOUND);
         }
@@ -174,7 +178,7 @@ public class UserController {
         }
         catch (Exception exception)
         {
-            return  new ResponseEntity<String>(HttpStatus.CONFLICT);
+            return  new ResponseEntity<String>(HttpStatus.BAD_REQUEST);
         }
 
         return new ResponseEntity<String>(HttpStatus.ACCEPTED);
@@ -260,13 +264,13 @@ public class UserController {
 
     @GetMapping("/teacher/{email}")
     public List<Teacher> getTeacher(@PathVariable String email){
-
+        System.out.println(userService.findTeacherByEmail(email));
         return List.of(userService.findTeacherByEmail(email));
     }
-
+    
     @GetMapping("/student/{email}")
     public List<Student> getStudent(@PathVariable String email){
-
+        
         return List.of(userService.findStudentByEmail(email));
 
     }
@@ -281,23 +285,5 @@ public class UserController {
 
         long deleted = userService.deleteUser(id);
         return ResponseEntity.ok(deleted);
-    }
-
-    @PostMapping("/login")
-    //  @Operation(summary = "Login based on user role after authentication", security = @SecurityRequirement(name = "bearerAuth"))
-    public String login(@RequestBody UserEntity user) {
-
-        System.out.println(user.getPassword());
-        UserEntity userByUsername = this.userService.findByName(user.getName());
-
-        switch(userByUsername.getRole()) {
-            case "STUDENT":
-                return "STUDENT";
-            case "TEACHER":
-                return "TEACHER";
-            case "ADMIN":
-                return "ADMIN";
-        }
-        return null;
     }
 }

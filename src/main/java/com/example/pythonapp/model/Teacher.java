@@ -18,11 +18,17 @@
         public Teacher() {
             exercises = new ArrayList<>();
         }
+        public Teacher(UserEntity userEntity)
+        {
+            name = userEntity.name;
+            email = userEntity.email;
+            password = userEntity.password;
+            role = userEntity.role;
+
+        }
         public void AddExc(Exercise something)
         {
-            System.out.println(something.getName());
             exercises.add(something);
-            System.out.println(exercises.toString());
         }
         public void removeExercise(Exercise something)
         {
