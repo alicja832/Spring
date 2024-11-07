@@ -18,6 +18,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -55,7 +56,7 @@ public class UserController {
     private AuthenticationManager authenticationManager;
     private final BCryptPasswordEncoder encoder=new BCryptPasswordEncoder();
 
-  
+
     @PostMapping("/")
     public ResponseEntity<String> add(@RequestBody UserEntity userEntity){
 
@@ -79,35 +80,13 @@ public class UserController {
             userService.saveTeacher(teacher);
         }
         if(userEntity.getRole().equals("STUDENT")) {
-            Teacher teacher = new Teacher(userEntity);
-                userService.saveTeacher(teacher);
+            Student student = new Student(userEntity);
+            userService.saveStudent(student);
         }
         return responseEntity;
     }
  
-    @PostMapping("/student")
-    public ResponseEntity<String> add(@RequestBody Student student){
 
-        student.setRole("STUDENT");
-        student.setPassword( encoder.encode(student.getPassword()));
-
-        Student savedStudent = userService.findStudentByEmail(student.getEmail());
-        ResponseEntity<String> responseEntity = new ResponseEntity<>(HttpStatus.CREATED);
-
-        if(savedStudent!=null)
-        {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Użytkownik o podanym adresie email istnieje");
-        }
-        savedStudent = userService.findStudentByEmail(student.getName());
-
-        if(savedStudent!=null)
-        {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Użytkownik o podanym loginie istnieje");
-        }
-        userService.saveStudent(student);
-        return responseEntity;
-    }
- 
     @PutMapping("/changePassword/")
     public synchronized ResponseEntity<String> changePassword(@RequestBody VerificationRequest request)
     {
@@ -199,7 +178,7 @@ public class UserController {
         if(pairfounded.getValue().equals(data.code))
         {
             EmailCode.remove(pairfounded);
-            System.out.println(EmailCode.size());
+
             return new ResponseEntity<>(HttpStatus.OK);
         }
         return new ResponseEntity<>("Nieprawidłowy kod",HttpStatus.BAD_REQUEST);
@@ -210,23 +189,21 @@ public class UserController {
     {
         List<Student> list = userService.listStudents();
         list.sort((Student a,Student b)->a.getScore()-b.getScore());
-        System.out.println(list);
+
         return list;
     }
-    @GetMapping("/exercises/{email}")
-    public List<Exercise> getExercises(@PathVariable String email){
+    @GetMapping("/exercises/")
+    public List<Exercise> getExercises(){
 
-        Teacher loginTeacher = userService.findTeacherByEmail(email);
+        Teacher loginTeacher = userService.findTeacherByName(SecurityContextHolder.getContext().getAuthentication().getName());
         if(loginTeacher!=null) {
             loginTeacher = userService.findTeacherByName(loginTeacher.getName());
-            System.out.printf(loginTeacher.getExercises().toString());
             return loginTeacher.getExercises();
 
         }
         return new ArrayList<>();
     }
     /**
-     * Narazie niech bedzie tak
      * @return
      * @throws Exception
      */
@@ -235,55 +212,33 @@ public class UserController {
        String token = null;
        String password = userEntity.getPassword();
        String name = userEntity.getName();
-       System.out.println(name);
-       System.out.println(password);
+       UserDetails userDetails = null;
        UserEntity entity = userService.findByName(name);
-       if(entity!=null)
-           System.out.println(entity.getRole());
-           UserDetails userDetails=new User(name,password,List.of(new SimpleGrantedAuthority("ROLE_" +entity.getRole()))) ;
+       if(entity!=null) {
+           userDetails = new User(name, password, List.of(new SimpleGrantedAuthority("ROLE_" + entity.getRole())));
            token = jwt.generateToken(userDetails);
-
-       try {
-           System.out.println(userDetails.getAuthorities());
-           Authentication authentication = authenticationManager.authenticate(
-                   new UsernamePasswordAuthenticationToken(userEntity.getName(), userEntity.getPassword())
-           );
-
-           System.out.println("Authentication successful: " + authentication.getName());
+           try {
+               Authentication authentication = authenticationManager.authenticate(
+                       new UsernamePasswordAuthenticationToken(userEntity.getName(), userEntity.getPassword())
+               );
+           } catch (BadCredentialsException e) {
+               throw new Exception("INVALID_CREDENTIALS", e);
+           } catch (Exception ex) {
+               System.out.println(ex.getMessage());
+           }
        }
-       catch (BadCredentialsException e) {
-           throw new Exception("INVALID_CREDENTIALS", e);
-       }
-       catch(Exception ex)
-       {
-           System.out.println(ex.getMessage());
-       }
-       System.out.println("OK");
+       else throw new Exception("USER_NOT_FOUND");
        return new JWTResponse(token);
    }
 
-    @GetMapping("/teacher/{email}")
-    public List<Teacher> getTeacher(@PathVariable String email){
-        System.out.println(userService.findTeacherByEmail(email));
-        return List.of(userService.findTeacherByEmail(email));
-    }
-    
-    @GetMapping("/student/{email}")
-    public List<Student> getStudent(@PathVariable String email){
-        
-        return List.of(userService.findStudentByEmail(email));
-
-    }
-    @GetMapping("/users")
-    public List<UserEntity> list(){
-
-        return userService.listAll();
+    @GetMapping("/")
+    public List<UserEntity> getTeacher(){
+        String name = SecurityContextHolder.getContext().getAuthentication().getName();
+        UserEntity userEntity = userService.findByName(name);
+        if(userEntity.getRole().equals("TEACHER"))
+            return List.of(userService.findTeacherByName(name));
+        return List.of(userService.findStudentByName(name));
     }
 
-    @GetMapping("/delete/{id}")
-    public ResponseEntity<Long> delete(@PathVariable long id){
 
-        long deleted = userService.deleteUser(id);
-        return ResponseEntity.ok(deleted);
-    }
 }

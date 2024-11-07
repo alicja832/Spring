@@ -36,9 +36,10 @@ public class UserControllerTest {
     }
     @Test
     void Authorized() {
-        Student student = new Student();
+        Teacher student = new Teacher();
         student.setEmail("someone@gmail.com");
         student.setName("someone");
+        student.setRole("TEACHER");
         student.setPassword("password");
         userController.add(student).getBody();
         student.setPassword("password");
@@ -61,7 +62,7 @@ public class UserControllerTest {
             given()
                     .when()
                     .header("Authorization", "Bearer " + jwtToken)
-                    .get("user/student/someone@gmail.com")
+                    .get("user/")
                     .then()
                     .statusCode(200)
                     .body("data.size()", equalTo(1));

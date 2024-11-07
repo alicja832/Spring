@@ -17,8 +17,7 @@ public class Student  extends UserEntity{
     private int score=0;
 
     @OneToMany(fetch = FetchType.EAGER)
-    @JoinColumn(name = "exercise_id")
-    @JsonRawValue
+    @JoinColumn(name = "solution_id")
     List<Solution> solutions;
 
     public Student()

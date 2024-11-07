@@ -1,6 +1,5 @@
 package com.example.pythonapp.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonRawValue;
 import jakarta.persistence.*;
 
 @Entity
@@ -18,7 +17,10 @@ public class Solution {
     @ManyToOne
     @JoinColumn(name="exercise_id", nullable=false)
     private Exercise exercise;
-    private String studentEmail;
+    @ManyToOne
+    @JoinColumn(name="student_id", nullable=false)
+    @JsonIgnore
+    private Student student;
     private int score = 0;
     private String output = null;
 
@@ -46,12 +48,6 @@ public class Solution {
         }
     public void setExercise(Exercise exercise) {
             this.exercise = exercise;
-        }
-    public String getStudentEmail() {
-            return studentEmail;
-        }
-    public void setStudentEmail(String studentEmail) {
-            this.studentEmail = studentEmail;
         }
     public int getScore() {
             return score;

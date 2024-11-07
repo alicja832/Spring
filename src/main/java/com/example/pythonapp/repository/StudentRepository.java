@@ -20,6 +20,6 @@ public interface StudentRepository extends JpaRepository<Student,Long> {
    @Transactional
    @Modifying
    @Query(value = "update student set score=:score where id=:id", nativeQuery = true)
-   void updateById(@Param("id") int id, @Param("score") int score);
+   void updateById(@Param("id") long id, @Param("score") int score);
 
 }

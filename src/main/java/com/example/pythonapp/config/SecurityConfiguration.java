@@ -56,17 +56,17 @@ public class SecurityConfiguration {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
               return http
                       .csrf(AbstractHttpConfigurer::disable)
-
                 .authorizeHttpRequests(authorizationManagerRequestMatcherRegistry ->
                         authorizationManagerRequestMatcherRegistry
                                 .requestMatchers("exercise/one/**").permitAll()
-                                .requestMatchers("user/student").permitAll()
                                 .requestMatchers("user/").permitAll()
                                 .requestMatchers("user/teacher").permitAll()
-                                .requestMatchers(HttpMethod.GET,  "exercise/solution/{id}").permitAll()
+                                
+                                .requestMatchers(HttpMethod.GET,  "exercise/solution/**").permitAll()
                                 .requestMatchers("exercise/interpreter").permitAll()
                                 .requestMatchers("exercise/check").permitAll()
                                 .requestMatchers(HttpMethod.GET,"exercise/").permitAll()
+                                .requestMatchers(HttpMethod.POST,"exercise/").hasRole("TEACHER")
                                 .requestMatchers("user/authenticate").permitAll()
                                 .anyRequest().authenticated())
                       .authenticationProvider(authProvider)
@@ -81,9 +81,7 @@ public class SecurityConfiguration {
 
 
         authProvider.setUserDetailsService(appUserDetailsService);
-        System.out.println("Problem");
         authProvider.setPasswordEncoder(passwordEncoder());
-
         AuthenticationManagerBuilder authenticationManagerBuilder =
                 http.getSharedObject(AuthenticationManagerBuilder.class);
         authenticationManagerBuilder.authenticationProvider(authProvider);

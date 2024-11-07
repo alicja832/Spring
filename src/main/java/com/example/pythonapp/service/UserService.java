@@ -25,7 +25,7 @@ public interface UserService {
     Student findStudentByName(String name);
     public long loginStudent(Student student);
     public long loginTeacher(Teacher teacher);
-    void updateStudent(int id,int score);
+    void updateStudent(long id,int score);
     void updateUser(String email,String password);
     long deleteUser(long id);
     List<Student> listStudents();

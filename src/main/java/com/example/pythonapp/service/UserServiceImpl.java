@@ -48,7 +48,7 @@ public class UserServiceImpl implements UserService {
         return studentRepository.findById(id);
     }
     @Override
-    public void updateStudent(int id,int score)
+    public void updateStudent(long id,int score)
     {
         studentRepository.updateById(id,score);
     }

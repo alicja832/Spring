@@ -1,6 +1,5 @@
 package com.example.pythonapp.controller;
 import javafx.util.Pair;
-import com.example.pythonapp.dto.ExerciseDto;
 import com.example.pythonapp.model.Exercise;
 import com.example.pythonapp.model.Solution;
 import com.example.pythonapp.model.Student;
@@ -8,19 +7,18 @@ import com.example.pythonapp.model.Teacher;
 import com.example.pythonapp.service.ExerciseService;
 import com.example.pythonapp.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
-@CrossOrigin(origins = "http://localhost:3000/", maxAge=360000)
 @RestController
+@CrossOrigin(origins = "http://localhost:3000/", maxAge=360000)
 @RequestMapping("/exercise")
 public class ExerciseController {
     @Autowired
@@ -33,34 +31,31 @@ public class ExerciseController {
      * @param exercise
      * @return
      */
-    
     @PostMapping("/")
-    public ResponseEntity<Exercise> add(@RequestBody ExerciseDto exercise){
+    public ResponseEntity<Exercise> add(@RequestBody Exercise exercise){
 
-        Exercise savedExercise = new Exercise();
-        savedExercise.setContent(exercise.getContent());
-        savedExercise.setName(exercise.getName());
-        savedExercise.setIntroduction(exercise.getIntroduction());
-        savedExercise.setCorrectSolution(exercise.getCorrectSolution());
-        savedExercise.setMaxPoints(exercise.getMaxPoints());
-        savedExercise.setTeacher(exercise.getTeacher());
-        savedExercise.setCorrectOutput(exerciseService.getOut("\n"+exercise.getCorrectSolution()+"\n"));
+        exercise.setCorrectOutput(exerciseService.getOut("\n"+exercise.getCorrectSolution()+"\n"));
+        if(exercise.getCorrectOutput().contains("Error"))
+            return new ResponseEntity<>(exercise, HttpStatus.BAD_REQUEST);
+        if(exercise.getCorrectOutput().contains("TraceBack"))
+            return new ResponseEntity<>(exercise, HttpStatus.BAD_REQUEST);
+        String name = SecurityContextHolder.getContext().getAuthentication().getName();
+        Teacher teacher = userService.findTeacherByName(name);
+        exercise.setTeacher(teacher);
+
         try {
-            savedExercise = exerciseService.save(savedExercise);
+            exercise = exerciseService.save(exercise);
         }
         catch(Exception exception)
         {
             System.out.println(exercise);
-            return new ResponseEntity<>(savedExercise, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(exercise, HttpStatus.BAD_REQUEST);
         }
-            if(savedExercise.getCorrectOutput().contains("Error"))
-                    return new ResponseEntity<>(savedExercise, HttpStatus.BAD_REQUEST);
-            if(savedExercise.getCorrectOutput().contains("TraceBack"))
-                        return new ResponseEntity<>(savedExercise, HttpStatus.BAD_REQUEST);
-        Teacher teacher = userService.findTeacherByName(exercise.getTeacher().getName());
-        teacher.AddExc(savedExercise);
+           
 
-        return new ResponseEntity<>(savedExercise, HttpStatus.CREATED);
+        teacher.addExercise(exercise);
+
+        return new ResponseEntity<>(exercise, HttpStatus.CREATED);
     }
 
     /**
@@ -68,12 +63,14 @@ public class ExerciseController {
      * @param id
      * @return
      */
+    @CrossOrigin
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable int id){
+    public ResponseEntity<Exercise> delete(@PathVariable int id){
 
 	    Exercise exercise = exerciseService.findExerciseById(id);
         exerciseService.delete(id);
         exercise.getTeacher().removeExercise(exercise);
+        return new ResponseEntity<>(exercise, HttpStatus.OK);
     }
     /**
      *
@@ -96,20 +93,10 @@ public class ExerciseController {
      * @return
      * all exercises from database
      */
-    @GetMapping("/")
-    public List<Pair<Exercise,Boolean>> listExercises(){
 
-       if(exerciseService.getAllExercises().isEmpty() || exerciseService.findExerciseByName("Sortowanie przez wybieranie")==null)
-           setExercises();
-        List<Pair<Exercise,Boolean>> listExercise = new ArrayList<>();
-        for(Exercise e:exerciseService.getAllExercises())
-        {
-            listExercise.add(new Pair<>(e,false));
-        }
-        return listExercise;
-    }
     private void setExercises()
     {
+        //uwaga to na sztywno dodamy do bazy danych
         Teacher teacher = new Teacher();
         teacher.setEmail("alicja.zosia.k@gmail.com");
         teacher.setName("FirstTeacher");
@@ -134,17 +121,19 @@ public class ExerciseController {
             teacher = userService.findTeacherByEmail("alicja.zosia.k@gmail.com");
         }
         secondExercise.setTeacher(teacher);
-        System.out.println(secondExercise.getCorrectOutput());
         exerciseService.save(secondExercise);
     }
-    
-    @GetMapping("/{email}")
-    public List<Pair<Exercise,Boolean>> listExercises(@PathVariable String email){
+   
+    @GetMapping("/")
+    public List<Pair<Exercise,Boolean>> listExercises(){
 
+        String name = "";
+        if(SecurityContextHolder.getContext().getAuthentication()!=null)
+            name = SecurityContextHolder.getContext().getAuthentication().getName();
         if(exerciseService.getAllExercises().isEmpty() || exerciseService.findExerciseByName("Sortowanie przez wybieranie")==null)
             setExercises();
         List<Solution> solutions;
-        Student student = userService.findStudentByEmail(email);
+        Student student = userService.findStudentByName(name);
         if(student!=null)
         {
             solutions = exerciseService.findStudentSolution(student);
@@ -192,9 +181,11 @@ public class ExerciseController {
     /**
      * get one's solutions with name exercise and score
      **/
-    @GetMapping("/solutions/{name}")
-    public List<Map<String,String>> getSolutions(@PathVariable String name){
+    @GetMapping("/solutions")
+    @CrossOrigin(origins = "http://localhost:3000/profil")
+    public List<Map<String,String>> getSolutions(){
 
+        String name = SecurityContextHolder.getContext().getAuthentication().getName();
         List<Map<String, String>> excercisesAndScores = new ArrayList<>();
         List<Solution> solutions = exerciseService.findStudentSolution(userService.findStudentByName(name));
 
@@ -218,8 +209,7 @@ public class ExerciseController {
     @PostMapping("/solution")
     public ResponseEntity<Solution> addSolution(@RequestBody Solution solution){
 
-
-        Student loginStudent = userService.findStudentByEmail(solution.getStudentEmail());
+        Student loginStudent = userService.findStudentByName(SecurityContextHolder.getContext().getAuthentication().getName());
         if(solution.getScore()==0)
         {
             this.checkSolution(solution);
@@ -229,11 +219,9 @@ public class ExerciseController {
             solution.setOutput(getresponse(solution.getSolutionContent()));
         }
 
-
-            exerciseService.save(solution);
-            loginStudent.addSolution(solution);
-            loginStudent.addPoints(solution.getScore());
-        
+        exerciseService.save(solution);
+        userService.updateStudent(userService.findStudentByName(loginStudent.getId(),loginStudent.getScore()+solution.getScore()));
+        loginStudent.addSolution(solution);
 
         return new ResponseEntity<>(solution,HttpStatus.CREATED);
 
@@ -259,7 +247,7 @@ public class ExerciseController {
 
         int oldScore = exerciseService.findSolutionById(solution.getId()).getScore();
         exerciseService.updateSolution(solution.getId(),solution);
-        Student student = userService.findStudentByEmail(solution.getStudentEmail());
+        Student student = userService.findStudentByName();
         student.setScore(student.getScore()-oldScore+solution.getScore());
 
     }

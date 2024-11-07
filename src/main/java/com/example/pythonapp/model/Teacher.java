@@ -26,13 +26,13 @@
             role = userEntity.role;
 
         }
-        public void AddExc(Exercise something)
+        public void addExercise(Exercise exercise)
         {
-            exercises.add(something);
+            exercises.add(exercise);
         }
-        public void removeExercise(Exercise something)
+        public void removeExercise(Exercise exercise)
         {
-            exercises.remove(something);
+            exercises.remove(exercise);
         }
         public void updateExercise(Exercise exercise)
         {
