@@ -11,15 +11,16 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface SolutionRepository extends JpaRepository<Solution,Long> {
-    List<Solution> findAllByStudentEmailEquals(String StudentEmail);
-    Solution findById(int id);
+    List<Solution> findAllByStudentEquals(Student Student);
+    Optional<Solution> findById(int id);
     Long deleteById(int id);
     @Transactional
     @Modifying
-    @Query(value = "update solution set solutioncontent=:solutioncontent,score=:score where id=:id", nativeQuery = true)
+    @Query(value = "update solution set solution_content=:solutioncontent,score=:score where id=:id", nativeQuery = true)
     void updateById(@Param("id") int id, @Param("solutioncontent") String solutioncontent, @Param("score") int score);
 
 }

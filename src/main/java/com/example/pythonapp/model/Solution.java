@@ -11,7 +11,7 @@ public class Solution {
     @Column(unique = true,name="id" ,nullable = false)
     private int Id;
 
-    @Column(name="solutioncontent" ,nullable = false)
+    @Column(name="solution_content" ,nullable = false)
     private String solutionContent;
 
     @ManyToOne
@@ -55,6 +55,9 @@ public class Solution {
     public void setScore(int score) {
             this.score = score;
         }
+    public Student getStudent() {return student;}
+    public void setStudent(Student student) {this.student = student;}
+
     public boolean equals(Object o) {
         if (this == o)
                 return true;
@@ -63,6 +66,6 @@ public class Solution {
             if (getClass() != o.getClass())
                 return false;
             Solution solution = (Solution) o;
-            return (this.exercise.getId() == solution.getExercise().getId()) && ( this.studentEmail.equals(solution.studentEmail));
+            return (this.exercise.getId() == solution.getExercise().getId()) && ( this.student.getId() == (solution.student.getId()));
     }
 }

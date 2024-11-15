@@ -2,11 +2,11 @@ package com.example.pythonapp.details;
 import com.example.pythonapp.model.UserEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 public class AppUserDetails implements UserDetails {
+
     final private UserEntity user;
 
     public AppUserDetails(UserEntity user) {
@@ -15,12 +15,7 @@ public class AppUserDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new GrantedAuthority() {
-            @Override
-            public String getAuthority() {
-                return "ROLE_" + user.getRole();
-            }
-        });
+        return new ArrayList<GrantedAuthority>();
     }
 
     @Override

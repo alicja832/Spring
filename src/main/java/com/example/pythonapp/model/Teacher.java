@@ -2,29 +2,29 @@
 
     import jakarta.persistence.*;
 
+
     import java.io.Serializable;
     import java.util.ArrayList;
     import java.util.List;
 
+
     @Entity
-    public class Teacher extends UserEntity implements Serializable {
+    public class Teacher extends UserEntity {
 
 
 
         @OneToMany(fetch = FetchType.EAGER)
         @JoinColumn(name = "teacher_id")
-        private List<Exercise> exercises = null;
+        private List<Exercise> exercises = new ArrayList<>();
 
         public Teacher() {
-            exercises = new ArrayList<>();
+
         }
         public Teacher(UserEntity userEntity)
         {
             name = userEntity.name;
             email = userEntity.email;
             password = userEntity.password;
-            role = userEntity.role;
-
         }
         public void addExercise(Exercise exercise)
         {
@@ -38,13 +38,11 @@
         {
             exercises.set( exercises.indexOf(exercise),exercise);
         }
-        public List<Exercise> getExercises() {
-            return exercises;
-        }
 
         public void setExercises(List<Exercise> exercises) {
             this.exercises = exercises;
         }
+        public List<Exercise> getExercises() {return exercises;}
 
         public boolean equals(Object o) {
             if (this == o)

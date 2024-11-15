@@ -10,26 +10,13 @@ import com.example.pythonapp.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.util.Optional;
+
 @Service
 public interface UserService {
-
-    Student saveStudent(Student student);
-    Teacher saveTeacher(Teacher teacher);
-    Teacher findById(long id);
-    Solution saveSolution(Solution solution);
-    Student findbyId(long id);
-    UserEntity findByEmail(String email);
-    Teacher findTeacherByEmail(String email);
-    Student findStudentByEmail(String email);
-    Teacher findTeacherByName(String name);
-    Student findStudentByName(String name);
-    public long loginStudent(Student student);
-    public long loginTeacher(Teacher teacher);
-    void updateStudent(long id,int score);
+    Optional<UserEntity> findByEmail(String email);
     void updateUser(String email,String password);
-    long deleteUser(long id);
-    List<Student> listStudents();
-    List<UserEntity> listAll();
-    UserEntity findUserByNameAndPassword(String username, String password);
-    UserEntity findByName(String name);
+    int deleteUser(int id);
+    Optional<UserEntity> findByName(String name);
+    Optional<UserEntity> findByNameAndPassword(String name, String password);
 }

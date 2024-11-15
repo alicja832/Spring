@@ -49,7 +49,7 @@ public class SecurityConfiguration {
     public SecurityConfiguration(JwtFilter jwtFilter) {
 
         this.jwtFilter = jwtFilter;
-        authProvider = new DaoAuthenticationProvider();
+        this.authProvider = new DaoAuthenticationProvider();
     }
     
     @Bean
@@ -60,9 +60,9 @@ public class SecurityConfiguration {
                         authorizationManagerRequestMatcherRegistry
                                 .requestMatchers("exercise/one/**").permitAll()
                                 .requestMatchers("user/").permitAll()
+                                .requestMatchers("ranking/").permitAll()
                                 .requestMatchers("user/teacher").permitAll()
-                                
-                                .requestMatchers(HttpMethod.GET,  "exercise/solution/**").permitAll()
+                                .requestMatchers("user/code").permitAll()
                                 .requestMatchers("exercise/interpreter").permitAll()
                                 .requestMatchers("exercise/check").permitAll()
                                 .requestMatchers(HttpMethod.GET,"exercise/").permitAll()

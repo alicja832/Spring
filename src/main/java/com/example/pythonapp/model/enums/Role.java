@@ -1,6 +1,6 @@
 package com.example.pythonapp.model.enums;
 
-public enum RoleEnum {
+public enum Role {
     ADMIN, STUDENT, TEACHER
 }
 

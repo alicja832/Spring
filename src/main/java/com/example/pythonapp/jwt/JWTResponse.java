@@ -1,20 +1,29 @@
 package com.example.pythonapp.jwt;
-
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
+import java.util.Date;
 
 @Data
 public class JWTResponse {
 
     private String jwtToken;
+    private String refreshToken;
+    private Date jwtExpirationDate;
+    public JWTResponse(String token,String refreshToken,Date jwtExpirationDate) {
 
-    public JWTResponse(String token) {
-        jwtToken = token;
+        this.jwtToken = token;
+        this.refreshToken = refreshToken;
+        this.jwtExpirationDate = jwtExpirationDate;
     }
-    public String getjwtToken()
+    public String getJwtToken()
     {
         return jwtToken;
+    }
+
+    public String getRefreshToken() {
+        return refreshToken;
+    }
+
+    public Date getJwtExpirationDate() {
+        return jwtExpirationDate;
     }
 }

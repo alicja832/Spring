@@ -12,10 +12,12 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Repository
 public interface ExerciseRepository extends JpaRepository<Exercise,Long> {
-    Exercise findByName(String name);
-    Exercise findById(long id);
+    Optional<Exercise> findByName(String name);
+    Optional<Exercise> findById(long id);
     @Transactional
     @Modifying
     @Query(value = "update exercise set name=:name,introduction=:introduction,content=:content,maxpoints=:maxpoints," +

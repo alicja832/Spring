@@ -13,10 +13,9 @@ import java.util.Optional;
 @Repository
 public interface StudentRepository extends JpaRepository<Student,Long> {
 
-   Student findById(long id);
-   Student findByEmail(String email);
-   Student findByName(String name);
-   List<Student> findAll();
+   Optional<Student> findById(long id);
+   Optional<Student> findByEmail(String email);
+   Optional<Student> findByName(String name);
    @Transactional
    @Modifying
    @Query(value = "update student set score=:score where id=:id", nativeQuery = true)

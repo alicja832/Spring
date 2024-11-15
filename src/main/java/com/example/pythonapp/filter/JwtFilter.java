@@ -1,20 +1,18 @@
 package com.example.pythonapp.filter;
-import com.example.pythonapp.jwt.JwtToken;
 import com.example.pythonapp.model.UserEntity;
+import com.example.pythonapp.model.enums.Role;
+import com.example.pythonapp.repository.StudentRepository;
+import com.example.pythonapp.repository.TeacherRepository;
 import com.example.pythonapp.repository.UserRepository;
-import jakarta.servlet.ServletOutputStream;
-import jakarta.servlet.http.HttpSession;
+import com.example.pythonapp.jwt.JWTToken;
+import com.example.pythonapp.exception.UserNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -31,44 +29,44 @@ import java.util.List;
 public class JwtFilter extends OncePerRequestFilter {
 
     @Autowired
-    private JwtToken jwt;
+    private JWTToken jwt;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private TeacherRepository teacherRepository;
 
 
     @Override
     protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain filterChain) throws ServletException, IOException {
 
-        httpServletResponse.setHeader("Allow", "HEAD,GET,PUT,OPTIONS");
         String authorization = httpServletRequest.getHeader("Authorization");
         String token = null;
         String userName = null;
-        UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken=null;
-        System.out.println("ath"+authorization);
-        if (null != authorization && authorization.startsWith("Bearer ")) {
+
+
+        if (authorization!=null && authorization.startsWith("Bearer ")) {
             token = authorization.substring(7);
             userName = jwt.getUsernameFromToken(token);
-            System.out.println(userName);
         }
 
         if (userName!=null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserEntity userEntity = userRepository.findByName(userName);
-            System.out.println(userEntity.getRole());
+            UserEntity userEntity = userRepository.findByName(userName).orElseThrow(UserNotFoundException::new);
+            String role = teacherRepository.findByName(userName).isPresent() ? "ROLE_"+ Role.TEACHER : "ROLE_"+Role.STUDENT;
             UserDetails userDetails
-                    = new User(userEntity.getName(),userEntity.getPassword(), List.of(new SimpleGrantedAuthority("ROLE_" +userEntity.getRole()))) ;
+                    = new User(userEntity.getName(),userEntity.getPassword(), List.of(new SimpleGrantedAuthority(role))) ;
 
 
             if (jwt.validateToken(token, userDetails)) {
-                usernamePasswordAuthenticationToken
+
+                UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken
                         = new UsernamePasswordAuthenticationToken(userDetails,
-                        null, userDetails.getAuthorities());
+                        null, List.of(new SimpleGrantedAuthority(role)));
 
                 usernamePasswordAuthenticationToken.setDetails(
                         new WebAuthenticationDetailsSource().buildDetails( httpServletRequest)
                 );
-                System.out.println(usernamePasswordAuthenticationToken);
+
                 SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
-                System.out.println(SecurityContextHolder.getContext().getAuthentication().isAuthenticated());
             }
 
         }

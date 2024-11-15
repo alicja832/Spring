@@ -1,12 +1,7 @@
 package com.example.pythonapp.model;
-
-import com.fasterxml.jackson.annotation.JsonRawValue;
 import jakarta.persistence.*;
-import org.springframework.web.bind.annotation.RequestBody;
-
-
+import lombok.Setter;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 @Entity
@@ -16,33 +11,26 @@ public class Student  extends UserEntity{
     @Column(name = "score", nullable = false)
     private int score=0;
 
+
     @OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name = "solution_id")
-    List<Solution> solutions;
+    List<Solution> solutions = new ArrayList<>();
 
     public Student()
     {
-        solutions = new ArrayList<>();
+
     }
     public Student(UserEntity userEntity)
     {
         name = userEntity.name;
         email = userEntity.email;
         password = userEntity.password;
-        role = userEntity.role;
-        solutions = new ArrayList<>();
     }
     public List<Solution> getSolutions() {
         
         return solutions;
     }
-    public void updateSolution(Solution solution)
-    {
-        solutions.set(solutions.indexOf(solution),solution);
-    }
-    public void setSolutions(List<Solution> solutions) {
-        this.solutions = solutions;
-    }
+
     public void addSolution(Solution solution)
     {
         solutions.add(solution);
@@ -51,9 +39,6 @@ public class Student  extends UserEntity{
         return score;
     }
 
-    public void setScore(int score) {
-        this.score = score;
-    }
     public boolean equals(Object o) {
         if (this == o)
             return true;
@@ -63,9 +48,6 @@ public class Student  extends UserEntity{
             return false;
         Student student = (Student) o;
         return this.id == student.id;
-    }
-    public void addPoints(int score){
-        this.score+=score;
     }
 
 }

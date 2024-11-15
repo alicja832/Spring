@@ -1,28 +1,22 @@
 package com.example.pythonapp.service;
 import com.example.pythonapp.model.Exercise;
-import com.example.pythonapp.model.Solution;
-import com.example.pythonapp.model.Student;
 import com.example.pythonapp.repository.ExerciseRepository;
-import com.example.pythonapp.repository.SolutionRepository;
 import org.python.util.PythonInterpreter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.io.StringWriter;
-import java.security.interfaces.EdECKey;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
 import java.io.PrintWriter;
+
 @Service
 public class ExerciseServiceImpl implements ExerciseService {
 
     @Autowired
     private ExerciseRepository exerciseRepository;
     private PythonInterpreter interpreter;
-    @Autowired
-    private SolutionRepository solutionRepository;
+
 
     /**
      * A method which have to initailize the python interpreter
@@ -42,15 +36,7 @@ public class ExerciseServiceImpl implements ExerciseService {
     public Exercise save(Exercise exercise){
         return exerciseRepository.save(exercise);
     }
-    @Override
-    public Solution save(Solution solution){
 
-        if(solution.getOutput()==null)
-        {
-            solution.setOutput(getOut(solution.getSolutionContent()));
-        }
-        return solutionRepository.save(solution);
-    }
     @Override
     public void update(long id,Exercise exercise)
     {
@@ -85,7 +71,7 @@ public class ExerciseServiceImpl implements ExerciseService {
     }
 
     @Override
-    public Exercise findExerciseById(long id)   
+    public Optional<Exercise> findExerciseById(long id)
     {
         return exerciseRepository.findById(id);
     }
@@ -97,32 +83,7 @@ public class ExerciseServiceImpl implements ExerciseService {
     }
 
     @Override
-    public List<Solution> findStudentSolution(Student student)
-    {
-        return  solutionRepository.findAllByStudentEmailEquals(student.getEmail());
-
-    }
-
-    @Override
-    public Solution findSolutionById(int id)
-    {
-        return solutionRepository.findById(id);
-    }
-
-    @Override
-    public void updateSolution(int id,Solution solution)
-    {
-        solutionRepository.updateById(id,solution.getSolutionContent(),solution.getScore());
-    }
-
-    @Override
-    public long deleteSolutionById(long id)
-    {
-        solutionRepository.deleteById(id);
-        return id;
-    }
-    @Override
-    public Exercise findExerciseByName(String name)
+    public Optional<Exercise> findExerciseByName(String name)
     {
         return exerciseRepository.findByName(name);
     }

@@ -1,6 +1,5 @@
 package com.example.pythonapp.details;
 
-import com.example.pythonapp.details.AppUserDetails;
 import com.example.pythonapp.model.UserEntity;
 import com.example.pythonapp.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +7,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import com.example.pythonapp.exception.UserNotFoundException;
 
 @Service
 public class AppUserDetailsService implements UserDetailsService {
@@ -17,7 +17,7 @@ public class AppUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) {
-        UserEntity user = userRepository.findByName(username);
+        UserEntity user = userRepository.findByName(username).orElseThrow(UserNotFoundException::new);
         if (user == null) {
             throw new UsernameNotFoundException(username);
         }

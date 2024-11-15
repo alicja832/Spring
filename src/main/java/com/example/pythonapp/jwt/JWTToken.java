@@ -22,9 +22,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 @Component
-public class JwtToken implements Serializable {
-
-    private static final long serialVersionUID = 234234523523L;
+public class JWTToken implements Serializable {
 
     @Value("${security.jwt.expiration-time}")
     private long jwtExpirationTime;
@@ -40,7 +38,6 @@ public class JwtToken implements Serializable {
 
     //retrieve expiration date from jwt token
     public Date getExpirationDateFromToken(String token) {
-
         return getClaimFromToken(token, Claims::getExpiration);
     }
     // W tych dwóch funkcjach trochę nie wiem za bardzo o co chodzi niestety
@@ -64,8 +61,8 @@ public class JwtToken implements Serializable {
     //check if the token has expired
     private Boolean isTokenExpired(String token) {
         final Date expiration = getExpirationDateFromToken(token);
-        //return expiration.before(new Date());
-        return false;
+        return expiration.before(new Date());
+       
     }
 
 
@@ -87,25 +84,43 @@ public class JwtToken implements Serializable {
 
     }
 
-    public PublicKey generateJwtKeyDecryption(String jwtPublicKey) throws NoSuchAlgorithmException, InvalidKeySpecException {
+      public String  generateRefreshToken(UserDetails userDetails) {
+        
+        Map<String, Object> claims = new HashMap<>();
+        String subject = userDetails.getUsername();
+        String token = null;
+        try{
+            token = Jwts.builder().setClaims(claims).setSubject(subject).setIssuedAt(new Date(System.currentTimeMillis()))
+                    .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationTime * 1000 * 15))
+                    .signWith(SignatureAlgorithm.RS256,  generateJwtKeyEncryption(secretKey)).compact();
+
+        }
+        catch(Exception e){
+            System.out.println(e.getMessage());
+        }
+
+        return token;
+
+    }
+
+
+    public PublicKey generateJwtKeyDecryption(String jwtKey) throws NoSuchAlgorithmException, InvalidKeySpecException {
         KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-        byte[] keyBytes = Base64.decodeBase64(jwtPublicKey);
+        byte[] keyBytes = Base64.decodeBase64(jwtKey);
         X509EncodedKeySpec x509EncodedKeySpec=new X509EncodedKeySpec(keyBytes);
         return keyFactory.generatePublic(x509EncodedKeySpec);
     }
 
-    public PrivateKey generateJwtKeyEncryption(String jwtPrivateKey) throws NoSuchAlgorithmException, InvalidKeySpecException {
-        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-        byte[] keyBytes = Base64.decodeBase64(jwtPrivateKey);
-        PKCS8EncodedKeySpec pkcs8EncodedKeySpec=new PKCS8EncodedKeySpec(keyBytes);
-        return keyFactory.generatePrivate(pkcs8EncodedKeySpec);
-    }
+     public PrivateKey generateJwtKeyEncryption(String jwtKey) throws NoSuchAlgorithmException, InvalidKeySpecException {
+         KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+         byte[] keyBytes = Base64.decodeBase64(jwtKey);
+         PKCS8EncodedKeySpec pkcs8EncodedKeySpec=new PKCS8EncodedKeySpec(keyBytes);
+         return keyFactory.generatePrivate(pkcs8EncodedKeySpec);
+     }
     //validate token
     public Boolean validateToken(String token, UserDetails userDetails) {
 
         final String username = getUsernameFromToken(token);
-        //for now
-        //return true;
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
 }
