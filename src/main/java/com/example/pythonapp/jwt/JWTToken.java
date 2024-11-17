@@ -89,6 +89,7 @@ public class JWTToken implements Serializable {
         Map<String, Object> claims = new HashMap<>();
         String subject = userDetails.getUsername();
         String token = null;
+       
         try{
             token = Jwts.builder().setClaims(claims).setSubject(subject).setIssuedAt(new Date(System.currentTimeMillis()))
                     .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationTime * 1000 * 15))

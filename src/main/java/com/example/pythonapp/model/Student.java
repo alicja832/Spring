@@ -1,6 +1,5 @@
 package com.example.pythonapp.model;
 import jakarta.persistence.*;
-import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 

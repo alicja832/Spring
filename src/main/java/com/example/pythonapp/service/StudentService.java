@@ -7,7 +7,7 @@ import java.util.Optional;
 
 public interface StudentService {
     Student save(Student student);
-    Student findbyId(long id);
+    Student findbyId(int id);
     Student findByEmail(String email);
     void update(long id,int score);
     List<Student> listStudents();

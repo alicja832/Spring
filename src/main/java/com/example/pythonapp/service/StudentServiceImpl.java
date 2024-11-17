@@ -19,7 +19,7 @@ public class StudentServiceImpl implements StudentService {
         return studentRepository.save(student);
     }
     @Override
-    public Student findbyId(long id)
+    public Student findbyId(int id)
     {
         return studentRepository.findById(id).orElseThrow(UserNotFoundException::new);
     }

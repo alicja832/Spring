@@ -4,16 +4,12 @@ import jakarta.persistence.*;
 
 @Entity
 @Table(name = "solution")
+@Inheritance(strategy = InheritanceType.JOINED)
 public class Solution {
-
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(unique = true,name="id" ,nullable = false)
     private int Id;
-
-    @Column(name="solution_content" ,nullable = false)
-    private String solutionContent;
-
     @ManyToOne
     @JoinColumn(name="exercise_id", nullable=false)
     private Exercise exercise;
@@ -21,21 +17,8 @@ public class Solution {
     @JoinColumn(name="student_id", nullable=false)
     @JsonIgnore
     private Student student;
-    private int score = 0;
-    private String output = null;
+    private int score = 0;  
 
-    public String getOutput() {
-        return output;
-    }
-    public void setOutput(String output) {
-        this.output = output;
-    }
-    public String getSolutionContent() {
-        return solutionContent;
-    }
-    public void setSolutionContent(String solutionContent) {
-        this.solutionContent = solutionContent;
-    }
     public Solution() {}
     public int getId() {
             return Id;
@@ -61,11 +44,11 @@ public class Solution {
     public boolean equals(Object o) {
         if (this == o)
                 return true;
-            if (o == null)
+        if (o == null)
                 return false;
-            if (getClass() != o.getClass())
+        if (getClass() != o.getClass())
                 return false;
-            Solution solution = (Solution) o;
-            return (this.exercise.getId() == solution.getExercise().getId()) && ( this.student.getId() == (solution.student.getId()));
+        Solution solution = (Solution) o;
+        return (this.exercise.getId() == solution.getExercise().getId()) && ( this.student.getId() == (solution.student.getId()));
     }
 }

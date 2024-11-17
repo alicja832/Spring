@@ -1,11 +1,8 @@
 package com.example.pythonapp.controller;
 import com.example.pythonapp.exception.ExerciseNotFoundException;
+import com.example.pythonapp.model.*;
 import com.example.pythonapp.service.*;
 import javafx.util.Pair;
-import com.example.pythonapp.model.Exercise;
-import com.example.pythonapp.model.Solution;
-import com.example.pythonapp.model.Student;
-import com.example.pythonapp.model.Teacher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +18,7 @@ import java.util.function.Predicate;
 @CrossOrigin(origins = "http://localhost:3000/", maxAge=360000)
 @RequestMapping("/exercise")
 public class ExerciseController {
+
     @Autowired
     private ExerciseService exerciseService;
     @Autowired
@@ -29,26 +27,41 @@ public class ExerciseController {
     private TeacherService teacherService;
     @Autowired
     private StudentService studentService;
-    
+
     /**
-     * add new exercise
-     * @param exercise
-     * @return
+     * add new programming exercise
+     * @param exercise - new programming exercise to add
+     * @return ResponseEntity with HTTP status
      */
-    @PostMapping("/")
-    public ResponseEntity<Exercise> add(@RequestBody Exercise exercise){
+    @PostMapping("/programming")
+    public ResponseEntity<Exercise> add(@RequestBody LongExercise exercise){
 
         exercise.setCorrectOutput(exerciseService.getOut("\n"+exercise.getCorrectSolution()+"\n"));
         if(exercise.getCorrectOutput().contains("Error"))
             return new ResponseEntity<>(exercise, HttpStatus.BAD_REQUEST);
         if(exercise.getCorrectOutput().contains("TraceBack"))
             return new ResponseEntity<>(exercise, HttpStatus.BAD_REQUEST);
-        String name = SecurityContextHolder.getContext().getAuthentication().getName();
-        Teacher teacher = teacherService.findByName(name).get();
-        exercise.setTeacher(teacher);
 
+        Teacher teacher = setTeacher(exercise);
         try {
             exerciseService.save(exercise);
+        }catch(Exception e){
+            return new ResponseEntity<>(exercise, HttpStatus.BAD_REQUEST);
+        }
+        teacher.addExercise(exercise);
+        return new ResponseEntity<>(exercise, HttpStatus.CREATED);
+    }
+    /**
+     * add new abc exercise
+     * @param exercise - new abc exercise to add
+     * @return ResponseEntity with HTTP status
+     */
+    @PostMapping("/abc")
+    public ResponseEntity<Exercise> add(@RequestBody ShortExercise exercise){
+
+       Teacher teacher = setTeacher(exercise);
+       try {
+            exercise = exerciseService.save(exercise);
         }catch(Exception e){
             return new ResponseEntity<>(exercise, HttpStatus.BAD_REQUEST);
         }
@@ -56,13 +69,18 @@ public class ExerciseController {
 
         return new ResponseEntity<>(exercise, HttpStatus.CREATED);
     }
-
+    private Teacher setTeacher(Exercise exercise)
+    {
+        String name = SecurityContextHolder.getContext().getAuthentication().getName();
+        Teacher teacher = teacherService.findByName(name).get();
+        exercise.setTeacher(teacher);
+        return teacher;
+    }
     /**
      * delete exercise
      * @param id
      * @return
      */
-    @CrossOrigin
     @DeleteMapping("/{id}")
     public ResponseEntity<Exercise> delete(@PathVariable int id){
 
@@ -71,26 +89,32 @@ public class ExerciseController {
         return new ResponseEntity<>(exercise, HttpStatus.OK);
     }
     /**
-     * update excercise
-     * @param exercise
+     * update short excercise
+     * @param exercise - new version of exercise
      */
-    @PutMapping
-    public void update(@RequestBody Exercise exercise){
-
-        exercise.setCorrectOutput(exerciseService.getOut("\""+exercise.getCorrectSolution()+"\""));
-        Exercise exercisefound = exerciseService.findExerciseById(exercise.getId()).orElseThrow(ExerciseNotFoundException::new);
-        Teacher teacher = exercisefound.getTeacher();
-        exercise.setTeacher(teacher);
-        exerciseService.update(exercise.getId(), exercise);
-        Exercise newExercise = exerciseService.findExerciseById(exercise.getId()).orElseThrow(ExerciseNotFoundException::new);
-        teacher.updateExercise(newExercise);
+    @PutMapping("/abc")
+    public void update(@RequestBody ShortExercise exercise){
+        Exercise exercisefound = exerciseService.findExerciseByName(exercise.getName()).get();
+        exerciseService.update(exercisefound.getId(), exercise);
     }
+    /**
+     * update long excercise
+     * @param exercise - new version of exercise
+     */
+    @PutMapping("/programming")
+    public void update(@RequestBody LongExercise exercise){
+        Exercise exercisefound = exerciseService.findExerciseByName(exercise.getName()).get();
+        exerciseService.update(exercisefound.getId(), exercise);
+    }
+    /**
+     * list all short exercises
+     * @return list of pairs which exercies are done
+     */
+    @GetMapping("/abc")
+    public List<Pair<ShortExercise,Boolean>> listShortExercises(){
 
-    @GetMapping("/")
-    public List<Pair<Exercise,Boolean>> listExercises(){
-
-        List<Exercise> list = exerciseService.getAllExercises();
-        List<Pair<Exercise,Boolean>> listExercise = new ArrayList<>();
+        List<ShortExercise> list = exerciseService.getAllShortExercises();
+        List<Pair<ShortExercise,Boolean>> listExercise = new ArrayList<>();
         List<Solution> solutions = new ArrayList<>();
 
         if(SecurityContextHolder.getContext().getAuthentication()!=null) {
@@ -99,26 +123,65 @@ public class ExerciseController {
               solutions = solutionService.findStudentSolution(studentService.findByName(SecurityContextHolder.getContext().getAuthentication().getName()).get());
         }
 
-        for(Exercise e:list)
+        for(ShortExercise e:list)
         {
             Predicate<Solution> function = (solution) ->solution.getExercise().equals(e);
             boolean flag = solutions.stream().anyMatch(function);
             if(flag)
-                listExercise.add(new Pair<Exercise,Boolean>(e,true));
+                listExercise.add(new Pair<ShortExercise,Boolean>(e,true));
             else
-                listExercise.add(new Pair<Exercise,Boolean>(e,false));
+                listExercise.add(new Pair<ShortExercise,Boolean>(e,false));
         }
         return listExercise;
     }
     /**
-     * get one exercise
+     * list all long exercises
+     * @return list of pairs which exercies are done
+     */
+    @GetMapping("/programming")
+    public List<Pair<LongExercise,Boolean>> listExercises(){
+
+        List<LongExercise> list = exerciseService.getAllLongExercises();
+        List<Pair<LongExercise,Boolean>> listExercise = new ArrayList<>();
+        List<Solution> solutions = new ArrayList<>();
+
+        if(SecurityContextHolder.getContext().getAuthentication()!=null) {
+
+            if(studentService.findByName(SecurityContextHolder.getContext().getAuthentication().getName()).isPresent())
+                solutions = solutionService.findStudentSolution(studentService.findByName(SecurityContextHolder.getContext().getAuthentication().getName()).get());
+        }
+
+        for(LongExercise e:list)
+        {
+            Predicate<Solution> function = (solution) ->solution.getExercise().equals(e);
+            boolean flag = solutions.stream().anyMatch(function);
+            if(flag)
+                listExercise.add(new Pair<LongExercise,Boolean>(e,true));
+            else
+                listExercise.add(new Pair<LongExercise,Boolean>(e,false));
+        }
+        return listExercise;
+    }
+    /**
+     * get one programming exercise
      * @param id
      * @return
      */
-    @GetMapping("/one/{id}")
-    public List<Exercise> FindById(@PathVariable int id) {
+    @GetMapping("/one/programming/{id}")
+    public List<LongExercise> FindLongExerciseById(@PathVariable int id) {
 
-        Exercise exercise = exerciseService.findExerciseById(id).orElseThrow(ExerciseNotFoundException::new);
+        LongExercise exercise = exerciseService.findLongExerciseById(id).orElseThrow(ExerciseNotFoundException::new);
+        return List.of(exercise);
+    }
+    /**
+     * get one abc exercise
+     * @param id
+     * @return
+     */
+    @GetMapping("/one/abc/{id}")
+    public List<ShortExercise> FindShortExerciseById(@PathVariable int id) {
+
+        ShortExercise exercise = exerciseService.findShortExerciseById(id).orElseThrow(ExerciseNotFoundException::new);
         return List.of(exercise);
     }
     /**
@@ -134,32 +197,37 @@ public class ExerciseController {
     /**
      * get one's solutions with name exercise and score
      **/
-    @GetMapping("/solutions")
+    @GetMapping("/solutions/programming")
     public List<Map<String,String>> getSolutions(){
 
         String name = SecurityContextHolder.getContext().getAuthentication().getName();
-        List<Map<String, String>> excercisesAndScores = new ArrayList<>();
+        List<Map<String, String>> exercisesAndScores = new ArrayList<>();
         List<Solution> solutions = solutionService.findStudentSolution(studentService.findByName(name).get());
 
         for(Solution solution:solutions) {
 
             Map<String,String> map = new HashMap<>();
             Exercise exercise=solution.getExercise();
-            if(exercise!=null){
-                map.put("id", Integer.toString(solution.getId()));
-                map.put("name",solution.getExercise().getName());
-                map.put("score", Integer.toString(solution.getScore()));
-            }
-            excercisesAndScores.add(map);
+
+
+                    map.put("id", Integer.toString(solution.getId()));
+                    map.put("name", solution.getExercise().getName());
+                    map.put("score", Integer.toString(solution.getScore()));
+
+
+                    if(exercise instanceof LongExercise) { map.put("retakeposibility", "true");}
+                    else {map.put("retakeposibility", "false");}
+
+            exercisesAndScores.add(map);
         }
 
-        return excercisesAndScores;
+        return exercisesAndScores;
     }
-      /**
-     * add one's solutions with name exercise and score
+    /**
+     * add one's programming solution with name exercise and score
      **/
-    @PostMapping("/solution")
-    public ResponseEntity<Solution> addSolution(@RequestBody Solution solution){
+    @PostMapping("/solution/programming")
+    public ResponseEntity<Solution> addSolution(@RequestBody LongSolution solution){
 
         Student loginStudent = studentService.findByName(SecurityContextHolder.getContext().getAuthentication().getName()).get();
         if(solution.getScore()==0)
@@ -169,6 +237,22 @@ public class ExerciseController {
         if(solution.getOutput()==null)
         {
             solution.setOutput(getresponse(solution.getSolutionContent()));
+        }
+        solution.setStudent(loginStudent);
+        solutionService.save(solution);
+        studentService.update(loginStudent.getId(),loginStudent.getScore()+solution.getScore());
+        return new ResponseEntity<>(solution,HttpStatus.CREATED);
+    }
+    /**
+     * add one's abc solution with name exercise and score
+     **/
+    @PostMapping("/solution/abc")
+    public ResponseEntity<Solution> addSolution(@RequestBody ShortSolution solution){
+
+        Student loginStudent = studentService.findByName(SecurityContextHolder.getContext().getAuthentication().getName()).get();
+        if(solution.getScore()==0)
+        {
+            this.checkSolution(solution);
         }
         solution.setStudent(loginStudent);
         solutionService.save(solution);
@@ -193,7 +277,7 @@ public class ExerciseController {
      * @param solution new version of solution
      */
     @PutMapping("/solution")
-    public void updateSolution(@RequestBody Solution solution){
+    public void updateSolution(@RequestBody LongSolution solution){
         int oldScore = solutionService.findById(solution.getId()).getScore();
         solutionService.update(solution.getId(),solution);
         String name = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -202,17 +286,16 @@ public class ExerciseController {
     }
 
     /**
-     * function which check the solution and change the user's score
-     * @param solution - solution to check
+     * function which check the solution of programming exercise
+     * @param solution - programming solution to check
      * @return
      */
-    @PostMapping("/check")
+    @PostMapping("/programming/check")
+    public int checkSolution(@RequestBody LongSolution solution){
 
-    public int checkSolution(@RequestBody Solution solution){
-
-        String expectedOutput = solution.getExercise().getCorrectOutput();
+        LongExercise exercise =  exerciseService.findLongExerciseById(solution.getExercise().getId()).orElseThrow(ExerciseNotFoundException::new);
+        String expectedOutput = exercise.getCorrectOutput();
         int maxPoints =  solution.getExercise().getMaxPoints();
-
         if(expectedOutput.equals(solution.getOutput()) || expectedOutput.trim().equals(solution.getOutput().trim()))
         {
             solution.setScore(maxPoints);
@@ -221,5 +304,25 @@ public class ExerciseController {
 
         return 0;
     }
+    /**
+     * function which check the solution of abc exercise
+     * @param solution - programming solution to check
+     * @return
+     */
+     @PostMapping("/abc/check")
+    public int checkSolution(@RequestBody ShortSolution solution){
+
+        ShortExercise exercise = exerciseService.findShortExerciseById(solution.getExercise().getId()).orElseThrow(ExerciseNotFoundException::new);
+        char correctAnswer = exercise.getCorrectAnswer();
+        int maxPoints =  solution.getExercise().getMaxPoints();
+        if(correctAnswer ==  solution.getAnswer())
+        {
+            solution.setScore(maxPoints);
+            return maxPoints;
+        }
+
+        return 0;
+    }
+
 
 }

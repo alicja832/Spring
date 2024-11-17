@@ -3,6 +3,7 @@ import com.example.pythonapp.dto.VerificationRequest;
 import com.example.pythonapp.mapper.UserMapper;
 import com.example.pythonapp.model.*;
 import com.example.pythonapp.model.enums.Role;
+import com.example.pythonapp.service.SolutionService;
 import com.example.pythonapp.service.StudentService;
 import com.example.pythonapp.service.TeacherService;
 import com.example.pythonapp.service.UserService;
@@ -18,20 +19,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-
 import java.lang.Math;
 import java.util.*;
-
 import com.example.pythonapp.jwt.JWTResponse;
 import com.example.pythonapp.jwt.JWTToken;
-import com.example.pythonapp.config.SecurityConfiguration.*;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationManager;
 
@@ -49,11 +46,14 @@ public class UserController {
     private StudentService studentService;
     private List<Pair<String,String>> EmailCode = new ArrayList<>();
     @Autowired
+    private SolutionService solutionService;
+    @Autowired
     private JWTToken jwt;
     @Autowired
     private AuthenticationManager authenticationManager;
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
     private final UserMapper userMapper = new UserMapper();
+
 
     /**
      * Dodawanie nowego uzytkownika
@@ -63,7 +63,6 @@ public class UserController {
 
         userCreationDto.setPassword( encoder.encode(userCreationDto.getPassword()));
         ResponseEntity<String> responseEntity = new ResponseEntity<>(HttpStatus.CREATED);
-
         if(userService.findByEmail(userCreationDto.getEmail()).isPresent())
         {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Użytkownik o podanym adresie email istnieje");
@@ -196,17 +195,76 @@ public class UserController {
     {
         List<Student> list = studentService.listStudents();
         list.sort((Student a,Student b)->a.getScore()-b.getScore());
-
         return list;
     }
+
     /**
     * lista zadan stworzonych przez zalogowanego nauczyciela
     */
-    @GetMapping("/exercises/")
-    public List<Exercise> getExercises(){
+    @GetMapping("/exercises")
+    public List<Map<String,String>> getExercises(){
+
+
 
         Teacher loginTeacher = teacherService.findByName(SecurityContextHolder.getContext().getAuthentication().getName()).orElseThrow(UserNotFoundException::new);
-        return loginTeacher.getExercises();
+        List<Exercise> exercises = loginTeacher.getExercises();
+        List<Map<String, String>> exercisesWithInfo = new ArrayList<>();
+
+
+            for (Exercise exercise : exercises) {
+                Map<Integer, Integer> withScores = new HashMap<>();
+                List<Solution> listSolutions = solutionService.getAllSolutionsByExercise(exercise);
+                for (Solution solution : listSolutions) {
+                    int score = solution.getScore();
+                    if (withScores.containsKey(score))
+                        withScores.put(score, 1);
+                    else
+                        withScores.replace(score, withScores.get(score) + 1);
+                }
+                int mostpopularScore = 0;
+                int scorecount = 0;
+                Iterator<Map.Entry<Integer, Integer>> it = withScores.entrySet().iterator();
+                while (it.hasNext()) {
+                    Map.Entry<Integer, Integer> element = it.next();
+                    if (element.getValue() > scorecount) {
+                        mostpopularScore = element.getKey();
+                        scorecount = element.getValue();
+                    }
+                }
+                Map<String,String> info = new HashMap<>();
+                info.put("name",exercise.getName());
+                info.put("content",exercise.getContent());
+                info.put("introduction",exercise.getIntroduction());
+                info.put("maxPoints",Integer.toString(exercise.getMaxPoints()));
+                info.put("score",Integer.toString(mostpopularScore));
+                info.put("quantity",Integer.toString(scorecount));
+                if(exercise instanceof LongExercise) 
+                	info.put("correctSolution",((LongExercise)exercise).getCorrectSolution());
+                if(exercise instanceof ShortExercise) 
+                {	
+                	info.put("firstOption",((ShortExercise)exercise).getFirstOption());
+                	info.put("secondOption",((ShortExercise)exercise).getSecondOption());
+                	info.put("thirdOption",((ShortExercise)exercise).getThirdOption());
+                	info.put("fourthOption",((ShortExercise)exercise).getFourthOption());
+                	info.put("correctAnswer",Character.toString(((ShortExercise)exercise).getCorrectAnswer()));
+                }
+               
+                exercisesWithInfo.add(info);
+            }
+
+        return exercisesWithInfo;
+    }
+    /**
+     *
+     */
+    @GetMapping("/position")
+    public Pair<Integer,Integer> studentPosition(){
+
+        String name = SecurityContextHolder.getContext().getAuthentication().getName();
+        Student loginStudent = studentService.findByName(name).get();
+        List<Student> ranking = getStudentRanking();
+
+        return new Pair<Integer,Integer>(ranking.indexOf(loginStudent),ranking.size());
     }
     /**
      * @return
@@ -229,37 +287,46 @@ public class UserController {
 
         String userName = SecurityContextHolder.getContext().getAuthentication().getName();
         UserEntity userEntity = userService.findByName(userName).orElseThrow(UserNotFoundException::new);
+        System.out.println(userEntity.getName());
         return primaryAuthentication(userEntity,false);
     }
-    private  JWTResponse primaryAuthentication(UserEntity userEntity,Boolean haveToGenerateRefreshToken)throws Exception
+    private  JWTResponse primaryAuthentication(UserEntity userEntity,Boolean haveToGenerateRefreshToken)throws RuntimeException
     {
         String refreshToken;
         String token;
         String role;
         UserDetails userDetails;
+        UserEntity loginUser;
 
         String password = userEntity.getPassword();
         String name = userEntity.getName();
-        UserEntity loginUser = userService.findByName(name).orElseThrow(UserNotFoundException::new);
+        loginUser = userEntity;
         
-        if(!encoder.matches(password,loginUser.getPassword()))
+
+        if(haveToGenerateRefreshToken)
         {
-            throw new UserNotFoundException();
+             loginUser = userService.findByName(name).orElseThrow(UserNotFoundException::new);
+            if(!encoder.matches(password,loginUser.getPassword()))
+            {
+                throw new UserNotFoundException();
+            }
+            try {
+                authenticationManager.authenticate(
+                        new UsernamePasswordAuthenticationToken(userEntity.getName(), userEntity.getPassword())
+                );
+            } catch (BadCredentialsException e) {
+                throw new UserNotFoundException();
+            } catch (Exception ex) {
+                System.out.println(ex.getMessage());
+            }
         }
         role = teacherService.findByName(name).isPresent() ? "ROLE_"+Role.TEACHER : "ROLE_"+Role.STUDENT;
-
+        System.out.println(role);
         userDetails = new User(name, password, List.of(new SimpleGrantedAuthority(role)));
         token = jwt.generateToken(userDetails);
         refreshToken = haveToGenerateRefreshToken? jwt.generateRefreshToken(userDetails) : null;
-        try {
-            authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(userEntity.getName(), userEntity.getPassword())
-            );
-        } catch (BadCredentialsException e) {
-            throw new UserNotFoundException();
-        } catch (Exception ex) {
-            System.out.println(ex.getMessage());
-        }
+        System.out.println(token);
+       
         return  new JWTResponse(token,refreshToken,jwt.getExpirationDateFromToken(token));
     }
 

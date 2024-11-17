@@ -15,13 +15,12 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 
 @Repository
-public interface ExerciseRepository extends JpaRepository<Exercise,Long> {
+public interface ExerciseRepository extends JpaRepository<Exercise,Integer> {
     Optional<Exercise> findByName(String name);
-    Optional<Exercise> findById(long id);
+    Optional<Exercise> findById(int id);
     @Transactional
     @Modifying
-    @Query(value = "update exercise set name=:name,introduction=:introduction,content=:content,maxpoints=:maxpoints," +
-            "correctsolution=:correctsolution," +
-            "correctoutput=:correctoutput where id=:id", nativeQuery = true)
-    void updateById(@Param("id") long id,@Param("name") String name,@Param("introduction") String introduction,@Param("content") String content,@Param("maxpoints") int maxPoints,@Param("correctsolution") String correctSolution,@Param("correctoutput") String correctOutput);
+    @Query(value = "update exercise set name=:name,introduction=:introduction,content=:content,max_points=:max_points " +
+           "where id=:id", nativeQuery = true)
+    void updateById(@Param("id") int id,@Param("name") String name,@Param("introduction") String introduction,@Param("content") String content,@Param("max_points") int maxPoints);
 }

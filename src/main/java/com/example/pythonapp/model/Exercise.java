@@ -1,8 +1,10 @@
 package com.example.pythonapp.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+
 @Entity
 @Table(name = "exercise")
+@Inheritance(strategy = InheritanceType.JOINED)
 public class Exercise {
 
     @Id
@@ -18,10 +20,7 @@ public class Exercise {
     private String content;
     @Column(name="max_points")
     private int maxPoints;
-    @Column(name="solution")
-    private String correctSolution;
-    @Column(name="output")
-    private String correctOutput = null;
+  
     @ManyToOne
     @JoinColumn(name="teacher_id", nullable=false)
     @JsonIgnore
@@ -77,22 +76,6 @@ public class Exercise {
 
     public void setMaxPoints(int maxPoints) {
         this.maxPoints = maxPoints;
-    }
-
-    public String getCorrectSolution() {
-        return correctSolution;
-    }
-
-    public void setCorrectSolution(String correctSolution) {
-        this.correctSolution = correctSolution;
-    }
-
-    public String getCorrectOutput() {
-        return correctOutput;
-    }
-
-    public void setCorrectOutput(String correctOutput) {
-        this.correctOutput = correctOutput;
     }
 
     public Teacher getTeacher() {

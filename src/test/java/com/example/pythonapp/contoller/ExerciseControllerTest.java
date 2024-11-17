@@ -1,17 +1,19 @@
 package com.example.pythonapp.contoller;
 import com.example.pythonapp.controller.UserController;
+import com.example.pythonapp.controller.ExerciseController;
 import com.example.pythonapp.details.AppUserDetails;
 import com.example.pythonapp.dto.UserCreationDto;
 import com.example.pythonapp.jwt.JWTResponse;
 import com.example.pythonapp.jwt.JWTToken;
 import com.example.pythonapp.model.Teacher;
+import com.example.pythonapp.model.Exercise;
+import com.example.pythonapp.model.LongSolution;
 import com.example.pythonapp.model.enums.Role;
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
-
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 
@@ -19,7 +21,7 @@ import static org.hamcrest.Matchers.equalTo;
 public class ExerciseControllerTest {
 
     @Autowired
-    UserController userController;
+    ExerciseController exerciseController;
     @Autowired
     JWTToken token;
     @LocalServerPort
@@ -31,39 +33,17 @@ public class ExerciseControllerTest {
         RestAssured.port = port;
     }
 
-//    @Test
-//    @Order(1)
-//    void Authorized() {
-//        Teacher teacher = new Teacher();
-//        teacher.setEmail("someone@gmail.com");
-//        teacher.setName("someone");
-//        teacher.setPassword("password");
-//        userController.add(new UserCreationDto(teacher.getName(),teacher.getEmail(),teacher.getPassword(), Role.TEACHER)).getBody();
-//        teacher.setPassword("password");
-//        JWTResponse jwt = null;
-//        try {
-//            jwt = userController.authenticate(teacher);
-//        } catch (Exception exception) {
-//            exception.printStackTrace();
-//        }
-//
-//        if (jwt != null)
-//            jwtToken = jwt.getJwtToken();
-//
-//        AppUserDetails app = new AppUserDetails(teacher);
-//        Assertions.assertEquals(token.getUsernameFromToken(jwtToken), teacher.getName());
-//        Assertions.assertEquals(token.validateToken(jwtToken, app), true);
-//
-//
-//        given()
-//                .when()
-//                .header("Authorization", "Bearer " + jwtToken)
-//                .get("user/")
-//                .then()
-//                .statusCode(200)
-//                .body("data.size()", equalTo(1));
-//
-//    }
+   @Test
+   @Order(1)
+   void Authorized() {
+       
+       Exercise exercise = exerciseController.FindLongExerciseById(1).get(0);
+       LongSolution solution = new LongSolution();
+       solution.setSolutionContent("print(1)");
+       solution.setOutput("1");
+       solution.setExercise(exercise);
+       Assertions.assertEquals(0,exerciseController.checkSolution(solution));
+   }
 //
 //    @Test
 //    @Order(2)
