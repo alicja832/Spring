@@ -22,6 +22,6 @@ public interface ShortExerciseRepository extends JpaRepository<ShortExercise,Int
             "third_option =:third_option," +
             "fourth_option =:fourth_option," +
             "correct_answer=:correct_answer where id=:id", nativeQuery = true)
-    void updateById(@Param("id") int id, @Param("first_option") String firstOption, @Param("second_option") String secondOption,@Param("third_option") String thirdOption,@Param("fourth_option") String fourthOption,@Param("correct_answer") int answer);
+    void updateById(@Param("id") int id, @Param("first_option") String firstOption, @Param("second_option") String secondOption,@Param("third_option") String thirdOption,@Param("fourth_option") String fourthOption,@Param("correct_answer") char answer);
 
 }

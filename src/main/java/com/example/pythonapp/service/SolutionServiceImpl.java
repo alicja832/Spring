@@ -37,11 +37,16 @@ public class SolutionServiceImpl implements SolutionService {
     {
         return solutionRepository.findById(id).orElseThrow(SolutionNotFoundException::new);
     }
-
     @Override
-    public void update(int id, LongSolution solution)
+    public LongSolution findLongSolutionById(int id)
     {
-        longSolutionRepository.updateById(id,solution.getSolutionContent(),solution.getScore());
+        return longSolutionRepository.findById(id).orElseThrow(SolutionNotFoundException::new);
+    }
+    @Override
+    public void updateSolution(int id, LongSolution solution)
+    {
+        solutionRepository.updateById(id,solution.getScore());
+        longSolutionRepository.updateById(id,solution.getSolutionContent());
     }
 
     @Override

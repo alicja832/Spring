@@ -19,4 +19,8 @@ public interface SolutionRepository extends JpaRepository<Solution,Integer> {
     Optional<Solution> findById(int id);
     Long deleteById(int id);
     List<Solution> getAllByExercise(Exercise Exercise);
+    @Transactional
+    @Modifying
+    @Query(value = "update solution set score=:score where id=:id", nativeQuery = true)
+    void updateById(@Param("id") int id, @Param("score") int score);
 }

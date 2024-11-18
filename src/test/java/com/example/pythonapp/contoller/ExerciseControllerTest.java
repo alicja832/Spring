@@ -2,6 +2,7 @@ package com.example.pythonapp.contoller;
 import com.example.pythonapp.controller.UserController;
 import com.example.pythonapp.controller.ExerciseController;
 import com.example.pythonapp.details.AppUserDetails;
+import com.example.pythonapp.dto.LongSolutionDto;
 import com.example.pythonapp.dto.UserCreationDto;
 import com.example.pythonapp.jwt.JWTResponse;
 import com.example.pythonapp.jwt.JWTToken;
@@ -38,7 +39,7 @@ public class ExerciseControllerTest {
    void Authorized() {
        
        Exercise exercise = exerciseController.FindLongExerciseById(1).get(0);
-       LongSolution solution = new LongSolution();
+       LongSolutionDto solution = new LongSolutionDto();
        solution.setSolutionContent("print(1)");
        solution.setOutput("1");
        solution.setExercise(exercise);
@@ -79,16 +80,16 @@ public class ExerciseControllerTest {
 //
 //    }
 //
-//    @Test
-//    @Order(4)
-//    void AuthorizedPost() {
-//
-//        given()
-//                .when()
-//                .post("user/")
-//                .then()
-//                .statusCode(403);
-//
-//    }
+   @Test
+   @Order(2)
+   void AuthorizedPost() {
+
+       given()
+               .when()
+               .post("user/")
+               .then()
+               .statusCode(403);
+
+   }
 
 }

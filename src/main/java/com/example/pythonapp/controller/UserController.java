@@ -204,19 +204,16 @@ public class UserController {
     @GetMapping("/exercises")
     public List<Map<String,String>> getExercises(){
 
-
-
         Teacher loginTeacher = teacherService.findByName(SecurityContextHolder.getContext().getAuthentication().getName()).orElseThrow(UserNotFoundException::new);
         List<Exercise> exercises = loginTeacher.getExercises();
         List<Map<String, String>> exercisesWithInfo = new ArrayList<>();
-
 
             for (Exercise exercise : exercises) {
                 Map<Integer, Integer> withScores = new HashMap<>();
                 List<Solution> listSolutions = solutionService.getAllSolutionsByExercise(exercise);
                 for (Solution solution : listSolutions) {
                     int score = solution.getScore();
-                    if (withScores.containsKey(score))
+                    if (!withScores.containsKey(score))
                         withScores.put(score, 1);
                     else
                         withScores.replace(score, withScores.get(score) + 1);
@@ -224,6 +221,7 @@ public class UserController {
                 int mostpopularScore = 0;
                 int scorecount = 0;
                 Iterator<Map.Entry<Integer, Integer>> it = withScores.entrySet().iterator();
+                
                 while (it.hasNext()) {
                     Map.Entry<Integer, Integer> element = it.next();
                     if (element.getValue() > scorecount) {
@@ -231,7 +229,9 @@ public class UserController {
                         scorecount = element.getValue();
                     }
                 }
+                
                 Map<String,String> info = new HashMap<>();
+                info.put("id",Integer.toString(exercise.getId()));
                 info.put("name",exercise.getName());
                 info.put("content",exercise.getContent());
                 info.put("introduction",exercise.getIntroduction());
@@ -255,7 +255,7 @@ public class UserController {
         return exercisesWithInfo;
     }
     /**
-     *
+     * function which describe the position of student in ranking
      */
     @GetMapping("/position")
     public Pair<Integer,Integer> studentPosition(){
@@ -300,8 +300,6 @@ public class UserController {
 
         String password = userEntity.getPassword();
         String name = userEntity.getName();
-        loginUser = userEntity;
-        
 
         if(haveToGenerateRefreshToken)
         {
@@ -321,11 +319,9 @@ public class UserController {
             }
         }
         role = teacherService.findByName(name).isPresent() ? "ROLE_"+Role.TEACHER : "ROLE_"+Role.STUDENT;
-        System.out.println(role);
         userDetails = new User(name, password, List.of(new SimpleGrantedAuthority(role)));
         token = jwt.generateToken(userDetails);
         refreshToken = haveToGenerateRefreshToken? jwt.generateRefreshToken(userDetails) : null;
-        System.out.println(token);
        
         return  new JWTResponse(token,refreshToken,jwt.getExpirationDateFromToken(token));
     }

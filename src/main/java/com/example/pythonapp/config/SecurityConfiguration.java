@@ -37,7 +37,7 @@ public class SecurityConfiguration {
     
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        String permittedList [] = {"exercise/one/**","user/","user/ranking","user/teacher","user/code","exercise/interpreter","exercise/check/programming","exercise/check/abc","user/authenticate"};
+        String permittedList [] = {"exercise/one/**","user/","user/ranking","user/teacher","user/code","exercise/interpreter","exercise/programming/check","exercise/abc/check","user/authenticate"};
               return http
                       .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorizationManagerRequestMatcherRegistry ->

@@ -9,15 +9,15 @@ public class Solution {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(unique = true,name="id" ,nullable = false)
-    private int Id;
+    protected int Id;
     @ManyToOne
     @JoinColumn(name="exercise_id", nullable=false)
-    private Exercise exercise;
+    protected Exercise exercise;
     @ManyToOne
     @JoinColumn(name="student_id", nullable=false)
     @JsonIgnore
-    private Student student;
-    private int score = 0;  
+    protected Student student;
+    protected int score = 0;
 
     public Solution() {}
     public int getId() {

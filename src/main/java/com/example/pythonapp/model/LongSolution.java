@@ -6,7 +6,6 @@ import jakarta.persistence.Entity;
 public class LongSolution extends Solution{
     @Column(name="solution_content" ,nullable = false)
     private String solutionContent;
-    private String output = null;
 
     public String getSolutionContent() {
         return solutionContent;
@@ -14,13 +13,5 @@ public class LongSolution extends Solution{
 
     public void setSolutionContent(String solutionContent) {
         this.solutionContent = solutionContent;
-    }
-
-    public String getOutput() {
-        return output;
-    }
-
-    public void setOutput(String output) {
-        this.output = output;
     }
 }
