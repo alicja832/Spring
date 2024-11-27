@@ -7,14 +7,10 @@
     @Entity
     public class Teacher extends UserEntity {
 
-
-
-        @OneToMany(fetch = FetchType.EAGER)
-        @JoinColumn(name = "teacher_id")
+        @OneToMany
         private List<Exercise> exercises = new ArrayList<>();
 
         public Teacher() {
-
         }
         public Teacher(UserEntity userEntity)
         {

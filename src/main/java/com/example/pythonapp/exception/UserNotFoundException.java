@@ -9,6 +9,6 @@ public class UserNotFoundException extends RuntimeException {
     @Override
     public String getMessage()
     {
-        return "Błędne dane logowani";
+        return "Błędne dane logowania";
     }
 }

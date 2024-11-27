@@ -22,4 +22,8 @@ public interface ExerciseService {
     Optional<Exercise> findExerciseByName(String name);
     LongExercise save(LongExercise longExercise);
     ShortExercise save(ShortExercise shortExercise);
+    LongCorrectSolutionPart save(LongCorrectSolutionPart correctSolutionPart);
+    void update(int id,LongCorrectSolutionPart correctSolutionPart);
+    List<LongCorrectSolutionPart> findAllLongCorrectSolutionByExerciseId(int exerciseId);
+    List<Exercise> findAllByTeacher_Id(int teacherId);
 }

@@ -1,8 +1,10 @@
 package com.example.pythonapp.service;
 import com.example.pythonapp.model.Exercise;
+import com.example.pythonapp.model.LongCorrectSolutionPart;
 import com.example.pythonapp.model.LongExercise;
 import com.example.pythonapp.model.ShortExercise;
 import com.example.pythonapp.repository.ExerciseRepository;
+import com.example.pythonapp.repository.LongCorrectSolutionPartRepository;
 import com.example.pythonapp.repository.LongExerciseRepository;
 import com.example.pythonapp.repository.ShortExerciseRepository;
 import org.python.util.PythonInterpreter;
@@ -24,7 +26,8 @@ public class ExerciseServiceImpl implements ExerciseService {
     @Autowired
     private LongExerciseRepository longExerciseRepository;
     private PythonInterpreter interpreter;
-
+    @Autowired
+    private LongCorrectSolutionPartRepository longCorrectSolutionPartRepository;
 
     /**
      * A method which have to initialize the python interpreter
@@ -86,7 +89,7 @@ public class ExerciseServiceImpl implements ExerciseService {
     public void update(int id, LongExercise exercise)
     {
          updateExercise(id,(Exercise)exercise);
-       longExerciseRepository.updateById(id,exercise.getCorrectSolution(),exercise.getCorrectOutput());
+         longExerciseRepository.updateById(id,exercise.getCorrectSolution());
     }
     /**
      * A method which update short exercise
@@ -96,6 +99,37 @@ public class ExerciseServiceImpl implements ExerciseService {
     {
         updateExercise(id,(Exercise)exercise);
        shortExerciseRepository.updateById(id,exercise.getFirstOption(),exercise.getSecondOption(),exercise.getThirdOption(),exercise.getFourthOption(),exercise.getCorrectAnswer());
+    }
+
+    /**
+     * find all by exercise_id
+     * @param exerciseId
+     * @return
+     */
+    @Override
+    public List<LongCorrectSolutionPart> findAllLongCorrectSolutionByExerciseId(int exerciseId)
+    {
+        return longCorrectSolutionPartRepository.findAllByExerciseId(exerciseId);
+    }
+    /***
+     * update correctSolutionPart
+     * @param id
+     * @param correctSolutionPart
+     * @return
+     */
+    public void update(int id,LongCorrectSolutionPart correctSolutionPart)
+    {
+        longCorrectSolutionPartRepository.update(id,correctSolutionPart.getOrder() ,correctSolutionPart.getCorrectSolutionPart());
+    }
+    /**
+     * save the long solution part in the database
+     * @param correctSolutionPart instance of correectSolutionPart to be save
+     * @return saved longCorrectSolutionPart
+     */
+    @Override
+    public LongCorrectSolutionPart save(LongCorrectSolutionPart correctSolutionPart)
+    {
+        return longCorrectSolutionPartRepository.save(correctSolutionPart);
     }
     /**
      * A method which list short exercises
@@ -158,6 +192,14 @@ public class ExerciseServiceImpl implements ExerciseService {
     @Override
     public void delete(int id)
     {
+        try{
+            if(!longCorrectSolutionPartRepository.findAllByExerciseId(id).isEmpty())
+                longCorrectSolutionPartRepository.deleteAllByExerciseId(id);
+        }
+        catch(Exception exception)
+        {
+            System.out.println(exception.getMessage());
+        }
         exerciseRepository.deleteById(id);
     }
 
@@ -166,4 +208,10 @@ public class ExerciseServiceImpl implements ExerciseService {
     {
         return exerciseRepository.findByName(name);
     }
+    @Override
+    public  List<Exercise> findAllByTeacher_Id(int teacherId)
+    {
+        return exerciseRepository.findAllByTeacher_Id(teacherId);
+    }
+
 }

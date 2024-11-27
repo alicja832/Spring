@@ -2,6 +2,8 @@ package com.example.pythonapp.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
+import java.util.List;
+
 @Entity
 @Table(name = "exercise")
 @Inheritance(strategy = InheritanceType.JOINED)
@@ -10,7 +12,6 @@ public class Exercise {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(unique = true, name = "id",nullable = false)
-
     private int id;
     @Column(unique = true, name="name")
     private String name;
@@ -20,11 +21,13 @@ public class Exercise {
     private String content;
     @Column(name="max_points")
     private int maxPoints;
-  
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="teacher_id", nullable=false)
     @JsonIgnore
     private Teacher teacher;
+    @OneToMany
+    private List<LongCorrectSolutionPart> longCorrectSolutionPart;
+
 
     @Override
     public boolean equals(Object o) {
@@ -37,7 +40,19 @@ public class Exercise {
         Exercise exercise = (Exercise) o;
         return this.id == exercise.id;
     }
+    public List<LongCorrectSolutionPart> getLongCorrectSolutionPart() {return this.longCorrectSolutionPart;}
 
+    public void setLongCorrectSolutionPart(List<LongCorrectSolutionPart> longCorrectSolutionPart) {
+        this.longCorrectSolutionPart = longCorrectSolutionPart;
+    }
+    public Exercise(){}
+    public Exercise(String name,String introduction, String content,int maxPoints)
+    {
+        this.name = name;
+        this.introduction = introduction;
+        this.content = content;
+        this.maxPoints = maxPoints;
+    }
     public int getId() {
         return id;
     }

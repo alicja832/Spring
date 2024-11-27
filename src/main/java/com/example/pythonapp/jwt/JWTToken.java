@@ -30,7 +30,10 @@ public class JWTToken implements Serializable {
     @Value("${security.jwt.secret-key}")
     private String secretKey;
 
-
+    public  long getJwtExpirationTime()
+    {
+        return jwtExpirationTime;
+    }
     //retrieve username from jwt token
     public String getUsernameFromToken(String token) {
         return getClaimFromToken(token, Claims::getSubject);
@@ -68,12 +71,14 @@ public class JWTToken implements Serializable {
 
     public String  generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
+        claims.put("name",userDetails.getUsername());
         String subject = userDetails.getUsername();
+
         String token = null;
         try{
-            token = Jwts.builder().setClaims(claims).setSubject(subject).setIssuedAt(new Date(System.currentTimeMillis()))
+           token =  Jwts.builder().setClaims(claims).setSubject(subject).setIssuedAt(new Date(System.currentTimeMillis()))
                     .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationTime * 1000))
-                    .signWith(SignatureAlgorithm.RS256,  generateJwtKeyEncryption(secretKey)).compact();
+                 .signWith(SignatureAlgorithm.RS256,  generateJwtKeyEncryption(secretKey)).compact();
 
         }
         catch(Exception e){
@@ -92,7 +97,7 @@ public class JWTToken implements Serializable {
        
         try{
             token = Jwts.builder().setClaims(claims).setSubject(subject).setIssuedAt(new Date(System.currentTimeMillis()))
-                    .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationTime * 1000 * 15))
+                    .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationTime * 1000 * 3))
                     .signWith(SignatureAlgorithm.RS256,  generateJwtKeyEncryption(secretKey)).compact();
 
         }

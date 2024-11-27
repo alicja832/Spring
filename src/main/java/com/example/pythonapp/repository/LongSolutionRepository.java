@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
+import org.springframework.stereotype.Repository;
 import java.util.List;
 
 public interface LongSolutionRepository extends JpaRepository<LongSolution,Integer> {

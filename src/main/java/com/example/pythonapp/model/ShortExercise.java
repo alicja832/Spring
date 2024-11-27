@@ -5,17 +5,19 @@ import jakarta.persistence.Entity;
 @Entity
 public class ShortExercise extends Exercise{
 
-    @Column(name="first_option")
+    @Column(name="first_option",nullable=false)
     private String firstOption;
-    @Column(name="second_option")
+    @Column(name="second_option",nullable=false)
     private String secondOption;
-    @Column(name="third_option")
+    @Column(name="third_option",nullable=false)
     private String thirdOption;
     @Column(name="fourth_option")
     private String fourthOption;
-    @Column(name="correct_answer")
+    @Column(name="correct_answer",nullable=false)
     private char correctAnswer;
 
+    
+    public ShortExercise() {}
     public String getFirstOption() {
         return firstOption;
     }

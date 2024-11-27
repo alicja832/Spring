@@ -11,13 +11,14 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-
+import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface ExerciseRepository extends JpaRepository<Exercise,Integer> {
     Optional<Exercise> findByName(String name);
     Optional<Exercise> findById(int id);
+    List<Exercise> findAllByTeacher_Id(int teacherId);
     @Transactional
     @Modifying
     @Query(value = "update exercise set name=:name,introduction=:introduction,content=:content,max_points=:max_points " +

@@ -5,22 +5,24 @@ import java.util.Date;
 @Data
 public class JWTResponse {
 
-    private String jwtToken;
-    private String refreshToken;
+    private String token;
     private Date jwtExpirationDate;
-    public JWTResponse(String token,String refreshToken,Date jwtExpirationDate) {
+    public JWTResponse(String token,Date jwtExpirationDate) {
 
-        this.jwtToken = token;
-        this.refreshToken = refreshToken;
+        this.token = token;
         this.jwtExpirationDate = jwtExpirationDate;
     }
-    public String getJwtToken()
+    public String getToken()
     {
-        return jwtToken;
+        return token;
+    }
+    public void setToken(String token)
+    {
+        this.token = token;
     }
 
-    public String getRefreshToken() {
-        return refreshToken;
+    public void setJwtExpirationDate(Date jwtExpirationDate) {
+        this.jwtExpirationDate = jwtExpirationDate;
     }
 
     public Date getJwtExpirationDate() {

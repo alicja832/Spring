@@ -43,7 +43,6 @@ public class JwtFilter extends OncePerRequestFilter {
         String token = null;
         String userName = null;
 
-
         if (authorization!=null && authorization.startsWith("Bearer ")) {
             token = authorization.substring(7);
             userName = jwt.getUsernameFromToken(token);
@@ -54,8 +53,6 @@ public class JwtFilter extends OncePerRequestFilter {
             String role = teacherRepository.findByName(userName).isPresent() ? "ROLE_"+ Role.TEACHER : "ROLE_"+Role.STUDENT;
             UserDetails userDetails
                     = new User(userEntity.getName(),userEntity.getPassword(), List.of(new SimpleGrantedAuthority(role))) ;
-
-
             if (jwt.validateToken(token, userDetails)) {
 
                 UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken
@@ -68,8 +65,8 @@ public class JwtFilter extends OncePerRequestFilter {
 
                 SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
             }
-
         }
+
         try {
             filterChain.doFilter(httpServletRequest, httpServletResponse);
         } catch (Exception e) {

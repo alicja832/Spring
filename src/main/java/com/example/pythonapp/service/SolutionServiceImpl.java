@@ -2,6 +2,7 @@ package com.example.pythonapp.service;
 
 import com.example.pythonapp.exception.SolutionNotFoundException;
 import com.example.pythonapp.model.*;
+import com.example.pythonapp.repository.LongCorrectSolutionPartRepository;
 import com.example.pythonapp.repository.LongSolutionRepository;
 import com.example.pythonapp.repository.ShortSolutionRepository;
 import com.example.pythonapp.repository.SolutionRepository;
@@ -26,11 +27,13 @@ public class SolutionServiceImpl implements SolutionService {
     public Solution save(LongSolution solution){
         return longSolutionRepository.save(solution);
     }
+
     @Override
     public List<Solution> findStudentSolution(Student student)
     {
         return  solutionRepository.findAllByStudentEquals(student);
     }
+
 
     @Override
     public Solution findById(int id)
@@ -48,12 +51,10 @@ public class SolutionServiceImpl implements SolutionService {
         solutionRepository.updateById(id,solution.getScore());
         longSolutionRepository.updateById(id,solution.getSolutionContent());
     }
-
     @Override
-    public int deleteById(int id)
+    public ShortSolution findShortSolutionById(int id)
     {
-        solutionRepository.deleteById(id);
-        return id;
+        return shortSolutionRepository.findById(id).orElseThrow(SolutionNotFoundException::new);
     }
     @Override
     public List<Solution> getAllSolutionsByExercise (Exercise exercise)

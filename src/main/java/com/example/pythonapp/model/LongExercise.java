@@ -7,23 +7,20 @@ public class LongExercise extends Exercise{
 
     @Column(name="correct_solution")
     private String correctSolution;
-    @Column(name="correct_output")
-    private String correctOutput = null;
 
-    public String getCorrectSolution() {
+    public LongExercise() {}
+    public LongExercise(String name, String introduction, String content, int maxPoints,String correctSolution) {
+        super(name,introduction,content,maxPoints);
+        this.correctSolution = correctSolution;
+    }
+
+
+    public String getCorrectSolution(){
         return correctSolution;
     }
 
     public void setCorrectSolution(String correctSolution) {
         this.correctSolution = correctSolution;
-    }
-
-    public String getCorrectOutput() {
-        return correctOutput;
-    }
-
-    public void setCorrectOutput(String correctOutput) {
-        this.correctOutput = correctOutput;
     }
 
 }

@@ -10,7 +10,8 @@ public interface SolutionService {
     List<Solution> findStudentSolution(Student student);
     Solution findById(int id);
     LongSolution findLongSolutionById(int id);
-    int deleteById(int id);
+    ShortSolution findShortSolutionById(int id);
     void updateSolution(int id, LongSolution solution);
     List<Solution> getAllSolutionsByExercise(Exercise exercise);
+
 }

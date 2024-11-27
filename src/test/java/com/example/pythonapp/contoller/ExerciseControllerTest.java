@@ -6,6 +6,7 @@ import com.example.pythonapp.dto.LongSolutionDto;
 import com.example.pythonapp.dto.UserCreationDto;
 import com.example.pythonapp.jwt.JWTResponse;
 import com.example.pythonapp.jwt.JWTToken;
+import com.example.pythonapp.model.Solution;
 import com.example.pythonapp.model.Teacher;
 import com.example.pythonapp.model.Exercise;
 import com.example.pythonapp.model.LongSolution;
@@ -17,12 +18,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
-
+//DOROBIĆ TESTY
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class ExerciseControllerTest {
 
     @Autowired
     ExerciseController exerciseController;
+    @Autowired
+    UserController userController;
     @Autowired
     JWTToken token;
     @LocalServerPort
@@ -34,38 +37,20 @@ public class ExerciseControllerTest {
         RestAssured.port = port;
     }
 
-   @Test
-   @Order(1)
-   void Authorized() {
-       
-       Exercise exercise = exerciseController.FindLongExerciseById(1).get(0);
-       LongSolutionDto solution = new LongSolutionDto();
-       solution.setSolutionContent("print(1)");
-       solution.setOutput("1");
-       solution.setExercise(exercise);
-       Assertions.assertEquals(0,exerciseController.checkSolution(solution));
-   }
-//
-//    @Test
-//    @Order(2)
-//    void ShouldGiveToken() {
-//        Teacher teacher = new Teacher();
-//        teacher.setEmail("someone@gmail.com");
-//        teacher.setName("someone");
-//        teacher.setPassword("password");
-//        userController.add(new UserCreationDto(teacher.getName(),teacher.getEmail(),teacher.getPassword(), Role.TEACHER)).getBody();
-//        teacher.setPassword("password");
-//        JWTResponse jwt = null;
-//        try {
-//            jwt = userController.authenticate(teacher);
-//        } catch (Exception exception) {
-//            exception.printStackTrace();
-//        }
-//
-//        if (jwt != null)
-//            jwtToken = jwt.getJwtToken();
-//
-//    }
+
+
+
+
+//        @Test
+//        @Order(1)
+//        void TestAddSolution() {
+//        Exercise exercise = exerciseController.listExercises().get(0).getKey();
+//        Solution solution = new Solution();
+//        solution.setExercise(exercise);
+//        solution.set
+   // }
+
+
 //
 //    @Test
 //    @Order(3)
@@ -80,16 +65,6 @@ public class ExerciseControllerTest {
 //
 //    }
 //
-   @Test
-   @Order(2)
-   void AuthorizedPost() {
 
-       given()
-               .when()
-               .post("user/")
-               .then()
-               .statusCode(403);
-
-   }
 
 }

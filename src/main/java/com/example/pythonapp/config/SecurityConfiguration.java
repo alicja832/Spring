@@ -34,10 +34,10 @@ public class SecurityConfiguration {
         this.jwtFilter = jwtFilter;
         this.authProvider = new DaoAuthenticationProvider();
     }
-    
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        String permittedList [] = {"exercise/one/**","user/","user/ranking","user/teacher","user/code","exercise/interpreter","exercise/programming/check","exercise/abc/check","user/authenticate"};
+        String permittedList [] = {"exercise/one/**","user/","user/ranking","user/token","user/teacher","user/code","exercise/out","solution/programming/check","programming/abc/check","user/authenticate"};
               return http
                       .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorizationManagerRequestMatcherRegistry ->

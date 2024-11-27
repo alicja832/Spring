@@ -11,8 +11,7 @@ public class Student  extends UserEntity{
     private int score=0;
 
 
-    @OneToMany(fetch = FetchType.EAGER)
-    @JoinColumn(name = "solution_id")
+    @OneToMany
     List<Solution> solutions = new ArrayList<>();
 
     public Student()

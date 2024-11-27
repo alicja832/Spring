@@ -1,8 +1,8 @@
 package com.example.pythonapp.controller;
-import com.example.pythonapp.dto.LongSolutionDto;
+import com.example.pythonapp.dto.LongExerciseOutDto;
 import com.example.pythonapp.exception.ExerciseNotFoundException;
-import com.example.pythonapp.mapper.LongSolutionMapper;
 import com.example.pythonapp.model.*;
+import com.example.pythonapp.dto.LongExerciseDto;
 import com.example.pythonapp.service.*;
 import javafx.util.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,13 +11,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Predicate;
+import com.example.pythonapp.dto.LongExerciseDto;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:3000/", maxAge=360000)
+//@CrossOrigin(origins = "https://pythonfront-dnb5a2epcyh3e0ep.polandcentral-01.azurewebsites.net", maxAge=360000)
+@CrossOrigin (origins="http://localhost:3000",maxAge = 3600)
 @RequestMapping("/exercise")
 public class ExerciseController {
 
@@ -36,22 +36,70 @@ public class ExerciseController {
      * @return ResponseEntity with HTTP status
      */
     @PostMapping("/programming")
-    public ResponseEntity<Exercise> add(@RequestBody LongExercise exercise){
+    public ResponseEntity<String> add(@RequestBody LongExerciseDto exercise){
 
-        exercise.setCorrectOutput(exerciseService.getOut("\n"+exercise.getCorrectSolution()+"\n"));
-        if(exercise.getCorrectOutput().contains("Error"))
-            return new ResponseEntity<>(exercise, HttpStatus.BAD_REQUEST);
-        if(exercise.getCorrectOutput().contains("TraceBack"))
-            return new ResponseEntity<>(exercise, HttpStatus.BAD_REQUEST);
-
-        Teacher teacher = setTeacherInExercise(exercise);
-        try {
-            exerciseService.save(exercise);
-        }catch(Exception e){
-            return new ResponseEntity<>(exercise, HttpStatus.BAD_REQUEST);
+        Pair<LongExercise,ArrayList<LongCorrectSolutionPart>> longExerciseArrayListPair;
+        LongExercise longExercise;
+        String name = SecurityContextHolder.getContext().getAuthentication().getName();
+        Teacher teacher = teacherService.findByName(name).get();
+        
+        try{
+             longExerciseArrayListPair = createLongExercisefromDto(exercise);
         }
-        teacher.addExercise(exercise);
-        return new ResponseEntity<>(exercise, HttpStatus.CREATED);
+        catch(Exception exception)
+        {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        longExerciseArrayListPair.getKey().setTeacher(teacher);
+        try {
+            longExercise = exerciseService.save(longExerciseArrayListPair.getKey());
+        }catch(Exception e){
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        
+        teacher.addExercise(longExercise);
+        for(LongCorrectSolutionPart longCorrectSolutionPart:longExerciseArrayListPair.getValue())
+        {
+            
+            longCorrectSolutionPart.setExercise(longExercise);
+            try{
+                exerciseService.save(longCorrectSolutionPart);
+            }
+            catch(Exception ex)
+            {
+                System.out.println(ex.getMessage());
+            }
+        }
+
+        return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+    /**
+     * Function which create LongExercise from LongExerciseDto and save the parts of the solutions in the list
+     * this is because the exercise_id have to be set in each correct solution Part
+     * @param exercise
+     * @return
+     * @throws Exception
+     */
+    Pair<LongExercise,ArrayList<LongCorrectSolutionPart>> createLongExercisefromDto(LongExerciseDto exercise) throws Exception
+    {
+        String[] correctSolutionParts =  exercise.getCorrectSolutions();
+        String correctSolution="";
+        int amount = exercise.getMaxPoints();
+        ArrayList<LongCorrectSolutionPart> parts=new ArrayList<>();
+        String[] correctSolutions = new String[amount];
+        for(int i=0;i<amount;i++)
+        {
+            String result = exerciseService.getOut(correctSolutionParts[i]);
+            if(result.contains("Error") || result.contains("TraceBack"))
+                throw new Exception("Wrong code");
+            parts.add(new LongCorrectSolutionPart(i,correctSolutionParts[i]));
+            correctSolution+=correctSolutionParts[i];
+            correctSolution+="\n";
+            correctSolutions[i] = exerciseService.getOut(correctSolutionParts[i]);
+        }
+        return new Pair<>(new LongExercise(exercise.getName(),exercise.getIntroduction(),exercise.getContent(),exercise.getMaxPoints(),correctSolution),parts);
     }
     /**
      * add new abc exercise
@@ -59,26 +107,23 @@ public class ExerciseController {
      * @return ResponseEntity with HTTP status
      */
     @PostMapping("/abc")
-    public ResponseEntity<Exercise> add(@RequestBody ShortExercise exercise){
+    public ResponseEntity<String> add(@RequestBody ShortExercise exercise){
 
-       Teacher teacher = setTeacherInExercise(exercise);
+       String name = SecurityContextHolder.getContext().getAuthentication().getName();
+       Teacher teacher = teacherService.findByName(name).get();
+       exercise.setTeacher(teacher);
        exercise.setCorrectAnswer(Character.toUpperCase(exercise.getCorrectAnswer()));
        try {
             exercise = exerciseService.save(exercise);
+         
         }catch(Exception e){
-            return new ResponseEntity<>(exercise, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-        teacher.addExercise(exercise);
+        Exercise addExercise = exercise; 
+        teacher.addExercise(addExercise);
+        return new ResponseEntity<>( HttpStatus.CREATED);
+    }
 
-        return new ResponseEntity<>(exercise, HttpStatus.CREATED);
-    }
-    private Teacher setTeacherInExercise(Exercise exercise)
-    {
-        String name = SecurityContextHolder.getContext().getAuthentication().getName();
-        Teacher teacher = teacherService.findByName(name).get();
-        exercise.setTeacher(teacher);
-        return teacher;
-    }
     /**
      * delete exercise
      * @param id
@@ -99,12 +144,10 @@ public class ExerciseController {
     public ResponseEntity<String> update(@RequestBody ShortExercise exercise){
         
         try{
-            ShortExercise exercisefound = exerciseService.findShortExerciseByName(exercise.getName()).get();
             exercise.setCorrectAnswer(Character.toUpperCase(exercise.getCorrectAnswer()));
-            exerciseService.update(exercisefound.getId(), exercise);
+            exerciseService.update(exercise.getId(), exercise);
         }catch(Exception e)
         {
-           System.out.println(e.getMessage());
            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Edycja zadania nie powiodła się.");
         }
         return ResponseEntity.status(HttpStatus.OK).body("Edycja zadania powiodła się");
@@ -114,17 +157,36 @@ public class ExerciseController {
      * @param exercise - new version of exercise
      */
     @PutMapping("/programming")
-    public ResponseEntity<String> update(@RequestBody LongExercise exercise){
-        
+    public ResponseEntity<String> update(@RequestBody LongExerciseDto exercise){
+
+        Pair<LongExercise,ArrayList<LongCorrectSolutionPart>> longExerciseArrayListPair;
+       
         try{
-            LongExercise exercisefound = exerciseService.findLongExerciseByName(exercise.getName()).get();
-            exercise.setCorrectOutput(exerciseService.getOut(exercisefound.getCorrectSolution()));
-            exerciseService.update(exercisefound.getId(), exercise);
+            longExerciseArrayListPair = createLongExercisefromDto(exercise);
+        }
+        catch(Exception exception)
+        {
+            System.out.println(exception.getMessage());
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+     
+        try{
+            exerciseService.update(exercise.getId(), longExerciseArrayListPair.getKey());
         }
         catch(Exception e)
         {
-            System.out.println(e.getMessage());
+             System.out.println(e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Edycja zadania nie powiodła się");
+        }
+        System.out.println(longExerciseArrayListPair.getValue());
+        for(LongCorrectSolutionPart longCorrectSolutionPart:longExerciseArrayListPair.getValue())
+        {
+            try{
+                exerciseService.update(exercise.getId(),longCorrectSolutionPart);
+            }catch(Exception e)
+            {
+                System.out.println(e.getMessage());
+            }
         }
         return ResponseEntity.status(HttpStatus.OK).body("Edycja zadania powiodła się");
     }
@@ -190,10 +252,11 @@ public class ExerciseController {
      * @return
      */
     @GetMapping("/one/programming/{id}")
-    public List<LongExercise> FindLongExerciseById(@PathVariable int id) {
+    public List<LongExerciseOutDto> FindLongExerciseById(@PathVariable int id) {
 
         LongExercise exercise = exerciseService.findLongExerciseById(id).orElseThrow(ExerciseNotFoundException::new);
-        return List.of(exercise);
+        LongExerciseOutDto exerciseDto = new LongExerciseOutDto(id,exercise.getName(),exercise.getIntroduction(),exercise.getContent(),exercise.getMaxPoints(), exerciseService.getOut("\n"+exercise.getCorrectSolution()+"\n"));
+        return List.of(exerciseDto);
     }
     /**
      * get one abc exercise
@@ -211,142 +274,8 @@ public class ExerciseController {
      * @param text
      * @return
      */
-    @PostMapping("/interpreter")
-    public String getresponse(@RequestBody String text){
-        return exerciseService.getOut(text);
+    @PostMapping("/out")
+    public String getResponse(@RequestBody String text){
+        return exerciseService.getOut("\n"+text+"\n");
     }
-
-    /**
-     * get one's solutions with name exercise and score
-     **/
-    @GetMapping("/solutions/programming")
-    public List<Map<String,String>> getSolutions(){
-
-        String name = SecurityContextHolder.getContext().getAuthentication().getName();
-        List<Map<String, String>> exercisesAndScores = new ArrayList<>();
-        List<Solution> solutions = solutionService.findStudentSolution(studentService.findByName(name).get());
-
-        for(Solution solution:solutions) {
-
-            Map<String,String> map = new HashMap<>();
-            Exercise exercise=solution.getExercise();
-
-
-                    map.put("id", Integer.toString(solution.getId()));
-                    map.put("name", solution.getExercise().getName());
-                    map.put("score", Integer.toString(solution.getScore()));
-
-
-                    if(exercise instanceof LongExercise) { map.put("retakeposibility", "true");}
-                    else {map.put("retakeposibility", "false");}
-
-            exercisesAndScores.add(map);
-        }
-
-        return exercisesAndScores;
-    }
-    /**
-     * add one's programming solution with name exercise and score
-     **/
-    @PostMapping("/solution/programming")
-    public ResponseEntity<Solution> addSolution(@RequestBody LongSolutionDto solution){
-        LongSolutionMapper longSolutionMapper=new LongSolutionMapper();
-        Student loginStudent = studentService.findByName(SecurityContextHolder.getContext().getAuthentication().getName()).get();
-        if(solution.getScore()==0)
-        {
-            this.checkSolution(solution);
-        }
-        solution.setStudent(loginStudent);
-        LongSolution solutionCreated = longSolutionMapper.createLongSolution(solution);
-        solutionService.save(solutionCreated);
-        studentService.update(loginStudent.getId(),loginStudent.getScore()+solution.getScore());
-        return new ResponseEntity<>(solutionCreated,HttpStatus.CREATED);
-    }
-    /**
-     * add one's abc solution with name exercise and score
-     **/
-    @PostMapping("/solution/abc")
-    public ResponseEntity<Solution> addSolution(@RequestBody ShortSolution solution){
-
-        Student loginStudent = studentService.findByName(SecurityContextHolder.getContext().getAuthentication().getName()).get();
-        if(solution.getScore()==0)
-        {
-            this.checkSolution(solution);
-        }
-        solution.setStudent(loginStudent);
-        solutionService.save(solution);
-        studentService.update(loginStudent.getId(),loginStudent.getScore()+solution.getScore());
-
-        return new ResponseEntity<>(solution,HttpStatus.CREATED);
-
-    }
-    /**
-     * get one solution from database
-     * @param id
-     * @return
-     */
-    @GetMapping("/solution/{id}")
-    public List<LongSolution> getSolution(@PathVariable int id){
-
-
-        return List.of(solutionService.findLongSolutionById(id));
-    }
-
-    /**
-     * function to update one solution by one user
-     * @param solution new version of solution
-     */
-    @PutMapping("/solution")
-    public void updateSolution(@RequestBody LongSolution solution){
-        int oldScore = solutionService.findById(solution.getId()).getScore();
-        solutionService.updateSolution(solution.getId(),solution);
-        String name = SecurityContextHolder.getContext().getAuthentication().getName();
-        Student loginStudent = studentService.findByName(name).get();
-        studentService.update(loginStudent.getId(),loginStudent.getScore()-oldScore+solution.getScore());
-    }
-
-    /**
-     * function which check the solution of programming exercise
-     * @param solution - programming solution to check
-     * @return
-     */
-    @PostMapping("/programming/check")
-    public int checkSolution(@RequestBody LongSolutionDto solution){
-
-        LongExercise exercise =  exerciseService.findLongExerciseById(solution.getExercise().getId()).orElseThrow(ExerciseNotFoundException::new);
-        String expectedOutput = exercise.getCorrectOutput();
-        int maxPoints =  solution.getExercise().getMaxPoints();
-        if(solution.getOutput() == null)
-        {
-            solution.setOutput(exerciseService.getOut(solution.getSolutionContent()));
-        }
-        if(expectedOutput.equals(solution.getOutput()) || expectedOutput.trim().equals(solution.getOutput().trim()))
-        {
-            solution.setScore(maxPoints);
-            return maxPoints;
-        }
-
-        return 0;
-    }
-    /**
-     * function which check the solution of abc exercise
-     * @param solution - programming solution to check
-     * @return
-     */
-    @PostMapping("/abc/check")
-    public int checkSolution(@RequestBody ShortSolution solution){
-
-        ShortExercise exercise = exerciseService.findShortExerciseById(solution.getExercise().getId()).orElseThrow(ExerciseNotFoundException::new);
-        char correctAnswer = exercise.getCorrectAnswer();
-        int maxPoints =  solution.getExercise().getMaxPoints();
-        if(correctAnswer == Character.toUpperCase(solution.getAnswer()))
-        {
-            solution.setScore(maxPoints);
-            return maxPoints;
-        }
-
-        return 0;
-    }
-
-
 }

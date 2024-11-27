@@ -11,10 +11,10 @@ public class Solution {
     @Column(unique = true,name="id" ,nullable = false)
     protected int Id;
     @ManyToOne
-    @JoinColumn(name="exercise_id", nullable=false)
+    @JoinColumn(name="exercise_id", nullable=true)
     protected Exercise exercise;
     @ManyToOne
-    @JoinColumn(name="student_id", nullable=false)
+    @JoinColumn(name="student_id", nullable=false)  
     @JsonIgnore
     protected Student student;
     protected int score = 0;

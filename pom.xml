@@ -145,15 +145,15 @@
                 <version>2.9.0</version>
                 <configuration>
                     <schemaVersion>v2</schemaVersion>
-                    <resourceGroup>pythonv4-1727858124380-rg</resourceGroup>
-                    <appName>pythonv4-1727858124380</appName>
+                    <resourceGroup>pythonfront_group</resourceGroup>
+                    <appName>Naukapythona</appName>
                     <pricingTier>F1</pricingTier>
-                    <region>polandcentral</region>
+                    <region>Central US</region>
                     <runtime>
                         <os>Linux</os>
                         <javaVersion>Java 17</javaVersion>
                         <webContainer>Java SE</webContainer>
-                    </runtime>
+                    </runtime> 
                     <deployment>
                         <resources>
                             <resource>
