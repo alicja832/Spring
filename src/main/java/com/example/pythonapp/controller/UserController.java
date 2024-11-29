@@ -225,7 +225,7 @@ public class UserController {
     public List<Student> getStudentRanking()
     {
         List<Student> list = studentService.listStudents();
-        list.sort((Student a,Student b)->a.getScore()-b.getScore());
+        list.sort((Student a,Student b)->b.getScore()-a.getScore());
         return list;
     }
 

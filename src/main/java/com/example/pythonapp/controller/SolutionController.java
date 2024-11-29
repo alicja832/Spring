@@ -68,17 +68,15 @@ public class SolutionController {
         solution.setExercise(exercise);
         LongSolutionMapper longSolutionMapper=new LongSolutionMapper();
         Student loginStudent = studentService.findByName(SecurityContextHolder.getContext().getAuthentication().getName()).get();
-        int newscore=0;
-        if(solution.getScore()==0)
-        {
-            newscore = this.checkSolution(solution);
-        }
+        int newscore = this.checkSolution(solution);
+       
         LongSolution solutionCreated = longSolutionMapper.createLongSolution(solution);
         solutionCreated.setStudent(loginStudent);
         solutionCreated.setScore(newscore);
+        
         try{
             solutionService.save(solutionCreated);
-            studentService.update(loginStudent.getId(),loginStudent.getScore()+solution.getScore());
+            studentService.update(loginStudent.getId(),solutionCreated.getScore());
         }catch(Exception exception)
         {
             System.out.println(exception.getMessage());
@@ -92,13 +90,10 @@ public class SolutionController {
     public ResponseEntity<Solution> addSolution(@RequestBody ShortSolution solution){
 
         Student loginStudent = studentService.findByName(SecurityContextHolder.getContext().getAuthentication().getName()).get();
-        if(solution.getScore()==0)
-        {
-            this.checkSolution(solution);
-        }
+        solution.setScore(this.checkSolution(solution));
         solution.setStudent(loginStudent);
         solutionService.save(solution);
-        studentService.update(loginStudent.getId(),loginStudent.getScore()+solution.getScore());
+        studentService.update(loginStudent.getId(),solution.getScore());
 
         return new ResponseEntity<>(solution,HttpStatus.CREATED);
 
@@ -157,7 +152,7 @@ public class SolutionController {
 
         int oldScore = solutionService.findById(solutionCreated.getId()).getScore();
         solutionService.updateSolution(solutionCreated.getId(), solutionCreated);
-        studentService.update(loginStudent.getId(),loginStudent.getScore()-oldScore+newscore);
+        studentService.update(loginStudent.getId(),newscore-oldScore);
     }
 
     /**

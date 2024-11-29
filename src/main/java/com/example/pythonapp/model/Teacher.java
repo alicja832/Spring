@@ -7,9 +7,7 @@
     @Entity
     public class Teacher extends UserEntity {
 
-        @OneToMany
-        private List<Exercise> exercises = new ArrayList<>();
-
+    
         public Teacher() {
         }
         public Teacher(UserEntity userEntity)
@@ -18,24 +16,6 @@
             email = userEntity.email;
             password = userEntity.password;
         }
-        public void addExercise(Exercise exercise)
-        {
-            exercises.add(exercise);
-        }
-        public void removeExercise(Exercise exercise)
-        {
-            exercises.remove(exercise);
-        }
-        public void updateExercise(Exercise exercise)
-        {
-            exercises.set( exercises.indexOf(exercise),exercise);
-        }
-
-        public void setExercises(List<Exercise> exercises) {
-            this.exercises = exercises;
-        }
-        public List<Exercise> getExercises() {return exercises;}
-
         public boolean equals(Object o) {
             if (this == o)
                 return true;

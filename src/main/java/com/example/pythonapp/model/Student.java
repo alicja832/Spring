@@ -10,10 +10,6 @@ public class Student  extends UserEntity{
     @Column(name = "score", nullable = false)
     private int score=0;
 
-
-    @OneToMany
-    List<Solution> solutions = new ArrayList<>();
-
     public Student()
     {
 
@@ -23,15 +19,6 @@ public class Student  extends UserEntity{
         name = userEntity.name;
         email = userEntity.email;
         password = userEntity.password;
-    }
-    public List<Solution> getSolutions() {
-        
-        return solutions;
-    }
-
-    public void addSolution(Solution solution)
-    {
-        solutions.add(solution);
     }
     public int getScore() {
         return score;

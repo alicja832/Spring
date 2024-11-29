@@ -58,7 +58,6 @@ public class ExerciseController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         
-        teacher.addExercise(longExercise);
         for(LongCorrectSolutionPart longCorrectSolutionPart:longExerciseArrayListPair.getValue())
         {
             
@@ -119,8 +118,6 @@ public class ExerciseController {
         }catch(Exception e){
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-        Exercise addExercise = exercise; 
-        teacher.addExercise(addExercise);
         return new ResponseEntity<>( HttpStatus.CREATED);
     }
 

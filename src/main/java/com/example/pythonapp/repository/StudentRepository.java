@@ -18,7 +18,7 @@ public interface StudentRepository extends JpaRepository<Student,Integer> {
    Optional<Student> findByName(String name);
    @Transactional
    @Modifying
-   @Query(value = "update student set score=:score where id=:id", nativeQuery = true)
+   @Query(value = "update student set score=score+:score where id=:id", nativeQuery = true)
    void updateById(@Param("id") long id, @Param("score") int score);
 
 }
