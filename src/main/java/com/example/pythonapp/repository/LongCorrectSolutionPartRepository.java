@@ -20,5 +20,11 @@ public interface LongCorrectSolutionPartRepository extends JpaRepository<LongCor
     void update(@Param("exercise_id") int Id,@Param("order_id") int orderId,@Param("correct_solution_part")  String correct_solution_part);
 
     List<LongCorrectSolutionPart> findAllByExerciseId(int exerciseId);
+    List<LongCorrectSolutionPart> findAllByExerciseIdAndOrder(int exerciseId, int order);
+    @Transactional
+    @Modifying
     void deleteAllByExerciseId(int exerciseId);
+    @Transactional
+    @Modifying
+    void deleteAllByExerciseIdAndOrder(int exerciseId, int order);
 }

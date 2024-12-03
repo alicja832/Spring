@@ -22,7 +22,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
-
+import jakarta.servlet.http.Cookie;
 
 @Component
 @EnableWebSecurity
@@ -39,6 +39,7 @@ public class JwtFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain filterChain) throws ServletException, IOException {
 
+      
         String authorization = httpServletRequest.getHeader("Authorization");
         String token = null;
         String userName = null;

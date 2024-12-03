@@ -24,4 +24,7 @@ public interface ExerciseRepository extends JpaRepository<Exercise,Integer> {
     @Query(value = "update exercise set name=:name,introduction=:introduction,content=:content,max_points=:max_points " +
            "where id=:id", nativeQuery = true)
     void updateById(@Param("id") int id,@Param("name") String name,@Param("introduction") String introduction,@Param("content") String content,@Param("max_points") int maxPoints);
+    @Transactional
+    @Modifying
+    void deleteById(int id);
 }

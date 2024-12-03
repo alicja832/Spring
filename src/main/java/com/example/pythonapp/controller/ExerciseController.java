@@ -157,7 +157,6 @@ public class ExerciseController {
     public ResponseEntity<String> update(@RequestBody LongExerciseDto exercise){
 
         Pair<LongExercise,ArrayList<LongCorrectSolutionPart>> longExerciseArrayListPair;
-       
         try{
             longExerciseArrayListPair = createLongExercisefromDto(exercise);
         }
@@ -166,18 +165,33 @@ public class ExerciseController {
             System.out.println(exception.getMessage());
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-     
+         
         try{
             exerciseService.update(exercise.getId(), longExerciseArrayListPair.getKey());
         }
         catch(Exception e)
         {
-             System.out.println(e.getMessage());
+            System.out.println(e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Edycja zadania nie powiodła się");
         }
-        System.out.println(longExerciseArrayListPair.getValue());
+    
+
+        int previous_size = exerciseService.findAllLongCorrectSolutionByExerciseId(exercise.getId()).size();
+        int diff = previous_size - exercise.getMaxPoints();
+
         for(LongCorrectSolutionPart longCorrectSolutionPart:longExerciseArrayListPair.getValue())
         {
+            if(exerciseService.findAllLongCorrectSolutionByExerciseIdAndOrder(exercise.getId(),longCorrectSolutionPart.getOrder()).isEmpty())
+            {
+                longCorrectSolutionPart.setExercise(exerciseService.findExerciseById(exercise.getId()).get());
+                try{
+                    exerciseService.save(longCorrectSolutionPart);
+                }
+                catch(Exception ex)
+                {
+                    System.out.println(ex.getMessage());
+                }
+            }
             try{
                 exerciseService.update(exercise.getId(),longCorrectSolutionPart);
             }catch(Exception e)
@@ -185,6 +199,21 @@ public class ExerciseController {
                 System.out.println(e.getMessage());
             }
         }
+        if(diff>0)
+        {
+            int actual_size = exercise.getMaxPoints();
+            while(actual_size<previous_size)
+            {
+                try {
+                    exerciseService.deleteLongCorrectSolutionPart(exercise.getId(), actual_size);
+                }catch(Exception exception)
+                {
+                    System.out.println(exception.getMessage());
+                }
+                ++actual_size;
+            }
+        }
+        
         return ResponseEntity.status(HttpStatus.OK).body("Edycja zadania powiodła się");
     }
     /**

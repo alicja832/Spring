@@ -35,7 +35,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 
 @RestController
 //@CrossOrigin(origins = "https://pythonfront-dnb5a2epcyh3e0ep.polandcentral-01.azurewebsites.net",maxAge=360000)
-@CrossOrigin (origins="http://localhost:3000",maxAge = 3600)
+@CrossOrigin (origins="http://localhost:3000",allowCredentials = "true",maxAge = 36000)
 @RequestMapping("/user")
 public class UserController {
 
@@ -99,7 +99,7 @@ public class UserController {
     /**
      * zmiana hasła
      */
-    @PutMapping("/changePassword/")
+    @PutMapping("/changePassword")
     public ResponseEntity<String> changePassword(@RequestBody VerificationRequest request)
     {
         userService.updateUser(request.email,request.password);
@@ -176,24 +176,34 @@ public class UserController {
         return new ResponseEntity<String>(HttpStatus.OK);
     }
     @GetMapping("/token")
-    public JWTResponse GetNewToken(@CookieValue( name = "refresh-token") String refreshToken)
+    public JWTResponse GetNewToken(@CookieValue( name = "refreshToken") String refreshToken)
     {
+        String userName="";
         System.out.println(refreshToken);
-        String userName = jwt.getUsernameFromToken(refreshToken);
-        if (userName!=null && SecurityContextHolder.getContext().getAuthentication() == null) {
+        try{
+            userName = jwt.getUsernameFromToken(refreshToken);
+            System.out.println(userName);
+        }catch(Exception ex)
+        {
+            System.out.println(ex.getMessage());
+        }
+      
+        if (userName!=null) {
             UserEntity userEntity = userService.findByName(userName).orElseThrow(UserNotFoundException::new);
             String role = teacherService.findByName(userName).isPresent() ? "ROLE_"+ Role.TEACHER : "ROLE_"+Role.STUDENT;
             UserDetails userDetails
                     = new User(userEntity.getName(),userEntity.getPassword(), List.of(new SimpleGrantedAuthority(role))) ;
             if (jwt.validateToken(refreshToken, userDetails)) {
-
+                System.out.println("halo");
                 UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken
                         = new UsernamePasswordAuthenticationToken(userDetails,
-                        null, List.of(new SimpleGrantedAuthority(role)));
+                        userEntity.getPassword(), List.of(new SimpleGrantedAuthority(role)));
                 SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+                System.out.println(usernamePasswordAuthenticationToken);
             }
         }
-
+    
+        System.out.println(userName);
         return generateNewToken();
     }
     /**
@@ -303,7 +313,8 @@ public class UserController {
 
         return new Pair<Integer,Integer>(ranking.indexOf(loginStudent),ranking.size());
     }
-    /**
+   
+   /**
      * @return
      * @throws Exception
      * autentykacja uzytkownika, generowanie tokenu
@@ -332,7 +343,9 @@ public class UserController {
        }
         else{
             name = SecurityContextHolder.getContext().getAuthentication().getName();
+            System.out.println(name);
             password = userService.findByName(name).get().getPassword();
+            System.out.println(password);
        }
        String role = teacherService.findByName(name).isPresent() ? "ROLE_"+Role.TEACHER : "ROLE_"+Role.STUDENT;
        UserDetails userDetails = new User(name, password, List.of(new SimpleGrantedAuthority(role)));
@@ -345,7 +358,7 @@ public class UserController {
      * generowanie refresh tokenu
      */
     @GetMapping("/refreshtoken")
-    public ResponseEntity<String> refreshToken() {
+    public ResponseEntity<?> refreshToken() {
 
         String refreshToken=""; 
         UserDetails userDetails;
@@ -353,21 +366,23 @@ public class UserController {
         UserEntity userEntity = userService.findByName(name).orElseThrow(UserNotFoundException::new);
         String role;
         try{
+            
             role = teacherService.findByName(name).isPresent() ? "ROLE_"+Role.TEACHER : "ROLE_"+Role.STUDENT;
-        
             userDetails = new User(name, userEntity.getPassword(), List.of(new SimpleGrantedAuthority(role)));
             refreshToken = jwt.generateRefreshToken(userDetails);
+        
         }catch(Exception exception)
         {
             System.out.println(exception.getMessage());
         }
-        ResponseCookie springCookie = ResponseCookie.from("refresh-token", refreshToken)
+        
+        ResponseCookie springCookie = ResponseCookie.from("refreshToken", refreshToken)
                 .httpOnly(true)
-               .secure(false)
-                .path("/user/token")
+                .secure(false)
+                .path("/")
                 .maxAge(90000)
                 .domain("localhost")
-                .build();
+                .build();   
 
         return ResponseEntity
                 .ok()

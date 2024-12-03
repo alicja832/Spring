@@ -13,9 +13,9 @@ public class LongCorrectSolutionPart{
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "exercise_id")
     Exercise exercise;
+  
     @Column(name = "correct_solution_part")
     String correctSolutionPart;
-
     public LongCorrectSolutionPart(){}
     public LongCorrectSolutionPart(int order,  String correctSolutionPart){
         this.order = order;

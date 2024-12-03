@@ -56,7 +56,7 @@ CREATE TABLE users (
 INSERT INTO users(name,email,password) VALUES ('Anna','anna@gmail.com','$2a$12$ErkIeyihwOe1ItpMEY//feNhVsjVDvtsMTgMN7bCAHwPV8.aApMpO');
 INSERT INTO teacher(user_id) VALUES (1);
 INSERT INTO exercise(name,introduction,content,max_points,solution,output,teacher_id)VALUES
-(
+(ia
     'Algorytm BFS',
     'BFS (ang. Breadth-first search) to drugi, zupełnie inny sposób przeszukiwania grafu. Do realizacji tego algorytmu wykorzystujemy kolejkę fifo. Pokażemy działanie tego algorytmu na przykładzie: Mamy daną listę sąsiedztwa grafu: (listę poszczególnych wierzchołków wraz z numerami sąsiadujących z nimi wierzchołków)
     (1)-> [2,5,9] \n
@@ -136,3 +136,86 @@ while (queque):
 
 
 
+Słowniki są jedynym w Pythonie typem mapującym, w innych językach znanych jako tablice asocjacyjne. Jest to kolejny obok listy przykład typu modyfikowalnego w miejscu (może wystąpić problem płytkiej kopii). Składają się one z par przypisań klucz: wartość. Wartościam moga być obiekty dowolnego typu, natomiast kluczami nie mogą być obiekty modyfikowalne w miejscu(listy lub słowniki).Przykład:
+d={'a':1,'b':2}
+d = dict((('a',1),('b',1)))
+Operacje na słownikach:
+Pobieranie wartości:
+d['a']
+d.get('a')
+Dodawanie lub modyfikacja istniejących przypisań:
+d['c'] = 3
+d['a'] = 4
+Usuwanie:
+del d['a']
+Pobranie wartości klucza 'a' wraz z jego usunięciem ze słownika:
+d.pop('a')
+Lista kluczy: list(d.keys())
+Lista wartości: list(d.values())
+Sprawdzenie istnienia klucza w słowniku:
+'k' in d
+
+
+Łańcuch znaków tworzymy, umieszczając jego zawartość pomiędzy parą znaków ' , ", ''' lub """. Łańcuch definiowany trójkami apostrofów może być zdefiniowany w wielu linijkach. Wykorzystujemy to do komentowania bloków kodu - z punktu widzenia interpretera jest to łacuch nie przypisany do żadnej zmiennej,  a zatem ignorowany.  Łańcuch znaków jest to typ str. Mamy dostępne następujące metody na tym typie:
+split,rsplit - służą do dzielenia podłańcucha ze  względu na podłańcuch separujący:
+'Ala ma kota '.split('a') -> ['Al',' m',' kot',' ']
+'Ala ma kota '.split('a',2) -> ['Al',' m',' kota']
+'Ala ma kota '.rsplit('a',2) -> ['Ala m',' kot',' ']
+join - łączy łańcuchy z listy łańcuchem łączącym
+'  ',join(['Ala','ma','kota']) -> 'Ala   ma   kota'
+startswith/endswith - sprawdza czy łańcuch się zaczyna/kończy od podłańcucha
+
+
+
+
+Łańcuch znaków tworzymy, umieszczając jego zawartość pomiędzy parą znaków ' , ", ''' lub """. Łańcuch definiowany trójkami apostrofów może być zdefiniowany w wielu linijkach. Wykorzystujemy to do komentowania bloków kodu - z punktu widzenia interpretera jest to łacuch nie przypisany do żadnej zmiennej,  a zatem ignorowany.  Łańcuch znaków jest to typ str. Mamy dostępne następujące metody na tym typie:
+split,rsplit - służą do dzielenia podłańcucha ze  względu na podłańcuch separujący:
+'Ala ma kota '.split('a') -> ['Al',' m',' kot',' ']
+'Ala ma kota '.split('a',2) -> ['Al',' m',' kota']
+'Ala ma kota '.rsplit('a',2) -> ['Ala m',' kot',' ']
+join - łączy łańcuchy z listy łańcuchem łączącym
+'  ',join(['Ala','ma','kota']) -> 'Ala   ma   kota'
+startswith/endswith - sprawdza czy łańcuch się zaczyna/kończy od podłańcucha
+'Ala ma kota '.startwith('Ala') -> True
+'Ala ma kota '.endswith('Ala') -> False
+strip/lstrip/rstrip - usuwają białe znaki z obu stron / z lewej strony / z prawej strony:
+'  Hello  '.strip() -> 'Hello' 
+'  Hello  '.lstrip() -> 'Hello  '
+'  Hello  '.rstrip() -> '  Hello'
+replace - wyszukuje podciąg i zastępuje go innym:
+'abababa'.replace('aba','x') -> 'xbx'
+'abababa'.replace('aba','x',1) -> 'xbaba'
+
+
+	Mamy fragment kodu
+'Hello Ala  '.____.endswith('Ala') 
+Który z poniższych fragmentów kodu, jeśli wstawimy go w miejsce ___ ,sprawi, że całe wyrażenie będzie zwracało wartość True?
+split(' ')
+rstrip()
+lstrip()
+
+
+Jednym ze sposobów przeszukiwania grafu jest algorytm przeszukujący w głąb (DFS Depth-first search). Strategia takiego rozwiązania jest bardzo prosta. Z wierzchołka początkowego przechodzimy do pierwszego połączonego z nim - nazwijmy go wierzchołkiem A. Następnie z wierzchołka A przechodzimy do pierwszego nieodwiedzonego do tej pory z nim połączonego, nazwijmy go B. Z tego zaś do pierwszego nieodwiedzonego itd. Gdy w ten sposób skończą nam się wierzchołki, cofamy się do wierzchołka, z którego ostatnio przyszliśmy i wchodzimy z tego miejsca do następnego nieodwiedzonego (jeśli taki jest). Czynności te powtarzamy do momentu odwiedzenia wszystkich wierzchołków. 
+
+Każdorazowe przejście do wierzchołka odznaczamy ustawiając flagę jako odwiedzony (np. można te informacje przechowywać w dodatkowej tablicy lub jako dodatkowe pole w strukturze).
+
+Dla przykładu posłużymy się następującą strukturą grafu:
+
+
+DEFINICJE POLACZEN WIERZCHOLKOW:
+1 <--> 2
+2 <--> 3
+3 <--> 4
+3 <--> 5
+1 <--> 5
+4 <--> 8
+8 <--> 5
+8 <--> 9
+6 <--> 5
+5 <--> 7
+Załóżmy, że rozpoczynamy z wierzchołka z numerem 1. Odznaczamy go jako odwiedzony i przechodzimy do wierzchołka z numerem 2 (jest to pierwsze połączenie), z 2 przechodzimy do 3, następnie do 4, 8, 5, 6, 7. Siódmy wierzchołek nie ma więcej już połączeń, więc cofamy się do następnego wierzchołka, który je ma. Jest to wierzchołek numer 8, z którego przechodzimy do 9 i tu kończymy przeszukiwanie.
+
+
+Zakładając, że mamy n wierzchołków i p połączeń, złożoność czasowa omawianego algorytmu wynosi
+O(n+p).
+Zaimplementuj algorytm DFS na powyższym przykładzie definicji połączeń wierzchołków.

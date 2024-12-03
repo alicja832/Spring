@@ -94,7 +94,7 @@ public class SolutionController {
         solution.setStudent(loginStudent);
         solutionService.save(solution);
         studentService.update(loginStudent.getId(),solution.getScore());
-
+        
         return new ResponseEntity<>(solution,HttpStatus.CREATED);
 
     }
@@ -173,6 +173,8 @@ public class SolutionController {
         int score = 0;
         for(LongCorrectSolutionPart longCorrectSolutionPart:parts)
         {
+            System.out.println(output);
+            System.out.println(longCorrectSolutionPart.getCorrectSolutionPart());
             if(output.contains(exerciseService.getOut(longCorrectSolutionPart.getCorrectSolutionPart())))
                 ++score;
         }

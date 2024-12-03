@@ -25,5 +25,7 @@ public interface ExerciseService {
     LongCorrectSolutionPart save(LongCorrectSolutionPart correctSolutionPart);
     void update(int id,LongCorrectSolutionPart correctSolutionPart);
     List<LongCorrectSolutionPart> findAllLongCorrectSolutionByExerciseId(int exerciseId);
+    List<LongCorrectSolutionPart> findAllLongCorrectSolutionByExerciseIdAndOrder(int exerciseId,int orderId);
     List<Exercise> findAllByTeacher_Id(int teacherId);
+    void deleteLongCorrectSolutionPart(int exerciseId, int orderId);
 }

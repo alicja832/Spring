@@ -61,4 +61,5 @@ public class SolutionServiceImpl implements SolutionService {
     {
         return solutionRepository.getAllByExercise(exercise);
     }
+
 }

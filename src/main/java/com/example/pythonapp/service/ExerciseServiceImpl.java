@@ -82,6 +82,12 @@ public class ExerciseServiceImpl implements ExerciseService {
     {
         return longExerciseRepository.findByName(name);
     }
+    @Override
+    public List<LongCorrectSolutionPart> findAllLongCorrectSolutionByExerciseIdAndOrder(int exerciseId,int orderId)
+    {
+        return longCorrectSolutionPartRepository.findAllByExerciseIdAndOrder(exerciseId,orderId);
+    }
+
     /**
      * A method which update long exercise
      */
@@ -193,8 +199,7 @@ public class ExerciseServiceImpl implements ExerciseService {
     public void delete(int id)
     {
         try{
-            if(!longCorrectSolutionPartRepository.findAllByExerciseId(id).isEmpty())
-                longCorrectSolutionPartRepository.deleteAllByExerciseId(id);
+            longCorrectSolutionPartRepository.deleteAllByExerciseId(id);
         }
         catch(Exception exception)
         {
@@ -212,6 +217,11 @@ public class ExerciseServiceImpl implements ExerciseService {
     public  List<Exercise> findAllByTeacher_Id(int teacherId)
     {
         return exerciseRepository.findAllByTeacher_Id(teacherId);
+    }
+    @Override
+    public void deleteLongCorrectSolutionPart(int exerciseId, int orderId)
+    {
+        longCorrectSolutionPartRepository.deleteAllByExerciseIdAndOrder(exerciseId,orderId);
     }
 
 }
