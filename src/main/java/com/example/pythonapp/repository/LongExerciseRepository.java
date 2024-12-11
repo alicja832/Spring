@@ -19,7 +19,8 @@ public interface LongExerciseRepository extends JpaRepository<LongExercise,Integ
     @Transactional
     @Modifying
     @Query(value = "update long_exercise " +
-            "set correct_solution=:correct_solution " +
-            "where id=:id", nativeQuery = true)
-    void updateById(@Param("id") long id,@Param("correct_solution") String correctSolution);
+            "set correct_solution=:correct_solution, " +
+            "solution_schema=:solution_schema" +
+            " where id=:id", nativeQuery = true)
+    void updateById(@Param("id") long id,@Param("correct_solution") String correctSolution,@Param("solution_schema") String solution_schema);
 }

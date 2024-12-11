@@ -8,6 +8,7 @@ public class LongExerciseOutDto {
     private String content;
     private int maxPoints;
     private String correctOutput;
+    private String solutionSchema;
 
 
     public LongExerciseOutDto() {}
@@ -19,7 +20,6 @@ public class LongExerciseOutDto {
         this.content = content;
         this.maxPoints = maxPoints;
         this.correctOutput = correctOutput;
-
     }
     
     public int getId() {
@@ -69,6 +69,13 @@ public class LongExerciseOutDto {
     public void setCorrectOutput(String correctOutput) {
         this.correctOutput = correctOutput;
     }
-   
+    
+    public String getSolutionSchema() {
+        return solutionSchema;
+    }
+
+    public void setSolutionSchema(String solutionSchema) {
+        this.solutionSchema = solutionSchema;
+    }
 
 }

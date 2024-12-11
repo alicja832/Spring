@@ -1,12 +1,6 @@
 package com.example.pythonapp.service;
-import com.example.pythonapp.model.Exercise;
-import com.example.pythonapp.model.LongCorrectSolutionPart;
-import com.example.pythonapp.model.LongExercise;
-import com.example.pythonapp.model.ShortExercise;
-import com.example.pythonapp.repository.ExerciseRepository;
-import com.example.pythonapp.repository.LongCorrectSolutionPartRepository;
-import com.example.pythonapp.repository.LongExerciseRepository;
-import com.example.pythonapp.repository.ShortExerciseRepository;
+import com.example.pythonapp.model.*;
+import com.example.pythonapp.repository.*;
 import org.python.util.PythonInterpreter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,6 +19,8 @@ public class ExerciseServiceImpl implements ExerciseService {
     private ShortExerciseRepository shortExerciseRepository;
     @Autowired
     private LongExerciseRepository longExerciseRepository;
+    @Autowired
+    private TestingDataRepository testingDataRepository;
     private PythonInterpreter interpreter;
     @Autowired
     private LongCorrectSolutionPartRepository longCorrectSolutionPartRepository;
@@ -95,7 +91,7 @@ public class ExerciseServiceImpl implements ExerciseService {
     public void update(int id, LongExercise exercise)
     {
          updateExercise(id,(Exercise)exercise);
-         longExerciseRepository.updateById(id,exercise.getCorrectSolution());
+         longExerciseRepository.updateById(id,exercise.getCorrectSolution(),exercise.getSolutionSchema());
     }
     /**
      * A method which update short exercise
@@ -199,7 +195,10 @@ public class ExerciseServiceImpl implements ExerciseService {
     public void delete(int id)
     {
         try{
+            if(!testingDataRepository.findAllByExerciseId(id).isEmpty())
+                testingDataRepository.deleteAllByExerciseId(id);
             longCorrectSolutionPartRepository.deleteAllByExerciseId(id);
+            
         }
         catch(Exception exception)
         {
@@ -222,6 +221,36 @@ public class ExerciseServiceImpl implements ExerciseService {
     public void deleteLongCorrectSolutionPart(int exerciseId, int orderId)
     {
         longCorrectSolutionPartRepository.deleteAllByExerciseIdAndOrder(exerciseId,orderId);
+    }
+    @Override
+    public TestingData save(TestingData testingData)
+    {
+        return testingDataRepository.save(testingData);
+    }
+    @Override
+    public void update(int id,TestingData testingData)
+    {
+        testingDataRepository.update(id,testingData.getTestingData(),testingData.getPoints());
+    }
+   
+    @Override
+    public List<TestingData> findAllTestingDataByExerciseId(int exerciseId)
+    {
+        return testingDataRepository.findAllByExerciseId(exerciseId);
+    }
+    @Override
+    public void deleteAllTestingDataByExerciseId(int exerciseId)
+    {
+       testingDataRepository.deleteAllByExerciseId(exerciseId);
+    }
+    @Override
+    public String runFunction(String function, String parameters)
+    {
+        int funct = function.indexOf("def");
+        int closing_tag = function.indexOf("(");
+        String function_call = function.substring(funct+4,closing_tag+1);
+        System.out.println("\n"+function+"\n"+"print("+function_call+parameters+"))"+"\n");
+        return getOut("\n"+function+"\n"+"print("+function_call+parameters+"))"+"\n");
     }
 
 }

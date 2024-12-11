@@ -1,6 +1,10 @@
 package com.example.pythonapp.service;
 import com.example.pythonapp.model.*;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -23,9 +27,15 @@ public interface ExerciseService {
     LongExercise save(LongExercise longExercise);
     ShortExercise save(ShortExercise shortExercise);
     LongCorrectSolutionPart save(LongCorrectSolutionPart correctSolutionPart);
+    TestingData save(TestingData testingData);
+    void update(int id,TestingData testingData);
+    List<TestingData> findAllTestingDataByExerciseId(int exerciseId);
+    void deleteAllTestingDataByExerciseId(int exerciseId);
     void update(int id,LongCorrectSolutionPart correctSolutionPart);
     List<LongCorrectSolutionPart> findAllLongCorrectSolutionByExerciseId(int exerciseId);
     List<LongCorrectSolutionPart> findAllLongCorrectSolutionByExerciseIdAndOrder(int exerciseId,int orderId);
     List<Exercise> findAllByTeacher_Id(int teacherId);
     void deleteLongCorrectSolutionPart(int exerciseId, int orderId);
+    String runFunction(String function, String parameters);
+  
 }

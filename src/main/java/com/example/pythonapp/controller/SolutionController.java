@@ -1,4 +1,6 @@
 package com.example.pythonapp.controller;
+import javafx.util.Pair;
+import com.example.pythonapp.dto.LongExerciseOutDto;
 import com.example.pythonapp.dto.LongSolutionDto;
 import com.example.pythonapp.exception.ExerciseNotFoundException;
 import com.example.pythonapp.mapper.LongSolutionMapper;
@@ -64,11 +66,11 @@ public class SolutionController {
     @PostMapping("/programming")
     public ResponseEntity<Solution> addSolution(@RequestBody LongSolutionDto solution){
 
-        Exercise exercise =  exerciseService.findExerciseById(solution.getExercise().getId()).get();
+        LongExercise exercise =  exerciseService.findLongExerciseById(solution.getExercise().getId()).get();
         solution.setExercise(exercise);
         LongSolutionMapper longSolutionMapper=new LongSolutionMapper();
         Student loginStudent = studentService.findByName(SecurityContextHolder.getContext().getAuthentication().getName()).get();
-        int newscore = this.checkSolution(solution);
+        int newscore = (exercise.getSolutionSchema().isEmpty()) ? checkSolution(solution) : checkSolutionWithTests(solution).getValue();
        
         LongSolution solutionCreated = longSolutionMapper.createLongSolution(solution);
         solutionCreated.setStudent(loginStudent);
@@ -116,7 +118,8 @@ public class SolutionController {
     public List<LongCorrectSolutionPart> getLongPart(@PathVariable int id){
 
 
-        return exerciseService.findAllLongCorrectSolutionByExerciseId(id);
+        return  exerciseService.findAllLongCorrectSolutionByExerciseId(id);
+     
     }
      /**
      * get one short solution from database
@@ -160,6 +163,29 @@ public class SolutionController {
      * @param solution - programming solution to check
      * @return
      */
+    @PostMapping("/programming/test")
+    public Pair<String,Integer> checkSolutionWithTests(@RequestBody LongSolutionDto solution){
+
+        int score = 0;
+        String response = "";
+        LongExercise exercise =  exerciseService.findLongExerciseByName(solution.getExercise().getName()).orElseThrow(ExerciseNotFoundException::new);
+        List<TestingData> test = exerciseService.findAllTestingDataByExerciseId(exercise.getId());
+        for(int i=0;i<test.size();i++)
+        {
+            TestingData forTest = test.get(i);
+            String solutiontest = exerciseService.runFunction(solution.getSolutionContent(),forTest.getTestingData());
+            response+=("Test "+i+"\n");
+            response+=solutiontest+"\n";
+            if(exerciseService.runFunction(exercise.getCorrectSolution(), forTest.getTestingData()).equals(solutiontest))
+               score += forTest.getPoints();
+        }
+        return new Pair<>(response,score);
+    }
+    /**
+     * function which check the solution of programming exercise
+     * @param solution - programming solution to check
+     * @return
+     */
     @PostMapping("/programming/check")
     public int checkSolution(@RequestBody LongSolutionDto solution){
 
@@ -173,8 +199,6 @@ public class SolutionController {
         int score = 0;
         for(LongCorrectSolutionPart longCorrectSolutionPart:parts)
         {
-            System.out.println(output);
-            System.out.println(longCorrectSolutionPart.getCorrectSolutionPart());
             if(output.contains(exerciseService.getOut(longCorrectSolutionPart.getCorrectSolutionPart())))
                 ++score;
         }

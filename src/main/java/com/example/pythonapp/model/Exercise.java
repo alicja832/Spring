@@ -27,6 +27,8 @@ public class Exercise {
     private Teacher teacher;
     @OneToMany
     private List<LongCorrectSolutionPart> longCorrectSolutionPart;
+    @OneToMany
+    private List<TestingData> testingData;
 
 
     @Override
@@ -100,4 +102,5 @@ public class Exercise {
     public void setTeacher(Teacher teacher) {
         this.teacher = teacher;
     }
+    
 }

@@ -1,7 +1,7 @@
 package com.example.pythonapp.dto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-
+import java.util.Map;
 public class LongExerciseDto {
 
     private int id;
@@ -10,6 +10,9 @@ public class LongExerciseDto {
     private String content;
     private int maxPoints;
     private String[] correctSolutions;
+    private String solutionSchema;
+    private String[] testData;
+    private Integer[] points;
 
     public int getId() {
         return id;
@@ -57,5 +60,24 @@ public class LongExerciseDto {
     public void setCorrectSolution(String[] correctSolutions) {
         this.correctSolutions = correctSolutions;
     }
+    public void setSolutionSchema(String solutionSchema) {
+        this.solutionSchema = solutionSchema;
+    }
+    public String getSolutionSchema() {
+        return this.solutionSchema;
+    }
+    public String[] getTestData() {
+        return testData;
+    }
 
+    public void setTestData(String[] testData) {
+        this.testData = testData;
+    }
+    public Integer[] getPoints() {
+        return points;
+    }
+
+    public void setPoints(Integer[] points) {
+        this.points = points;
+    }
 }

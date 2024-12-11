@@ -182,7 +182,7 @@ public class UserController {
         System.out.println(refreshToken);
         try{
             userName = jwt.getUsernameFromToken(refreshToken);
-            System.out.println(userName);
+           
         }catch(Exception ex)
         {
             System.out.println(ex.getMessage());
@@ -194,7 +194,7 @@ public class UserController {
             UserDetails userDetails
                     = new User(userEntity.getName(),userEntity.getPassword(), List.of(new SimpleGrantedAuthority(role))) ;
             if (jwt.validateToken(refreshToken, userDetails)) {
-                System.out.println("halo");
+               
                 UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken
                         = new UsernamePasswordAuthenticationToken(userDetails,
                         userEntity.getPassword(), List.of(new SimpleGrantedAuthority(role)));
@@ -203,7 +203,7 @@ public class UserController {
             }
         }
     
-        System.out.println(userName);
+      
         return generateNewToken();
     }
     /**
@@ -286,7 +286,10 @@ public class UserController {
                 info.put("score",Integer.toString(mostpopularScore));
                 info.put("quantity",Integer.toString(scorecount));
                 if(exercise instanceof LongExercise) 
+                {
                 	info.put("correctSolution",((LongExercise)exercise).getCorrectSolution());
+                     info.put("solutionSchema",((LongExercise)exercise).getSolutionSchema());
+                }
                 if(exercise instanceof ShortExercise) 
                 {	
                 	info.put("firstOption",((ShortExercise)exercise).getFirstOption());
