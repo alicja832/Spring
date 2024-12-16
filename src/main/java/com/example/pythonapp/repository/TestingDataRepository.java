@@ -16,9 +16,9 @@ import java.util.Optional;
 public interface TestingDataRepository extends JpaRepository<TestingData,Integer> {
     @Transactional
     @Modifying
-    @Query(value = "update test_data " +
+    @Query(value = "update testing_data " +
             "set test_data=:test_data, " +
-            "points=:points" +
+            "points=:points " +
             "where id=:id", nativeQuery = true)
     void update(@Param("id") int Id,@Param("test_data")  String testData,@Param("points")Integer points);
 

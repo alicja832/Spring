@@ -1,6 +1,7 @@
 package com.example.pythonapp.controller;
 import javafx.util.Pair;
 import com.example.pythonapp.dto.LongExerciseOutDto;
+import com.example.pythonapp.PythonApplication;
 import com.example.pythonapp.dto.LongSolutionDto;
 import com.example.pythonapp.exception.ExerciseNotFoundException;
 import com.example.pythonapp.mapper.LongSolutionMapper;
@@ -17,9 +18,9 @@ import java.util.List;
 import java.util.Map;
 
 
+
 @RestController
-// @CrossOrigin(origins = "https://pythonfront-dnb5a2epcyh3e0ep.polandcentral-01.azurewebsites.net", maxAge=360000)
-@CrossOrigin (origins="http://localhost:3000",maxAge = 3600)
+@CrossOrigin (origins=PythonApplication.frontend,maxAge = 3600)
 @RequestMapping("/solution")
 public class SolutionController {
 
@@ -50,7 +51,6 @@ public class SolutionController {
                     map.put("id", Integer.toString(solution.getId()));
                     map.put("name", solution.getExercise().getName());
                     map.put("score", Integer.toString(solution.getScore()));
-
 
                     if(exercise instanceof LongExercise) { map.put("retakeposibility", "true");}
                     else {map.put("retakeposibility", "false");}
@@ -144,11 +144,13 @@ public class SolutionController {
         solution.setExercise(exercise);
         LongSolutionMapper longSolutionMapper=new LongSolutionMapper();
         Student loginStudent = studentService.findByName(SecurityContextHolder.getContext().getAuthentication().getName()).get();
-        int newscore=0;
+        int newscore=solution.getScore();
+        
         if(solution.getScore()==0)
         {
             newscore = this.checkSolution(solution);
         }
+        
         LongSolution solutionCreated = longSolutionMapper.createLongSolution(solution);
         solutionCreated.setStudent(loginStudent);
         solutionCreated.setScore(newscore);
@@ -174,7 +176,9 @@ public class SolutionController {
         {
             TestingData forTest = test.get(i);
             String solutiontest = exerciseService.runFunction(solution.getSolutionContent(),forTest.getTestingData());
-            response+=("Test "+i+"\n");
+            response+=("Test "+i+"\nDane:"+forTest.getTestingData()+"\n");
+            response+=("Oczekiwany rezultat: \n"+exerciseService.runFunction(exercise.getCorrectSolution(),forTest.getTestingData())+"\n");
+            response+=("Twój rezultat:\n");
             response+=solutiontest+"\n";
             if(exerciseService.runFunction(exercise.getCorrectSolution(), forTest.getTestingData()).equals(solutiontest))
                score += forTest.getPoints();

@@ -1,4 +1,5 @@
 .idea
 target
 .jython_cache/*
-
+cachedir/
+plik.txt

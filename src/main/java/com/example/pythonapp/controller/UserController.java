@@ -5,6 +5,7 @@ import com.example.pythonapp.model.*;
 import com.example.pythonapp.model.enums.Role;
 import com.example.pythonapp.service.*;
 import com.example.pythonapp.dto.UserCreationDto;
+import com.example.pythonapp.PythonApplication;
 import jakarta.mail.*;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeBodyPart;
@@ -34,8 +35,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 
 
 @RestController
-//@CrossOrigin(origins = "https://pythonfront-dnb5a2epcyh3e0ep.polandcentral-01.azurewebsites.net",maxAge=360000)
-@CrossOrigin (origins="http://localhost:3000",allowCredentials = "true",maxAge = 36000)
+@CrossOrigin (origins=PythonApplication.frontend,allowCredentials = "true",maxAge = 36000)
 @RequestMapping("/user")
 public class UserController {
 
@@ -57,8 +57,7 @@ public class UserController {
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
     private final UserMapper userMapper = new UserMapper();
    
-
-
+  
     /**
      * Dodawanie nowego uzytkownika
      */
@@ -99,10 +98,10 @@ public class UserController {
     /**
      * zmiana hasła
      */
-    @PutMapping("/changePassword")
+    @PutMapping("/changepassword")
     public ResponseEntity<String> changePassword(@RequestBody VerificationRequest request)
     {
-        userService.updateUser(request.email,request.password);
+        userService.updateUser(request.email,encoder.encode(request.password));
         return new ResponseEntity<>(HttpStatus.OK);
     }
     
@@ -122,7 +121,7 @@ public class UserController {
         Random generator = new Random();
         int code = 0;
         for(int i=0; i<6; i++) {
-            code += generator.nextInt()*Math.pow(10,i);
+            code += Math.abs(generator.nextInt())*Math.pow(10,i);
         }
         try {
 
@@ -209,7 +208,7 @@ public class UserController {
     /**
     * weryfikacja kodu do zmiany hasła
     */
-    @PostMapping("/CodeVerification")
+    @PostMapping("/codeverification")
     public ResponseEntity<String> codeVerification(@RequestBody VerificationRequest data)
     {
         Pair<String,String> emailFounded = EmailCode.stream()

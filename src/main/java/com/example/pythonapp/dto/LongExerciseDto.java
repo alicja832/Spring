@@ -5,6 +5,7 @@ import java.util.Map;
 public class LongExerciseDto {
 
     private int id;
+    private boolean access;
     private String name;
     private String introduction;
     private String content;
@@ -28,7 +29,14 @@ public class LongExerciseDto {
     public void setName(String name) {
         this.name = name;
     }
-
+    public boolean getAccess()
+    {
+        return this.access;
+    }
+    public void setAccess(boolean access)
+    {
+        this.access = access;
+    }
     public String getIntroduction() {
         return introduction;
     }

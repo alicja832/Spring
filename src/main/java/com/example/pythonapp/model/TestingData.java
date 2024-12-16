@@ -11,13 +11,13 @@ public class TestingData{
     private int id;
   
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "exercise_id")
+    @JoinColumn(name = "exercise_id",nullable = false)
     Exercise exercise;
   
-    @Column(name = "test_data")
+    @Column(name = "test_data",nullable = false)
     String testData;
 
-    @Column(name = "points")
+    @Column(name = "points",nullable = false)
     int points;
 
     public TestingData(){}

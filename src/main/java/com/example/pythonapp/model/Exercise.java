@@ -21,6 +21,8 @@ public class Exercise {
     private String content;
     @Column(name="max_points")
     private int maxPoints;
+    @Column(columnDefinition = "boolean default true")
+    private Boolean access;
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="teacher_id", nullable=false)
     @JsonIgnore
@@ -48,12 +50,13 @@ public class Exercise {
         this.longCorrectSolutionPart = longCorrectSolutionPart;
     }
     public Exercise(){}
-    public Exercise(String name,String introduction, String content,int maxPoints)
+    public Exercise(String name,String introduction, String content,int maxPoints,boolean access)
     {
         this.name = name;
         this.introduction = introduction;
         this.content = content;
         this.maxPoints = maxPoints;
+        this.access = access;
     }
     public int getId() {
         return id;
@@ -70,7 +73,14 @@ public class Exercise {
     public void setName(String name) {
         this.name = name;
     }
-
+    public boolean getAccess()
+    {
+        return this.access;
+    }
+    public void setAccess(boolean access)
+    {
+        this.access = access;
+    }
     public String getIntroduction() {
         return introduction;
     }

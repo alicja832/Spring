@@ -11,10 +11,10 @@ public class LongExercise extends Exercise{
     private String solutionSchema;
 
     public LongExercise() {}
-    public LongExercise(String name, String introduction, String content, int maxPoints,String correctSolution,String solutionSchema) {
-        super(name,introduction,content,maxPoints);
+    public LongExercise(String name, String introduction, String content, int maxPoints,String correctSolution,String solutionSchema,boolean access) {
+        super(name,introduction,content,maxPoints,access);
         this.correctSolution = correctSolution;
-         this.solutionSchema = solutionSchema;
+        this.solutionSchema = solutionSchema;
     }
 
     public String getSolutionSchema() {

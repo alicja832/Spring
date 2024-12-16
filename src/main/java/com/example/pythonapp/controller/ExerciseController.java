@@ -1,5 +1,6 @@
 package com.example.pythonapp.controller;
 import com.example.pythonapp.dto.LongExerciseOutDto;
+import com.example.pythonapp.PythonApplication;
 import com.example.pythonapp.exception.ExerciseNotFoundException;
 import com.example.pythonapp.model.*;
 import com.example.pythonapp.dto.LongExerciseDto;
@@ -18,8 +19,7 @@ import java.util.function.Predicate;
 import com.example.pythonapp.dto.LongExerciseDto;
 
 @RestController
-//@CrossOrigin(origins = "https://pythonfront-dnb5a2epcyh3e0ep.polandcentral-01.azurewebsites.net", maxAge=360000)
-@CrossOrigin (origins="http://localhost:3000",maxAge = 3600)
+@CrossOrigin (origins=PythonApplication.frontend,maxAge = 3600)
 @RequestMapping("/exercise")
 public class ExerciseController {
 
@@ -31,6 +31,8 @@ public class ExerciseController {
     private TeacherService teacherService;
     @Autowired
     private StudentService studentService;
+    @Autowired
+    private UserService userService;
 
     /**
      * add new programming exercise
@@ -62,7 +64,7 @@ public class ExerciseController {
             longExercise = exerciseService.save(longExerciseArrayListPair.getKey());
 
         }catch(Exception e){
-             System.out.println(e.getMessage());
+            System.out.println(e.getMessage());
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
          System.out.println(longExercise.getCorrectSolution());
@@ -111,15 +113,16 @@ public class ExerciseController {
         String[] correctSolutions = new String[amount];
         for(int i=0;i<amount;i++)
         {
-            String result = exerciseService.getOut(correctSolutionParts[i]);
-            if(result.contains("Error") || result.contains("TraceBack"))
+        
+            String result = exerciseService.getOut("\n"+correctSolutionParts[i]+"\n");
+            if(!result.isEmpty() && result.contains("Error") || result.contains("TraceBack"))
                 throw new Exception("Wrong code");
             parts.add(new LongCorrectSolutionPart(i,correctSolutionParts[i]));
             correctSolution+=correctSolutionParts[i];
             correctSolution+="\n";
             correctSolutions[i] = exerciseService.getOut(correctSolutionParts[i]);
         }
-        return new Pair<>(new LongExercise(exercise.getName(),exercise.getIntroduction(),exercise.getContent(),exercise.getMaxPoints(),correctSolution,exercise.getSolutionSchema()),parts);
+        return new Pair<>(new LongExercise(exercise.getName(),exercise.getIntroduction(),exercise.getContent(),exercise.getMaxPoints(),correctSolution,exercise.getSolutionSchema(),exercise.getAccess()),parts);
     }
     @GetMapping("/testdata/{id}")
     public List<TestingData> getTestingData(@PathVariable int id){
@@ -184,7 +187,7 @@ public class ExerciseController {
     public ResponseEntity<String> update(@RequestBody LongExerciseDto exercise){
 
         
-        
+    
         Pair<LongExercise,ArrayList<LongCorrectSolutionPart>> longExerciseArrayListPair;
         try{
             longExerciseArrayListPair = createLongExercisefromDto(exercise);
@@ -194,20 +197,29 @@ public class ExerciseController {
             System.out.println(exception.getMessage());
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
+      
         List<TestingData> testingdata = exerciseService.findAllTestingDataByExerciseId(exercise.getId());
         String[] testdata = exercise.getTestData();
         Integer[] testingPoints = exercise.getPoints();
         int i;
-        //TestingData(Exercise exercise,int points, String test_data)
+     
         for(i=0;i<testingdata.size();i++)
         {
-            exerciseService.update(testingData.get(i).getId(),new TestingData(longExerciseArrayListPair.getKey(),testingPoints[i],testdata[i]));
+            exerciseService.update(testingdata.get(i).getId(),new TestingData(longExerciseArrayListPair.getKey(),testingPoints[i],testdata[i]));
         }
+        Exercise exercisefound =exerciseService.findExerciseById(exercise.getId()).get();
         while(i<testdata.length)
         {
-            exerciseService.save(new TestingData(longExerciseArrayListPair.getKey(), testingpoints[i],testdata[i]));
+            try{
+            exerciseService.save(new TestingData(exercisefound, testingPoints[i],testdata[i]));
+            }
+            catch(Exception exception)
+            {
+                System.out.println(exception.getMessage());
+            }
             ++i;
         }
+
         try{
             exerciseService.update(exercise.getId(), longExerciseArrayListPair.getKey());
         }
@@ -216,8 +228,8 @@ public class ExerciseController {
             System.out.println(e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Edycja zadania nie powiodła się");
         }
-    
 
+       
         int previous_size = exerciseService.findAllLongCorrectSolutionByExerciseId(exercise.getId()).size();
         int diff = previous_size - exercise.getMaxPoints();
 
@@ -241,11 +253,13 @@ public class ExerciseController {
                 System.out.println(e.getMessage());
             }
         }
+       
         if(diff>0)
         {
             int actual_size = exercise.getMaxPoints();
             while(actual_size<previous_size)
             {
+               
                 try {
                     exerciseService.deleteLongCorrectSolutionPart(exercise.getId(), actual_size);
                 }catch(Exception exception)
@@ -268,21 +282,26 @@ public class ExerciseController {
         List<ShortExercise> list = exerciseService.getAllShortExercises();
         List<Pair<ShortExercise,Boolean>> listExercise = new ArrayList<>();
         List<Solution> solutions = new ArrayList<>();
-
-        if(SecurityContextHolder.getContext().getAuthentication()!=null) {
-
-            if(studentService.findByName(SecurityContextHolder.getContext().getAuthentication().getName()).isPresent())
-              solutions = solutionService.findStudentSolution(studentService.findByName(SecurityContextHolder.getContext().getAuthentication().getName()).get());
-        }
+        Boolean access = false;
+       
+          if(userService.findByName(SecurityContextHolder.getContext().getAuthentication().getName()).isPresent())
+                access = true;
+          if(studentService.findByName(SecurityContextHolder.getContext().getAuthentication().getName()).isPresent())
+            solutions = solutionService.findStudentSolution(studentService.findByName(SecurityContextHolder.getContext().getAuthentication().getName()).get());
+      
 
         for(ShortExercise e:list)
         {
             Predicate<Solution> function = (solution) ->solution.getExercise().equals(e);
             boolean flag = solutions.stream().anyMatch(function);
-            if(flag)
-                listExercise.add(new Pair<ShortExercise,Boolean>(e,true));
-            else
-                listExercise.add(new Pair<ShortExercise,Boolean>(e,false));
+            System.out.println(e.getAccess());
+            if(e.getAccess()==access || !(e.getAccess()))
+            {
+                if(flag)
+                    listExercise.add(new Pair<ShortExercise,Boolean>(e,true));
+                else
+                    listExercise.add(new Pair<ShortExercise,Boolean>(e,false));
+            }
         }
         return listExercise;
     }
@@ -296,21 +315,29 @@ public class ExerciseController {
         List<LongExercise> list = exerciseService.getAllLongExercises();
         List<Pair<LongExercise,Boolean>> listExercise = new ArrayList<>();
         List<Solution> solutions = new ArrayList<>();
-
-        if(SecurityContextHolder.getContext().getAuthentication()!=null) {
-
+        Boolean access = false;
+         
+       
+            if(userService.findByName(SecurityContextHolder.getContext().getAuthentication().getName()).isPresent())
+                access = true;
             if(studentService.findByName(SecurityContextHolder.getContext().getAuthentication().getName()).isPresent())
+            
                 solutions = solutionService.findStudentSolution(studentService.findByName(SecurityContextHolder.getContext().getAuthentication().getName()).get());
-        }
+            
+       
 
         for(LongExercise e:list)
         {
-            Predicate<Solution> function = (solution) ->solution.getExercise().equals(e);
-            boolean flag = solutions.stream().anyMatch(function);
-            if(flag)
-                listExercise.add(new Pair<LongExercise,Boolean>(e,true));
-            else
-                listExercise.add(new Pair<LongExercise,Boolean>(e,false));
+           
+            if(e.getAccess() == access || !(e.getAccess()))
+            {
+                Predicate<Solution> function = (solution) ->solution.getExercise().equals(e);
+                boolean flag = solutions.stream().anyMatch(function);
+                if(flag)
+                    listExercise.add(new Pair<LongExercise,Boolean>(e,true));
+                else
+                    listExercise.add(new Pair<LongExercise,Boolean>(e,false));
+            }
         }
         return listExercise;
     }
@@ -326,13 +353,19 @@ public class ExerciseController {
         if(!exercise.getSolutionSchema().isEmpty())
         {
             String dataToTest = null;
-            System.out.println("NIE OK");
-            List<TestingData> testData = exerciseService.findAllTestingDataByExerciseId(id);
-            if(!testData.isEmpty())
-                dataToTest = testData.get(0).getTestingData();
-            LongExerciseOutDto dto = new LongExerciseOutDto(id,exercise.getName(),exercise.getIntroduction(),exercise.getContent(),exercise.getMaxPoints(),"Wynik dla danych:"+dataToTest+"\n"+exerciseService.runFunction(exercise.getCorrectSolution(),dataToTest));
-            dto.setSolutionSchema(exercise.getSolutionSchema());
-            return List.of(dto);
+           
+            try{
+                List<TestingData> testData = exerciseService.findAllTestingDataByExerciseId(id);
+                if(!testData.isEmpty())
+                    dataToTest = testData.get(0).getTestingData();
+                LongExerciseOutDto dto = new LongExerciseOutDto(id,exercise.getName(),exercise.getIntroduction(),exercise.getContent(),exercise.getMaxPoints(),"Wynik dla danych: "+dataToTest+"\n"+exerciseService.runFunction(exercise.getCorrectSolution(),dataToTest));
+                dto.setSolutionSchema(exercise.getSolutionSchema());
+                return List.of(dto);
+            }catch(Exception ex)
+            {
+                System.out.println(ex.getMessage());
+            }
+            
 
         }
         return List.of(new LongExerciseOutDto(id,exercise.getName(),exercise.getIntroduction(),exercise.getContent(),exercise.getMaxPoints(),exercise.getCorrectSolution()));

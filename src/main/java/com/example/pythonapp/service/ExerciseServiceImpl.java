@@ -30,14 +30,16 @@ public class ExerciseServiceImpl implements ExerciseService {
      */
     private void initializePythonInterpreter()
     {
-        Properties props = new Properties();
-        props.put("python.home","target/classes/jython-plugins-tmp/Lib");
-        props.put("python.import.site","false");
-        Properties preprops = System.getProperties();
-        String sth[]={};
-        PythonInterpreter.initialize(preprops, props,sth);
         if(interpreter == null)
+        {
             interpreter = new PythonInterpreter();
+            Properties props = new Properties();
+            props.put("python.home","target/classes/jython-plugins-tmp/Lib");
+            props.put("python.import.site","false");
+            Properties preprops = System.getProperties();
+            String sth[]={};
+            PythonInterpreter.initialize(preprops, props,sth);
+        }
     }
 
     /**
@@ -250,7 +252,15 @@ public class ExerciseServiceImpl implements ExerciseService {
         int closing_tag = function.indexOf("(");
         String function_call = function.substring(funct+4,closing_tag+1);
         System.out.println("\n"+function+"\n"+"print("+function_call+parameters+"))"+"\n");
-        return getOut("\n"+function+"\n"+"print("+function_call+parameters+"))"+"\n");
+        String returned = getOut("\n"+function+"\n"+"print("+function_call+parameters+"))"+"\n");
+        if(returned.isEmpty() || returned.contains("None"))
+        {
+            System.out.println("\n"+function+"\n"+function_call+parameters+")"+"\n");
+            returned = getOut("\n"+function+"\n"+function_call+parameters+")"+"\n");
+            System.out.println(returned);
+        }
+
+        return returned;
     }
 
 }
