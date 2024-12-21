@@ -11,12 +11,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
+import com.example.pythonapp.dto.VerificationRequest;
 
 @Service
 public interface UserService {
     Optional<UserEntity> findByEmail(String email);
     void updateUser(String email,String password);
-    int deleteUser(int id);
     Optional<UserEntity> findByName(String name);
-    Optional<UserEntity> findByNameAndPassword(String name, String password);
+    void generateCode (String code)throws Exception;
+    boolean codeVerify(VerificationRequest data);
+
 }

@@ -16,11 +16,7 @@ public class TeacherServiceImpl implements TeacherService {
     {
         return teacherRepository.findById(id);
     }
-    @Override
-    public Teacher findByEmail(String email)
-    {
-        return teacherRepository.findByEmail(email);
-    }
+
     @Override
     public Optional<Teacher> findByName(String name)
     {
@@ -29,4 +25,9 @@ public class TeacherServiceImpl implements TeacherService {
 
     @Override
     public Teacher save(Teacher teacher) {return teacherRepository.save(teacher);}
+
+    @Override
+    public void delete(int id){
+        teacherRepository.deleteById(id);
+    }
 }

@@ -16,7 +16,14 @@ public class ShortExercise extends Exercise{
     @Column(name="correct_answer",nullable=false)
     private char correctAnswer;
 
-    
+    public ShortExercise(String name, String introduction, String content, int maxPoints,boolean access,String firstOption,String secondOption,String thirdOption,String fourthOption,char correctAnswer) {
+        super(name,introduction,content,maxPoints,access);
+       this.firstOption = firstOption;
+       this.secondOption = secondOption;
+       this.fourthOption = fourthOption;
+       this.thirdOption = thirdOption;
+       this.correctAnswer = correctAnswer;
+    }
     public ShortExercise() {}
     public String getFirstOption() {
         return firstOption;

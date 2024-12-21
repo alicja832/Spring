@@ -1,6 +1,5 @@
 package com.example.pythonapp.controller;
 import javafx.util.Pair;
-import com.example.pythonapp.dto.LongExerciseOutDto;
 import com.example.pythonapp.PythonApplication;
 import com.example.pythonapp.dto.LongSolutionDto;
 import com.example.pythonapp.exception.ExerciseNotFoundException;
@@ -30,12 +29,13 @@ public class SolutionController {
     private SolutionService solutionService;
     @Autowired
     private StudentService studentService;
-
+    private LongSolutionMapper longSolutionMapper=new LongSolutionMapper();
     
     /**
      * get one's solutions with name exercise and score
      **/
     @GetMapping("/programming")
+//    @GetMapping("/")
     public List<Map<String,String>> getSolutions(){
 
         String name = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -117,7 +117,6 @@ public class SolutionController {
      @GetMapping("/parts/{id}")
     public List<LongCorrectSolutionPart> getLongPart(@PathVariable int id){
 
-
         return  exerciseService.findAllLongCorrectSolutionByExerciseId(id);
      
     }
@@ -129,7 +128,6 @@ public class SolutionController {
     @GetMapping("/abc/{id}")
     public List<ShortSolution> getShortSolution(@PathVariable int id){
 
-
         return List.of(solutionService.findShortSolutionById(id));
     }
 
@@ -138,11 +136,9 @@ public class SolutionController {
      * @param solution new version of solution
      */
     @PutMapping("/")
-    public void updateSolution( @RequestBody LongSolutionDto solution){
-        
+    public ResponseEntity<String> updateSolution( @RequestBody LongSolutionDto solution){
         Exercise exercise =  exerciseService.findExerciseById(solution.getExercise().getId()).get();
         solution.setExercise(exercise);
-        LongSolutionMapper longSolutionMapper=new LongSolutionMapper();
         Student loginStudent = studentService.findByName(SecurityContextHolder.getContext().getAuthentication().getName()).get();
         int newscore=solution.getScore();
         
@@ -158,6 +154,7 @@ public class SolutionController {
         int oldScore = solutionService.findById(solutionCreated.getId()).getScore();
         solutionService.updateSolution(solutionCreated.getId(), solutionCreated);
         studentService.update(loginStudent.getId(),newscore-oldScore);
+        return new ResponseEntity(HttpStatus.OK);
     }
 
     /**
@@ -170,8 +167,10 @@ public class SolutionController {
 
         int score = 0;
         String response = "";
+        //uwaga tutaj była zmiana należy przetestować!
         LongExercise exercise =  exerciseService.findLongExerciseByName(solution.getExercise().getName()).orElseThrow(ExerciseNotFoundException::new);
         List<TestingData> test = exerciseService.findAllTestingDataByExerciseId(exercise.getId());
+        
         for(int i=0;i<test.size();i++)
         {
             TestingData forTest = test.get(i);

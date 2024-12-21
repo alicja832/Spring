@@ -40,7 +40,7 @@ public class ExerciseController {
      * @return ResponseEntity with HTTP status
      */
     @PostMapping("/programming")
-    public ResponseEntity<String> add(@RequestBody LongExerciseDto exercise){
+    public ResponseEntity<String> addLongExercise(@RequestBody LongExerciseDto exercise){
 
         Pair<LongExercise,ArrayList<LongCorrectSolutionPart>> longExerciseArrayListPair;
         LongExercise longExercise;
@@ -125,6 +125,7 @@ public class ExerciseController {
         return new Pair<>(new LongExercise(exercise.getName(),exercise.getIntroduction(),exercise.getContent(),exercise.getMaxPoints(),correctSolution,exercise.getSolutionSchema(),exercise.getAccess()),parts);
     }
     @GetMapping("/testdata/{id}")
+    //@GetMapping("/testData/{id}")
     public List<TestingData> getTestingData(@PathVariable int id){
 
       return  exerciseService. findAllTestingDataByExerciseId(id);
@@ -136,7 +137,7 @@ public class ExerciseController {
      * @return ResponseEntity with HTTP status
      */
     @PostMapping("/abc")
-    public ResponseEntity<String> add(@RequestBody ShortExercise exercise){
+    public ResponseEntity<String> addShortExercise(@RequestBody ShortExercise exercise){
 
        String name = SecurityContextHolder.getContext().getAuthentication().getName();
        Teacher teacher = teacherService.findByName(name).get();
@@ -157,7 +158,7 @@ public class ExerciseController {
      * @return
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Exercise> delete(@PathVariable int id){
+    public ResponseEntity<Exercise> deleteExercise(@PathVariable int id){
 
 	    Exercise exercise = exerciseService.findExerciseById(id).orElseThrow(ExerciseNotFoundException::new);
         exerciseService.delete(id);
@@ -168,7 +169,7 @@ public class ExerciseController {
      * @param exercise - new version of exercise
      */
     @PutMapping("/abc")
-    public ResponseEntity<String> update(@RequestBody ShortExercise exercise){
+    public ResponseEntity<String> updateShortExercise(@RequestBody ShortExercise exercise){
         
         try{
             exercise.setCorrectAnswer(Character.toUpperCase(exercise.getCorrectAnswer()));
@@ -184,7 +185,7 @@ public class ExerciseController {
      * @param exercise - new version of exercise
      */
     @PutMapping("/programming")
-    public ResponseEntity<String> update(@RequestBody LongExerciseDto exercise){
+    public ResponseEntity<String> updateLongExercise(@RequestBody LongExerciseDto exercise){
 
         
     
@@ -283,9 +284,9 @@ public class ExerciseController {
         List<Pair<ShortExercise,Boolean>> listExercise = new ArrayList<>();
         List<Solution> solutions = new ArrayList<>();
         Boolean access = false;
-       
+        System.out.println(SecurityContextHolder.getContext().getAuthentication());
           if(userService.findByName(SecurityContextHolder.getContext().getAuthentication().getName()).isPresent())
-                access = true;
+            access = true;
           if(studentService.findByName(SecurityContextHolder.getContext().getAuthentication().getName()).isPresent())
             solutions = solutionService.findStudentSolution(studentService.findByName(SecurityContextHolder.getContext().getAuthentication().getName()).get());
       
@@ -305,12 +306,13 @@ public class ExerciseController {
         }
         return listExercise;
     }
+    
     /**
      * list all long exercises
      * @return list of pairs which exercies are done
      */
     @GetMapping("/programming")
-    public List<Pair<LongExercise,Boolean>> listExercises(){
+    public List<Pair<LongExercise,Boolean>> listLongExercises(){
 
         List<LongExercise> list = exerciseService.getAllLongExercises();
         List<Pair<LongExercise,Boolean>> listExercise = new ArrayList<>();
@@ -347,6 +349,7 @@ public class ExerciseController {
      * @return
      */
     @GetMapping("/one/programming/{id}")
+    // @GetMapping("/oneProgramming/{id}")
     public List<LongExerciseOutDto> FindLongExerciseById(@PathVariable int id) {
 
         LongExercise exercise = exerciseService.findLongExerciseById(id).orElseThrow(ExerciseNotFoundException::new);
@@ -376,6 +379,7 @@ public class ExerciseController {
      * @return
      */
     @GetMapping("/one/abc/{id}")
+    // @GetMapping("/oneAbc/{id}")
     public List<ShortExercise> FindShortExerciseById(@PathVariable int id) {
 
         ShortExercise exercise = exerciseService.findShortExerciseById(id).orElseThrow(ExerciseNotFoundException::new);

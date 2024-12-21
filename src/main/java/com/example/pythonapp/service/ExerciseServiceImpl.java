@@ -64,14 +64,7 @@ public class ExerciseServiceImpl implements ExerciseService {
     {
         exerciseRepository.updateById(id,exercise.getName(),exercise.getIntroduction(),exercise.getContent(),exercise.getMaxPoints());
     }
-    /**
-     * method which find exercise
-     */
-    @Override
-    public Optional<ShortExercise> findShortExerciseByName(String name)
-    {
-        return shortExerciseRepository.findByName(name);
-    }
+
     /**
      * A method which find exercise
      */
@@ -209,11 +202,7 @@ public class ExerciseServiceImpl implements ExerciseService {
         exerciseRepository.deleteById(id);
     }
 
-    @Override
-    public Optional<Exercise> findExerciseByName(String name)
-    {
-        return exerciseRepository.findByName(name);
-    }
+
     @Override
     public  List<Exercise> findAllByTeacher_Id(int teacherId)
     {
@@ -240,11 +229,7 @@ public class ExerciseServiceImpl implements ExerciseService {
     {
         return testingDataRepository.findAllByExerciseId(exerciseId);
     }
-    @Override
-    public void deleteAllTestingDataByExerciseId(int exerciseId)
-    {
-       testingDataRepository.deleteAllByExerciseId(exerciseId);
-    }
+
     @Override
     public String runFunction(String function, String parameters)
     {

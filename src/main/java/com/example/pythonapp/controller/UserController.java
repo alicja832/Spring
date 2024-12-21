@@ -45,7 +45,7 @@ public class UserController {
     private TeacherService teacherService;
     @Autowired
     private StudentService studentService;
-    private List<Pair<String,String>> EmailCode = new ArrayList<>();
+  
     @Autowired
     private SolutionService solutionService;
     @Autowired
@@ -66,6 +66,7 @@ public class UserController {
 
         userCreationDto.setPassword( encoder.encode(userCreationDto.getPassword()));
         ResponseEntity<String> responseEntity = new ResponseEntity<>(HttpStatus.CREATED);
+
         if(userService.findByEmail(userCreationDto.getEmail()).isPresent())
         {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Użytkownik o podanym adresie email istnieje");
@@ -75,6 +76,7 @@ public class UserController {
         {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Użytkownik o podanym loginie istnieje");
         }
+
         UserEntity createdEntity = userMapper.createDto(userCreationDto);
         if(createdEntity instanceof Teacher) teacherService.save((Teacher) createdEntity);
         if(createdEntity instanceof Student) studentService.save((Student) createdEntity);
@@ -86,7 +88,7 @@ public class UserController {
      * @return
      */
     @GetMapping("/")
-    public List<UserEntity> getUser(){
+    public List<UserEntity> getUserInformation(){
         String name = SecurityContextHolder.getContext().getAuthentication().getName();
         UserEntity userEntity = userService.findByName(name).orElseThrow(UserNotFoundException::new);
         if(userService.findByName(name).isPresent())
@@ -115,76 +117,29 @@ public class UserController {
 
         if(userService.findByEmail(email).isEmpty())
         {
-
             return new ResponseEntity<String>("Nieprawidlowy adres email",HttpStatus.NOT_FOUND);
         }
-        Random generator = new Random();
-        int code = 0;
-        for(int i=0; i<6; i++) {
-            code += Math.abs(generator.nextInt())*Math.pow(10,i);
-        }
-        try {
-
-            String host = "smtp.gmail.com";  
-            final String username = "alicja.zosia.k@gmail.com"; 
-            final String password = "ogrl kvbf utms njjs"; 
-
-            Properties props = new Properties();
-            props.put("mail.smtp.auth", "true");
-            props.put("mail.smtp.starttls.enable", "true");
-            props.put("mail.smtp.host", host);
-            props.put("mail.smtp.port", "587");
-
-            Session session = Session.getInstance(props,new jakarta.mail.Authenticator() {
-                protected PasswordAuthentication getPasswordAuthentication() {
-                    return new PasswordAuthentication(username, password);
-                }
-            });
-
-            Message message = new MimeMessage(session);
-            message.setFrom(new InternetAddress("alicja.zosia.k@gmail.com"));
-            message.setRecipients(
-                    Message.RecipientType.TO, InternetAddress.parse(email));
-            message.setSubject("Your Passcode");
-
-            String msg = "Twój kod to:\n" +
-                    "\n" +
-                    code +
-                    "." +
-                    "\n" +
-                    "Ten email jest odpowiedzią na prośbę o odzyskanie zapomnianego hasła. Możesz zignorować tę wiadomość, jeśli nie złożyłeś takiej prośby.\n" +
-                    "Użyj tego kodu, aby zresetować swoje hasło.\n" +
-                    "Nie odpowiadaj na tę wiadomość.";
-
-            MimeBodyPart mimeBodyPart = new MimeBodyPart();
-            mimeBodyPart.setContent(msg, "text/html; charset=utf-8");
-
-            Multipart multipart = new MimeMultipart();
-            multipart.addBodyPart(mimeBodyPart);
-
-            message.setContent(multipart);
-            Transport.send(message);      
-
-            EmailCode.add(new Pair<>(email,Integer.toString(code)));
+        try{
+            userService.generateCode(email);
         }
         catch (Exception exception)
         {
-
             return new ResponseEntity<String>(HttpStatus.BAD_REQUEST);
         }
         return new ResponseEntity<String>(HttpStatus.OK);
     }
+
     @GetMapping("/token")
     public JWTResponse GetNewToken(@CookieValue( name = "refreshToken") String refreshToken)
     {
         String userName="";
-        System.out.println(refreshToken);
+
         try{
             userName = jwt.getUsernameFromToken(refreshToken);
            
         }catch(Exception ex)
         {
-            System.out.println(ex.getMessage());
+            throw new UserNotFoundException();
         }
       
         if (userName!=null) {
@@ -198,7 +153,10 @@ public class UserController {
                         = new UsernamePasswordAuthenticationToken(userDetails,
                         userEntity.getPassword(), List.of(new SimpleGrantedAuthority(role)));
                 SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
-                System.out.println(usernamePasswordAuthenticationToken);
+            }
+            else
+            {
+                throw new UserNotFoundException();
             }
         }
     
@@ -211,20 +169,7 @@ public class UserController {
     @PostMapping("/codeverification")
     public ResponseEntity<String> codeVerification(@RequestBody VerificationRequest data)
     {
-        Pair<String,String> emailFounded = EmailCode.stream()
-                .filter(pair -> data.email.equals(pair.getKey()))
-                .findAny()
-                .orElse(null);
-        if(emailFounded==null)
-        {
-            return new ResponseEntity<>("Nieprawidłowy email",HttpStatus.BAD_REQUEST);
-        }
-        if(emailFounded.getValue().equals(data.code))
-        {
-            EmailCode.remove(emailFounded);
-            return new ResponseEntity<>(HttpStatus.OK);
-        }
-        return new ResponseEntity<>("Nieprawidłowy kod",HttpStatus.BAD_REQUEST);
+        return userService.codeVerify(data) ? new ResponseEntity<>("Prawidłowy Kod",HttpStatus.OK) : new ResponseEntity<>("Nieprawidłowy kod",HttpStatus.BAD_REQUEST);
     }
 
     /**
@@ -242,7 +187,7 @@ public class UserController {
     * lista zadan stworzonych przez zalogowanego nauczyciela
     */
     @GetMapping("/exercises")
-    public List<Map<String,String>> getExercises(){
+    public List<Map<String,String>> getTeacherExercises(){
 
         Teacher loginTeacher = teacherService.findByName(SecurityContextHolder.getContext().getAuthentication().getName()).orElseThrow(UserNotFoundException::new);
         List<Exercise> exercises = new ArrayList<>();
@@ -307,7 +252,7 @@ public class UserController {
      * function which describe the position of student in ranking
      */
     @GetMapping("/position")
-    public Pair<Integer,Integer> studentPosition(){
+    public Pair<Integer,Integer> getStudentPosition(){
 
         String name = SecurityContextHolder.getContext().getAuthentication().getName();
         Student loginStudent = studentService.findByName(name).get();

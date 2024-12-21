@@ -3,6 +3,7 @@ import com.example.pythonapp.controller.UserController;
 import com.example.pythonapp.details.AppUserDetails;
 import com.example.pythonapp.jwt.JWTResponse;
 import com.example.pythonapp.jwt.JWTToken;
+import com.example.pythonapp.model.Student;
 import com.example.pythonapp.model.Teacher;
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.*;
@@ -10,8 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class UserControllerTest {
 
     @Autowired
@@ -21,51 +24,96 @@ public class UserControllerTest {
 
     @LocalServerPort
     private Integer port;
-    private String jwtToken;
+    private static String jwtToken;
 
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
     }
 
-//    @Test
-//    @Order(1)
-//    void TestAuthorization() {
-//        Teacher teacher = new Teacher();
-//        teacher.setEmail("alicja.zosia.k@gmail.com");
-//        teacher.setName("alicja832");
-//        teacher.setPassword("password");
-//        JWTResponse jwt = null;
-//        try {
-//            jwt = userController.authenticate(teacher);
-//        } catch (Exception exception) {
-//            exception.printStackTrace();
-//        }
-//
-//        if (jwt != null)
-//            jwtToken = jwt.getJwtToken();
-//
-//        AppUserDetails app = new AppUserDetails(teacher);
-//        Assertions.assertEquals(token.getUsernameFromToken(jwtToken), teacher.getName());
-//        Assertions.assertEquals(token.validateToken(jwtToken, app), true);
-//
-//        given()
-//                .when()
-//                .header("Authorization", "Bearer " + jwtToken)
-//                .get("user/")
-//                .then()
-//                .statusCode(200);
-//    }
     @Test
-    @Order(2)
-    void TestUnAuthorized() {
+    @Order(1)
+    void SetAuthorization() {
 
+        Teacher teacher = new Teacher();
+        teacher.setEmail("alicja.zosia.k@gmail.com");
+        teacher.setName("alicja832");
+        teacher.setPassword(("password"));
+        JWTResponse jwt = null;
+        try {
+            jwt = userController.authenticate(teacher);
+        } catch (Exception exception) {
+            exception.printStackTrace();
+        }
+
+        if (jwt != null)
+            jwtToken = jwt.getToken();
+        Assertions.assertEquals(token.getUsernameFromToken(jwtToken), teacher.getName());
+    }
+
+    @Test
+    @Order(3)
+    void TestGetUserInformation() {
 
         given()
                 .when()
-                .get("user/student/someone@gmail.com")
+                .header("Authorization", "Bearer " + jwtToken)
+                .get("/user/")
                 .then()
-                .statusCode(403);
-
+                .statusCode(200);
     }
+
+    @Test
+    @Order(4)
+    void TestGetStudentRanking() {
+
+        given()
+                .when()
+                .header("Authorization", "Bearer " + jwtToken)
+                .get("/user/ranking")
+                .then()
+                .body("size()", equalTo(2))
+                .statusCode(200);
+    }
+
+    @Test
+    @Order(5)
+    void TestGetTeacherExercises() {
+
+        given()
+                .when()
+                .header("Authorization", "Bearer " + jwtToken)
+                .get("/user/exercises")
+                .then()
+                .body("size()", equalTo(4))
+                .statusCode(200);
+    }
+
+    @Test
+    @Order(6)
+    void TestGetStudentPosition() {
+
+        Student student = new Student();
+        student.setEmail("akaluza@student.agh.edu.pl");
+        student.setName("alicja999");
+        student.setPassword("password");
+        JWTResponse jwt = null;
+        try {
+            jwt = userController.authenticate(student);
+        } catch (Exception exception) {
+            exception.printStackTrace();
+        }
+
+        if (jwt != null)
+            jwtToken = jwt.getToken();
+        Assertions.assertEquals(token.getUsernameFromToken(jwtToken),student.getName());
+
+        given()
+                .when()
+                .header("Authorization", "Bearer " + jwtToken)
+                .get("/user/position")
+                .then()
+                .statusCode(200);
+    }
+ 
 }

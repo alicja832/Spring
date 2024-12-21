@@ -1,6 +1,5 @@
 package com.example.pythonapp.service;
 
-import com.example.pythonapp.exception.UserNotFoundException;
 import com.example.pythonapp.model.Student;
 import com.example.pythonapp.repository.StudentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,11 +17,7 @@ public class StudentServiceImpl implements StudentService {
     {
         return studentRepository.save(student);
     }
-    @Override
-    public Student findbyId(int id)
-    {
-        return studentRepository.findById(id).orElseThrow(UserNotFoundException::new);
-    }
+
     @Override
     public void update(long id,int score)
     {
@@ -30,14 +25,15 @@ public class StudentServiceImpl implements StudentService {
     }
     @Override
     public List<Student> listStudents() {return studentRepository.findAll();}
-    @Override
-    public Student findByEmail(String email)
-    {
-        return studentRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
-    }
+
     @Override
     public Optional<Student> findByName(String name)
     {
         return studentRepository.findByName(name);
+    }
+
+    @Override
+    public void delete(int id){
+        studentRepository.deleteById(id);
     }
 }

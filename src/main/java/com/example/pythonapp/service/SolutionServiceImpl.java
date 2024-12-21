@@ -2,7 +2,6 @@ package com.example.pythonapp.service;
 
 import com.example.pythonapp.exception.SolutionNotFoundException;
 import com.example.pythonapp.model.*;
-import com.example.pythonapp.repository.LongCorrectSolutionPartRepository;
 import com.example.pythonapp.repository.LongSolutionRepository;
 import com.example.pythonapp.repository.ShortSolutionRepository;
 import com.example.pythonapp.repository.SolutionRepository;
@@ -60,6 +59,11 @@ public class SolutionServiceImpl implements SolutionService {
     public List<Solution> getAllSolutionsByExercise (Exercise exercise)
     {
         return solutionRepository.getAllByExercise(exercise);
+    }
+    @Override
+    public void delete(int id)
+    {
+        solutionRepository.deleteById(id);
     }
 
 }

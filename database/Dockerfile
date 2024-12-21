@@ -1,4 +1,0 @@
-FROM postgres
-ENV POSTGRES_USER=student
-ENV POSTGRES_PASSWORD=studentapp
-ENV POSTGRES_DB=alicja

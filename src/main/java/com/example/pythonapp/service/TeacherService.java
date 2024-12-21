@@ -8,6 +8,6 @@ public interface TeacherService {
 
     Teacher save(Teacher teacher);
     Teacher findById(int id);
-    Teacher findByEmail(String email);
     Optional<Teacher> findByName(String name);
+    void delete(int id);
 }
