@@ -1,13 +1,16 @@
 package com.example.pythonapp.service;
+import com.example.pythonapp.dto.LongExerciseDto;
+import com.example.pythonapp.exception.ExerciseNotFoundException;
 import com.example.pythonapp.model.*;
 import com.example.pythonapp.repository.*;
+import javafx.util.Pair;
 import org.python.util.PythonInterpreter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import java.io.StringWriter;
-import java.util.List;
-import java.util.Optional;
-import java.util.Properties;
+import java.util.*;
 import java.io.PrintWriter;
 
 @Service
@@ -64,7 +67,53 @@ public class ExerciseServiceImpl implements ExerciseService {
     {
         exerciseRepository.updateById(id,exercise.getName(),exercise.getIntroduction(),exercise.getContent(),exercise.getMaxPoints());
     }
+    @Override
+    public void updateLongExercise(LongExerciseDto exercise) throws Exception {
+        Pair<LongExercise, ArrayList<LongCorrectSolutionPart>> longExerciseArrayListPair;
+        longExerciseArrayListPair = createLongExerciseFromDto(exercise);
+        List<TestingData> testingdata = findAllTestingDataByExerciseId(exercise.getId());
+        String[] testdata = exercise.getTestData();
+        Integer[] testingPoints = exercise.getPoints();
+        int i;
+        for (i = 0; i < testingdata.size(); i++) {
+            update(testingdata.get(i).getId(), new TestingData(longExerciseArrayListPair.getKey(), testingPoints[i], testdata[i]));
+        }
+        Exercise exercisefound = findExerciseById(exercise.getId()).get();
+        while (i < testdata.length) {
+            save(new TestingData(exercisefound, testingPoints[i], testdata[i]));
+            ++i;
+        }
 
+
+        update(exercise.getId(), longExerciseArrayListPair.getKey());
+
+
+        int previous_size = findAllLongCorrectSolutionByExerciseId(exercise.getId()).size();
+        int diff = previous_size - exercise.getMaxPoints();
+
+        for (LongCorrectSolutionPart longCorrectSolutionPart : longExerciseArrayListPair.getValue()) {
+            if (findAllLongCorrectSolutionByExerciseIdAndOrder(exercise.getId(), longCorrectSolutionPart.getOrder()).isEmpty()) {
+                longCorrectSolutionPart.setExercise(findExerciseById(exercise.getId()).get());
+
+                save(longCorrectSolutionPart);
+
+            }
+            update(exercise.getId(), longCorrectSolutionPart);
+        }
+
+        if (diff > 0) {
+            int actual_size = exercise.getMaxPoints();
+            while (actual_size < previous_size) {
+
+                try {
+                    deleteLongCorrectSolutionPart(exercise.getId(), actual_size);
+                } catch (Exception exception) {
+                    System.out.println(exception.getMessage());
+                }
+                ++actual_size;
+            }
+        }
+    }
     /**
      * A method which find exercise
      */
@@ -124,10 +173,7 @@ public class ExerciseServiceImpl implements ExerciseService {
      * @return saved longCorrectSolutionPart
      */
     @Override
-    public LongCorrectSolutionPart save(LongCorrectSolutionPart correctSolutionPart)
-    {
-        return longCorrectSolutionPartRepository.save(correctSolutionPart);
-    }
+    public LongCorrectSolutionPart save(LongCorrectSolutionPart correctSolutionPart) {return longCorrectSolutionPartRepository.save(correctSolutionPart);}
     /**
      * A method which list short exercises
      */
@@ -147,24 +193,85 @@ public class ExerciseServiceImpl implements ExerciseService {
     /**
      * A method which use Python Interpreter to get output from console
      */
+
+    /**
+     * Function which create LongExercise from LongExerciseDto and save the parts of the solutions in the list
+     * this is because the exercise_id have to be set in each correct solution Part
+     * @param exercise
+     * @return
+     * @throws Exception
+     */
+    @Override
+    public Pair<LongExercise, ArrayList<LongCorrectSolutionPart>> createLongExerciseFromDto(LongExerciseDto exercise) throws Exception
+    {
+        String[] correctSolutionParts =  exercise.getCorrectSolutions();
+        String correctSolution="";
+        StringBuilder cS = new StringBuilder(correctSolution);
+        int amount = correctSolutionParts.length;
+        ArrayList<LongCorrectSolutionPart> parts=new ArrayList<>();
+        String[] correctSolutions = new String[amount];
+
+        for(int i=0;i<amount;i++)
+        {
+
+            String result = getOut(correctSolutionParts[i]);
+
+            if(result.isEmpty() || result.contains("Error") || result.contains("TraceBack"))
+                throw new Exception("Nieprawidłowy kod rozwiązania");
+
+            parts.add(new LongCorrectSolutionPart(i,correctSolutionParts[i]));
+            cS.append(correctSolutionParts[i]);
+            cS.append("\n");
+            correctSolutions[i] = getOut(correctSolutionParts[i]);
+        }
+        correctSolution = cS.toString();
+        return new Pair<>(new LongExercise(exercise.getName(),exercise.getIntroduction(),exercise.getContent(),exercise.getMaxPoints(),
+                correctSolution,exercise.getSolutionSchema(),exercise.getAccess()),parts);
+    }
+    @Override
+    public void addLongExercise(LongExerciseDto exercise,Teacher teacher)throws Exception {
+        Pair<LongExercise, ArrayList<LongCorrectSolutionPart>> longExerciseArrayListPair;
+        LongExercise longExercise;
+
+        String[] testingData = exercise.getTestData();
+        Integer[] points = exercise.getPoints();
+
+        longExerciseArrayListPair = createLongExerciseFromDto(exercise);
+
+
+        longExerciseArrayListPair.getKey().setTeacher(teacher);
+        try {
+            longExercise = save(longExerciseArrayListPair.getKey());
+
+        } catch (Exception e) {
+            throw new Exception("Błąd zapisu zadania");
+        }
+
+        for (int i = 0; i < testingData.length; i++) {
+
+            try {
+                save(new TestingData(longExercise, points[i], testingData[i]));
+            } catch (Exception ex) {
+                throw new Exception("Błąd zapisu danych testowych");
+            }
+        }
+    }
     @Override
     public String getOut(String text){
+
         initializePythonInterpreter();
         if(text.charAt(0)=='\"' || text.charAt(text.length()-1)=='\n')
                 text = text.substring(1,text.length()-1);
+
         StringWriter output = new StringWriter();
         interpreter.setOut(output);
-
         try {
-            interpreter.exec(text);
+            interpreter.exec("\n"+text+"\n");
         }
         catch(Exception e)
         {
-        
             e.printStackTrace(new PrintWriter(output));
-            String pythonError = output.toString();
-            int end = pythonError.indexOf("at");
-            return pythonError.substring(0,end);
+            return output.toString();
         }
 
         return output.toString();
@@ -218,6 +325,7 @@ public class ExerciseServiceImpl implements ExerciseService {
     {
         return testingDataRepository.save(testingData);
     }
+
     @Override
     public void update(int id,TestingData testingData)
     {
@@ -230,22 +338,81 @@ public class ExerciseServiceImpl implements ExerciseService {
         return testingDataRepository.findAllByExerciseId(exerciseId);
     }
 
+    /**
+     * @param function
+     * @param parameters
+     * @return
+     */
     @Override
     public String runFunction(String function, String parameters)
     {
-        int funct = function.indexOf("def");
+        int def = function.indexOf("def");
         int closing_tag = function.indexOf("(");
-        String function_call = function.substring(funct+4,closing_tag+1);
-        System.out.println("\n"+function+"\n"+"print("+function_call+parameters+"))"+"\n");
-        String returned = getOut("\n"+function+"\n"+"print("+function_call+parameters+"))"+"\n");
+        String function_call = function.substring(def+4,closing_tag+1);
+        String returned = getOut(function+"\n"+"print("+function_call+parameters+"))");
         if(returned.isEmpty() || returned.contains("None"))
         {
-            System.out.println("\n"+function+"\n"+function_call+parameters+")"+"\n");
-            returned = getOut("\n"+function+"\n"+function_call+parameters+")"+"\n");
-            System.out.println(returned);
+            returned = getOut(function+"\n"+function_call+parameters+")");
         }
 
         return returned;
     }
+
+    @Override
+    public Pair<String, Integer> checkSolutionWithTests(LongSolution longSolution) {
+
+        int score = 0;
+        String response = "";
+        StringBuilder sr = new StringBuilder(response);
+        String tmp;
+        LongExercise exercise =  findLongExerciseByName(longSolution.getExercise().getName()).orElseThrow(ExerciseNotFoundException::new);
+        List<TestingData> test =  findAllTestingDataByExerciseId(longSolution.getExercise().getId());
+
+        for(int i=0;i<test.size();i++)
+        {
+            TestingData forTest = test.get(i);
+            String solutionTest = runFunction(longSolution.getSolutionContent(),forTest.getTestingData());
+            tmp = "Test "+i+"\nDane:"+forTest.getTestingData()+"\n";
+            sr.append(tmp);
+            tmp = "Oczekiwany rezultat: \n"+runFunction(exercise.getCorrectSolution(),forTest.getTestingData())+"\n";
+            sr.append(tmp);
+            tmp = "Oczekiwany rezultat: \n"+runFunction(exercise.getCorrectSolution(),forTest.getTestingData())+"\n";
+            sr.append(tmp);
+            sr.append(solutionTest);
+            if(runFunction(exercise.getCorrectSolution(), forTest.getTestingData()).equals(solutionTest))
+                score += forTest.getPoints();
+        }
+
+        return new Pair<>(sr.toString(),score);
+    }
+
+    @Override
+    public int checkSolution(LongSolution longSolution) {
+
+        LongExercise exercise =  findLongExerciseByName(longSolution.getExercise().getName()).orElseThrow(ExerciseNotFoundException::new);
+        String output = getOut(longSolution.getSolutionContent());
+        List<LongCorrectSolutionPart> parts = findAllLongCorrectSolutionByExerciseId(exercise.getId());
+        int score = 0;
+        for(LongCorrectSolutionPart longCorrectSolutionPart:parts)
+        {
+            if(output.contains(getOut(longCorrectSolutionPart.getCorrectSolutionPart())))
+                ++score;
+        }
+        longSolution.setScore(score);
+        return score;
+    }
+
+    @Override
+    public int checkSolution(ShortSolution shortSolution) {
+        ShortExercise exercise = findShortExerciseById(shortSolution.getId()).get();
+        char correctAnswer = exercise.getCorrectAnswer();
+        int maxPoints = shortSolution.getExercise().getMaxPoints();
+        if (correctAnswer == Character.toUpperCase(shortSolution.getAnswer())) {
+            shortSolution.setScore(maxPoints);
+            return maxPoints;
+        }
+        return 0;
+    }
+
 
 }

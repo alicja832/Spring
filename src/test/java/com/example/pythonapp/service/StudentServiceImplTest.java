@@ -19,7 +19,7 @@ class StudentServiceImplTest {
         student = new Student();
         student.setName("John");
         student.setEmail("john@gmail.com");
-        student.setPassword("tttttt");
+        student.setPassword("password");
 
     }
     @Test

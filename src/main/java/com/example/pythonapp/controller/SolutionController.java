@@ -29,17 +29,17 @@ public class SolutionController {
     private SolutionService solutionService;
     @Autowired
     private StudentService studentService;
-    private LongSolutionMapper longSolutionMapper=new LongSolutionMapper();
+    private final LongSolutionMapper longSolutionMapper=new LongSolutionMapper();
     
     /**
      * get one's solutions with name exercise and score
      **/
-    @GetMapping("/programming")
-//    @GetMapping("/")
+    @GetMapping("/")
     public List<Map<String,String>> getSolutions(){
 
         String name = SecurityContextHolder.getContext().getAuthentication().getName();
         List<Map<String, String>> exercisesAndScores = new ArrayList<>();
+        if(studentService.findByName(name).isEmpty()) return exercisesAndScores;
         List<Solution> solutions = solutionService.findStudentSolution(studentService.findByName(name).get());
 
         for(Solution solution:solutions) {
@@ -92,7 +92,7 @@ public class SolutionController {
     public ResponseEntity<Solution> addSolution(@RequestBody ShortSolution solution){
 
         Student loginStudent = studentService.findByName(SecurityContextHolder.getContext().getAuthentication().getName()).get();
-        solution.setScore(this.checkSolution(solution));
+        solution.setScore(checkSolution(solution));
         solution.setStudent(loginStudent);
         solutionService.save(solution);
         studentService.update(loginStudent.getId(),solution.getScore());
@@ -137,24 +137,12 @@ public class SolutionController {
      */
     @PutMapping("/")
     public ResponseEntity<String> updateSolution( @RequestBody LongSolutionDto solution){
-        Exercise exercise =  exerciseService.findExerciseById(solution.getExercise().getId()).get();
-        solution.setExercise(exercise);
-        Student loginStudent = studentService.findByName(SecurityContextHolder.getContext().getAuthentication().getName()).get();
-        int newscore=solution.getScore();
-        
-        if(solution.getScore()==0)
-        {
-            newscore = this.checkSolution(solution);
-        }
-        
-        LongSolution solutionCreated = longSolutionMapper.createLongSolution(solution);
-        solutionCreated.setStudent(loginStudent);
-        solutionCreated.setScore(newscore);
 
-        int oldScore = solutionService.findById(solutionCreated.getId()).getScore();
-        solutionService.updateSolution(solutionCreated.getId(), solutionCreated);
-        studentService.update(loginStudent.getId(),newscore-oldScore);
-        return new ResponseEntity(HttpStatus.OK);
+        if( studentService.findByName(SecurityContextHolder.getContext().getAuthentication().getName()).isEmpty())
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Zalogowany użytkownik nie jest uczniem");
+        Student loginStudent = studentService.findByName(SecurityContextHolder.getContext().getAuthentication().getName()).get();
+        solutionService.updateSolution(longSolutionMapper.createLongSolution(solution),loginStudent);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     /**
@@ -164,25 +152,7 @@ public class SolutionController {
      */
     @PostMapping("/programming/test")
     public Pair<String,Integer> checkSolutionWithTests(@RequestBody LongSolutionDto solution){
-
-        int score = 0;
-        String response = "";
-        //uwaga tutaj była zmiana należy przetestować!
-        LongExercise exercise =  exerciseService.findLongExerciseByName(solution.getExercise().getName()).orElseThrow(ExerciseNotFoundException::new);
-        List<TestingData> test = exerciseService.findAllTestingDataByExerciseId(exercise.getId());
-        
-        for(int i=0;i<test.size();i++)
-        {
-            TestingData forTest = test.get(i);
-            String solutiontest = exerciseService.runFunction(solution.getSolutionContent(),forTest.getTestingData());
-            response+=("Test "+i+"\nDane:"+forTest.getTestingData()+"\n");
-            response+=("Oczekiwany rezultat: \n"+exerciseService.runFunction(exercise.getCorrectSolution(),forTest.getTestingData())+"\n");
-            response+=("Twój rezultat:\n");
-            response+=solutiontest+"\n";
-            if(exerciseService.runFunction(exercise.getCorrectSolution(), forTest.getTestingData()).equals(solutiontest))
-               score += forTest.getPoints();
-        }
-        return new Pair<>(response,score);
+        return exerciseService.checkSolutionWithTests( longSolutionMapper.createLongSolution(solution));
     }
     /**
      * function which check the solution of programming exercise
@@ -191,21 +161,7 @@ public class SolutionController {
      */
     @PostMapping("/programming/check")
     public int checkSolution(@RequestBody LongSolutionDto solution){
-
-        LongExercise exercise =  exerciseService.findLongExerciseByName(solution.getExercise().getName()).orElseThrow(ExerciseNotFoundException::new);
-        if(solution.getOutput() == null)
-        {
-            solution.setOutput(exerciseService.getOut(solution.getSolutionContent()));
-        }
-        String output = solution.getOutput();
-        List<LongCorrectSolutionPart> parts =exerciseService.findAllLongCorrectSolutionByExerciseId(exercise.getId());
-        int score = 0;
-        for(LongCorrectSolutionPart longCorrectSolutionPart:parts)
-        {
-            if(output.contains(exerciseService.getOut(longCorrectSolutionPart.getCorrectSolutionPart())))
-                ++score;
-        }
-        return score;
+       return exerciseService.checkSolution(longSolutionMapper.createLongSolution(solution));
     }
     /**
      * function which check the solution of abc exercise
@@ -215,16 +171,7 @@ public class SolutionController {
     @PostMapping("/abc/check")
     public int checkSolution(@RequestBody ShortSolution solution){
 
-        ShortExercise exercise = exerciseService.findShortExerciseById(solution.getExercise().getId()).orElseThrow(ExerciseNotFoundException::new);
-        char correctAnswer = exercise.getCorrectAnswer();
-        int maxPoints =  solution.getExercise().getMaxPoints();
-        if(correctAnswer == Character.toUpperCase(solution.getAnswer()))
-        {
-            solution.setScore(maxPoints);
-            return maxPoints;
-        }
-
-        return 0;
+        return exerciseService.checkSolution(solution);
     }
 
 

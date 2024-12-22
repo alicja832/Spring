@@ -1,22 +1,29 @@
 package com.example.pythonapp.service;
 
+import com.example.pythonapp.exception.ExerciseNotFoundException;
 import com.example.pythonapp.exception.SolutionNotFoundException;
 import com.example.pythonapp.model.*;
-import com.example.pythonapp.repository.LongSolutionRepository;
-import com.example.pythonapp.repository.ShortSolutionRepository;
-import com.example.pythonapp.repository.SolutionRepository;
+import com.example.pythonapp.repository.*;
+import javafx.util.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.*;
+
 @Service
 public class SolutionServiceImpl implements SolutionService {
+
     @Autowired
     private SolutionRepository solutionRepository;
     @Autowired
     private LongSolutionRepository longSolutionRepository;
     @Autowired
     private ShortSolutionRepository shortSolutionRepository;
+    @Autowired
+    private ExerciseService exerciseService;
+    @Autowired
+    private StudentService studentService;
+  
 
     @Override
     public Solution save(ShortSolution solution){
@@ -66,4 +73,90 @@ public class SolutionServiceImpl implements SolutionService {
         solutionRepository.deleteById(id);
     }
 
+    @Override
+    public void updateSolution(LongSolution solution,Student student)
+    {
+        Exercise exercise =  exerciseService.findExerciseById(solution.getExercise().getId()).get();
+        solution.setExercise(exercise);
+
+        int newscore=solution.getScore();
+
+        if(solution.getScore()==0)
+        {
+            newscore = exerciseService.checkSolution(solution);
+        }
+
+        solution.setStudent(student);
+        solution.setScore(newscore);
+
+        int oldScore = findById(solution.getId()).getScore();
+        updateSolution(solution.getId(), solution);
+        studentService.update(student.getId(),newscore-oldScore);
+    }
+    @Override
+    public List<Map<String,String>> getAllTeacherExercises(Teacher teacher)
+    {
+        List<Exercise> exercises = new ArrayList<>();
+        try{
+
+            exercises = exerciseService.findAllByTeacher_Id(teacher.getId());
+
+        }catch(Exception exception)
+        {
+            System.out.println(exception.getMessage());
+        }
+        List<Map<String, String>> exercisesWithInfo = new ArrayList<>();
+
+        for (Exercise exercise : exercises) {
+
+            Map<Integer, Integer> withScores = new HashMap<>();
+            List<Solution> listSolutions = getAllSolutionsByExercise(exercise);
+            for (Solution solution : listSolutions) {
+                int score = solution.getScore();
+                if (!withScores.containsKey(score))
+                    withScores.put(score, 1);
+                else
+                    withScores.replace(score, withScores.get(score) + 1);
+            }
+            int mostpopularScore = 0;
+            int scorecount = 0;
+            Iterator<Map.Entry<Integer, Integer>> it = withScores.entrySet().iterator();
+
+            while (it.hasNext()) {
+                Map.Entry<Integer, Integer> element = it.next();
+                if (element.getValue() > scorecount) {
+                    mostpopularScore = element.getKey();
+                    scorecount = element.getValue();
+                }
+            }
+
+            Map<String,String> info = new HashMap<>();
+            info.put("id",Integer.toString(exercise.getId()));
+            info.put("name",exercise.getName());
+            info.put("content",exercise.getContent());
+            info.put("introduction",exercise.getIntroduction());
+            info.put("maxPoints",Integer.toString(exercise.getMaxPoints()));
+            info.put("score",Integer.toString(mostpopularScore));
+            info.put("quantity",Integer.toString(scorecount));
+
+            if(exercise instanceof LongExercise)
+            {
+                info.put("correctSolution",((LongExercise)exercise).getCorrectSolution());
+                info.put("solutionSchema",((LongExercise)exercise).getSolutionSchema());
+            }
+
+            if(exercise instanceof ShortExercise)
+            {
+                info.put("firstOption",((ShortExercise)exercise).getFirstOption());
+                info.put("secondOption",((ShortExercise)exercise).getSecondOption());
+                info.put("thirdOption",((ShortExercise)exercise).getThirdOption());
+                info.put("fourthOption",((ShortExercise)exercise).getFourthOption());
+                info.put("correctAnswer",Character.toString(((ShortExercise)exercise).getCorrectAnswer()));
+            }
+
+            exercisesWithInfo.add(info);
+        }
+
+        return exercisesWithInfo;
+    }
 }

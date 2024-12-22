@@ -190,63 +190,7 @@ public class UserController {
     public List<Map<String,String>> getTeacherExercises(){
 
         Teacher loginTeacher = teacherService.findByName(SecurityContextHolder.getContext().getAuthentication().getName()).orElseThrow(UserNotFoundException::new);
-        List<Exercise> exercises = new ArrayList<>();
-        try{
-        exercises = exerciseService.findAllByTeacher_Id(loginTeacher.getId());
-        }catch(Exception exception)
-        {
-            System.out.println(exception.getMessage());
-        }
-        List<Map<String, String>> exercisesWithInfo = new ArrayList<>();
-
-            for (Exercise exercise : exercises) {
-                Map<Integer, Integer> withScores = new HashMap<>();
-                List<Solution> listSolutions = solutionService.getAllSolutionsByExercise(exercise);
-                for (Solution solution : listSolutions) {
-                    int score = solution.getScore();
-                    if (!withScores.containsKey(score))
-                        withScores.put(score, 1);
-                    else
-                        withScores.replace(score, withScores.get(score) + 1);
-                }
-                int mostpopularScore = 0;
-                int scorecount = 0;
-                Iterator<Map.Entry<Integer, Integer>> it = withScores.entrySet().iterator();
-                
-                while (it.hasNext()) {
-                    Map.Entry<Integer, Integer> element = it.next();
-                    if (element.getValue() > scorecount) {
-                        mostpopularScore = element.getKey();
-                        scorecount = element.getValue();
-                    }
-                }
-                
-                Map<String,String> info = new HashMap<>();
-                info.put("id",Integer.toString(exercise.getId()));
-                info.put("name",exercise.getName());
-                info.put("content",exercise.getContent());
-                info.put("introduction",exercise.getIntroduction());
-                info.put("maxPoints",Integer.toString(exercise.getMaxPoints()));
-                info.put("score",Integer.toString(mostpopularScore));
-                info.put("quantity",Integer.toString(scorecount));
-                if(exercise instanceof LongExercise) 
-                {
-                	info.put("correctSolution",((LongExercise)exercise).getCorrectSolution());
-                     info.put("solutionSchema",((LongExercise)exercise).getSolutionSchema());
-                }
-                if(exercise instanceof ShortExercise) 
-                {	
-                	info.put("firstOption",((ShortExercise)exercise).getFirstOption());
-                	info.put("secondOption",((ShortExercise)exercise).getSecondOption());
-                	info.put("thirdOption",((ShortExercise)exercise).getThirdOption());
-                	info.put("fourthOption",((ShortExercise)exercise).getFourthOption());
-                	info.put("correctAnswer",Character.toString(((ShortExercise)exercise).getCorrectAnswer()));
-                }
-               
-                exercisesWithInfo.add(info);
-            }
-
-        return exercisesWithInfo;
+        return solutionService.getAllTeacherExercises(loginTeacher);
     }
     /**
      * function which describe the position of student in ranking

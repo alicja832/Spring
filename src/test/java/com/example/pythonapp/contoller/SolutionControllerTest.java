@@ -62,9 +62,9 @@ public class SolutionControllerTest {
         given()
                 .when()
                 .header("Authorization", "Bearer " + jwtToken)
-                .get("/solution/programming")
+                .get("/solution/")
                 .then()
-                .body("size()", equalTo(2))
+                .body("size()", equalTo(3))
                 .statusCode(200);
     }
 

@@ -14,6 +14,7 @@ import java.util.Optional;
 
 @Repository
 public interface TestingDataRepository extends JpaRepository<TestingData,Integer> {
+
     @Transactional
     @Modifying
     @Query(value = "update testing_data " +

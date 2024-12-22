@@ -1,11 +1,7 @@
 package com.example.pythonapp.service;
-
-import com.example.pythonapp.dto.VerificationRequest;
-import com.example.pythonapp.model.Teacher;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-
 
 @SpringBootTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)

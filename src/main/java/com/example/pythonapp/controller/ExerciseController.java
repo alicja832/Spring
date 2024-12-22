@@ -42,93 +42,26 @@ public class ExerciseController {
     @PostMapping("/programming")
     public ResponseEntity<String> addLongExercise(@RequestBody LongExerciseDto exercise){
 
-        Pair<LongExercise,ArrayList<LongCorrectSolutionPart>> longExerciseArrayListPair;
-        LongExercise longExercise;
         String name = SecurityContextHolder.getContext().getAuthentication().getName();
+        if(teacherService.findByName(name).isEmpty()) return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Użytkownik nie jest zalogowanym nauczycielem.");
         Teacher teacher = teacherService.findByName(name).get();
-        String[] testingData =  exercise.getTestData();
-        Integer[] points =  exercise.getPoints();
-        
         try{
-             longExerciseArrayListPair = createLongExercisefromDto(exercise);
+            exerciseService.addLongExercise(exercise,teacher);
         }
         catch(Exception ex)
         {
-             System.out.println(ex.getMessage());
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
         }
-
-        longExerciseArrayListPair.getKey().setTeacher(teacher);
-        try {
-
-            longExercise = exerciseService.save(longExerciseArrayListPair.getKey());
-
-        }catch(Exception e){
-            System.out.println(e.getMessage());
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-         System.out.println(longExercise.getCorrectSolution());
-        for (int i=0;i<testingData.length;i++) {
-            
-            try{
-                exerciseService.save(new TestingData(longExercise, points[i],testingData[i]));
-            }
-            catch(Exception ex)
-            {
-                System.out.println(ex.getMessage());
-                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-            }
-        }
-
-
-        for(LongCorrectSolutionPart longCorrectSolutionPart:longExerciseArrayListPair.getValue())
-        {
-            longCorrectSolutionPart.setExercise(longExercise);
-            try{
-                exerciseService.save(longCorrectSolutionPart);
-            }
-            catch(Exception ex)
-            {
-                System.out.println(ex.getMessage());
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-            }
-        }
-
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-    /**
-     * Function which create LongExercise from LongExerciseDto and save the parts of the solutions in the list
-     * this is because the exercise_id have to be set in each correct solution Part
-     * @param exercise
-     * @return
-     * @throws Exception
-     */
-    Pair<LongExercise,ArrayList<LongCorrectSolutionPart>> createLongExercisefromDto(LongExerciseDto exercise) throws Exception
-    {
-        String[] correctSolutionParts =  exercise.getCorrectSolutions();
-        String correctSolution="";
-        int amount = correctSolutionParts.length;
-        ArrayList<LongCorrectSolutionPart> parts=new ArrayList<>();
-        String[] correctSolutions = new String[amount];
-        for(int i=0;i<amount;i++)
-        {
-        
-            String result = exerciseService.getOut("\n"+correctSolutionParts[i]+"\n");
-            if(!result.isEmpty() && result.contains("Error") || result.contains("TraceBack"))
-                throw new Exception("Wrong code");
-            parts.add(new LongCorrectSolutionPart(i,correctSolutionParts[i]));
-            correctSolution+=correctSolutionParts[i];
-            correctSolution+="\n";
-            correctSolutions[i] = exerciseService.getOut(correctSolutionParts[i]);
-        }
-        return new Pair<>(new LongExercise(exercise.getName(),exercise.getIntroduction(),exercise.getContent(),exercise.getMaxPoints(),correctSolution,exercise.getSolutionSchema(),exercise.getAccess()),parts);
-    }
+
+
     @GetMapping("/testdata/{id}")
     //@GetMapping("/testData/{id}")
     public List<TestingData> getTestingData(@PathVariable int id){
 
-      return  exerciseService. findAllTestingDataByExerciseId(id);
+      return  exerciseService.findAllTestingDataByExerciseId(id);
     
     }
     /**
@@ -144,8 +77,7 @@ public class ExerciseController {
        exercise.setTeacher(teacher);
        exercise.setCorrectAnswer(Character.toUpperCase(exercise.getCorrectAnswer()));
        try {
-            exercise = exerciseService.save(exercise);
-         
+            exerciseService.save(exercise);
         }catch(Exception e){
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
@@ -179,98 +111,23 @@ public class ExerciseController {
            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Edycja zadania nie powiodła się.");
         }
         return ResponseEntity.status(HttpStatus.OK).body("Edycja zadania powiodła się");
+
     }
+
     /**
      * update long excercise
      * @param exercise - new version of exercise
      */
     @PutMapping("/programming")
     public ResponseEntity<String> updateLongExercise(@RequestBody LongExerciseDto exercise){
-
-        
     
-        Pair<LongExercise,ArrayList<LongCorrectSolutionPart>> longExerciseArrayListPair;
         try{
-            longExerciseArrayListPair = createLongExercisefromDto(exercise);
+            exerciseService.updateLongExercise(exercise);
         }
-        catch(Exception exception)
+        catch (Exception e)
         {
-            System.out.println(exception.getMessage());
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return ResponseEntity.status(HttpStatus.OK).body(e.getMessage());
         }
-      
-        List<TestingData> testingdata = exerciseService.findAllTestingDataByExerciseId(exercise.getId());
-        String[] testdata = exercise.getTestData();
-        Integer[] testingPoints = exercise.getPoints();
-        int i;
-     
-        for(i=0;i<testingdata.size();i++)
-        {
-            exerciseService.update(testingdata.get(i).getId(),new TestingData(longExerciseArrayListPair.getKey(),testingPoints[i],testdata[i]));
-        }
-        Exercise exercisefound =exerciseService.findExerciseById(exercise.getId()).get();
-        while(i<testdata.length)
-        {
-            try{
-            exerciseService.save(new TestingData(exercisefound, testingPoints[i],testdata[i]));
-            }
-            catch(Exception exception)
-            {
-                System.out.println(exception.getMessage());
-            }
-            ++i;
-        }
-
-        try{
-            exerciseService.update(exercise.getId(), longExerciseArrayListPair.getKey());
-        }
-        catch(Exception e)
-        {
-            System.out.println(e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Edycja zadania nie powiodła się");
-        }
-
-       
-        int previous_size = exerciseService.findAllLongCorrectSolutionByExerciseId(exercise.getId()).size();
-        int diff = previous_size - exercise.getMaxPoints();
-
-        for(LongCorrectSolutionPart longCorrectSolutionPart:longExerciseArrayListPair.getValue())
-        {
-            if(exerciseService.findAllLongCorrectSolutionByExerciseIdAndOrder(exercise.getId(),longCorrectSolutionPart.getOrder()).isEmpty())
-            {
-                longCorrectSolutionPart.setExercise(exerciseService.findExerciseById(exercise.getId()).get());
-                try{
-                    exerciseService.save(longCorrectSolutionPart);
-                }
-                catch(Exception ex)
-                {
-                    System.out.println(ex.getMessage());
-                }
-            }
-            try{
-                exerciseService.update(exercise.getId(),longCorrectSolutionPart);
-            }catch(Exception e)
-            {
-                System.out.println(e.getMessage());
-            }
-        }
-       
-        if(diff>0)
-        {
-            int actual_size = exercise.getMaxPoints();
-            while(actual_size<previous_size)
-            {
-               
-                try {
-                    exerciseService.deleteLongCorrectSolutionPart(exercise.getId(), actual_size);
-                }catch(Exception exception)
-                {
-                    System.out.println(exception.getMessage());
-                }
-                ++actual_size;
-            }
-        }
-        
         return ResponseEntity.status(HttpStatus.OK).body("Edycja zadania powiodła się");
     }
     /**
@@ -283,11 +140,11 @@ public class ExerciseController {
         List<ShortExercise> list = exerciseService.getAllShortExercises();
         List<Pair<ShortExercise,Boolean>> listExercise = new ArrayList<>();
         List<Solution> solutions = new ArrayList<>();
-        Boolean access = false;
-        System.out.println(SecurityContextHolder.getContext().getAuthentication());
+        boolean access = false;
+
           if(userService.findByName(SecurityContextHolder.getContext().getAuthentication().getName()).isPresent())
             access = true;
-          if(studentService.findByName(SecurityContextHolder.getContext().getAuthentication().getName()).isPresent())
+          else if(studentService.findByName(SecurityContextHolder.getContext().getAuthentication().getName()).isPresent())
             solutions = solutionService.findStudentSolution(studentService.findByName(SecurityContextHolder.getContext().getAuthentication().getName()).get());
       
 
@@ -295,13 +152,13 @@ public class ExerciseController {
         {
             Predicate<Solution> function = (solution) ->solution.getExercise().equals(e);
             boolean flag = solutions.stream().anyMatch(function);
-            System.out.println(e.getAccess());
+
             if(e.getAccess()==access || !(e.getAccess()))
             {
                 if(flag)
-                    listExercise.add(new Pair<ShortExercise,Boolean>(e,true));
+                    listExercise.add(new Pair<>(e,true));
                 else
-                    listExercise.add(new Pair<ShortExercise,Boolean>(e,false));
+                    listExercise.add(new Pair<>(e,false));
             }
         }
         return listExercise;
@@ -336,9 +193,9 @@ public class ExerciseController {
                 Predicate<Solution> function = (solution) ->solution.getExercise().equals(e);
                 boolean flag = solutions.stream().anyMatch(function);
                 if(flag)
-                    listExercise.add(new Pair<LongExercise,Boolean>(e,true));
+                    listExercise.add(new Pair<>(e,true));
                 else
-                    listExercise.add(new Pair<LongExercise,Boolean>(e,false));
+                    listExercise.add(new Pair<>(e,false));
             }
         }
         return listExercise;
