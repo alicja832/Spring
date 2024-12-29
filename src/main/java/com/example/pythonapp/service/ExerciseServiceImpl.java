@@ -404,7 +404,17 @@ public class ExerciseServiceImpl implements ExerciseService {
         return score;
     }
 
-   
+    @Override
+    public int checkSolution(ShortSolution shortSolution) {
+        ShortExercise exercise = findShortExerciseById(shortSolution.getId()).get();
+        char correctAnswer = exercise.getCorrectAnswer();
+        int maxPoints = shortSolution.getExercise().getMaxPoints();
+        if (correctAnswer == Character.toUpperCase(shortSolution.getAnswer())) {
+            shortSolution.setScore(maxPoints);
+            return maxPoints;
+        }
+        return 0;
+    }
 
 
 }

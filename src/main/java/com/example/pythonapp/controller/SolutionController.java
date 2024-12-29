@@ -160,6 +160,16 @@ public class SolutionController {
     public int checkSolution(@RequestBody LongSolutionDto solution){
        return exerciseService.checkSolution(longSolutionMapper.createLongSolution(solution));
     }
-   
+    /**
+     * function which check the solution of abc exercise
+     * @param solution - programming solution to check
+     * @return
+     */
+    @PostMapping("/abc/check")
+    public int checkSolution(@RequestBody ShortSolution solution){
+
+        return exerciseService.checkSolution(solution);
+    }
+
 
 }
