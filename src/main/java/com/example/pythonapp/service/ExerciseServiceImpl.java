@@ -190,9 +190,7 @@ public class ExerciseServiceImpl implements ExerciseService {
     {
         return longExerciseRepository.findAll();
     }
-    /**
-     * A method which use Python Interpreter to get output from console
-     */
+   
 
     /**
      * Function which create LongExercise from LongExerciseDto and save the parts of the solutions in the list
@@ -256,6 +254,9 @@ public class ExerciseServiceImpl implements ExerciseService {
             }
         }
     }
+    /**
+     * A method which use Python Interpreter to get output from console
+    */
     @Override
     public String getOut(String text){
 
@@ -271,9 +272,10 @@ public class ExerciseServiceImpl implements ExerciseService {
         catch(Exception e)
         {
             e.printStackTrace(new PrintWriter(output));
-            return output.toString();
+            String response = output.toString();
+            //separete the info warning from the all exception send from PythonInterpreter class
+            return response.substring(0,response.indexOf("at org"));
         }
-
         return output.toString();
     }
 
@@ -402,17 +404,7 @@ public class ExerciseServiceImpl implements ExerciseService {
         return score;
     }
 
-    @Override
-    public int checkSolution(ShortSolution shortSolution) {
-        ShortExercise exercise = findShortExerciseById(shortSolution.getId()).get();
-        char correctAnswer = exercise.getCorrectAnswer();
-        int maxPoints = shortSolution.getExercise().getMaxPoints();
-        if (correctAnswer == Character.toUpperCase(shortSolution.getAnswer())) {
-            shortSolution.setScore(maxPoints);
-            return maxPoints;
-        }
-        return 0;
-    }
+   
 
 
 }

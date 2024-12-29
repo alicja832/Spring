@@ -16,8 +16,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
-
 @RestController
 @CrossOrigin (origins=PythonApplication.frontend,maxAge = 3600)
 @RequestMapping("/solution")
@@ -60,6 +58,7 @@ public class SolutionController {
 
         return exercisesAndScores;
     }
+    
     /**
      * add one's programming solution with name exercise and score
      **/
@@ -127,7 +126,6 @@ public class SolutionController {
      */
     @GetMapping("/abc/{id}")
     public List<ShortSolution> getShortSolution(@PathVariable int id){
-
         return List.of(solutionService.findShortSolutionById(id));
     }
 
@@ -138,10 +136,9 @@ public class SolutionController {
     @PutMapping("/")
     public ResponseEntity<String> updateSolution( @RequestBody LongSolutionDto solution){
 
-        if( studentService.findByName(SecurityContextHolder.getContext().getAuthentication().getName()).isEmpty())
+        if(studentService.findByName(SecurityContextHolder.getContext().getAuthentication().getName()).isEmpty())
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Zalogowany użytkownik nie jest uczniem");
-        Student loginStudent = studentService.findByName(SecurityContextHolder.getContext().getAuthentication().getName()).get();
-        solutionService.updateSolution(longSolutionMapper.createLongSolution(solution),loginStudent);
+        solutionService.updateSolution(longSolutionMapper.createLongSolution(solution),SecurityContextHolder.getContext().getAuthentication().getName());
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -163,16 +160,6 @@ public class SolutionController {
     public int checkSolution(@RequestBody LongSolutionDto solution){
        return exerciseService.checkSolution(longSolutionMapper.createLongSolution(solution));
     }
-    /**
-     * function which check the solution of abc exercise
-     * @param solution - programming solution to check
-     * @return
-     */
-    @PostMapping("/abc/check")
-    public int checkSolution(@RequestBody ShortSolution solution){
-
-        return exerciseService.checkSolution(solution);
-    }
-
+   
 
 }

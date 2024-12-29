@@ -15,7 +15,7 @@ public interface SolutionService {
     LongSolution findLongSolutionById(int id);
     ShortSolution findShortSolutionById(int id);
     void updateSolution(int id, LongSolution solution);
-    void updateSolution(LongSolution solution,Student student);
+    void updateSolution(LongSolution solution,String studentName);
     void delete(int id);
     List<Solution> getAllSolutionsByExercise(Exercise exercise);
     List<Map<String,String>> getAllTeacherExercises(Teacher teacher);

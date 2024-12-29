@@ -135,6 +135,7 @@ public class UserController {
         String userName="";
 
         try{
+            
             userName = jwt.getUsernameFromToken(refreshToken);
            
         }catch(Exception ex)
@@ -269,10 +270,10 @@ public class UserController {
         
         ResponseCookie springCookie = ResponseCookie.from("refreshToken", refreshToken)
                 .httpOnly(true)
-                .secure(false)
+                .secure(true)
                 .path("/")
                 .maxAge(90000)
-                .domain("localhost")
+                .domain("pythfront.azurewebsites.net")
                 .build();   
 
         return ResponseEntity

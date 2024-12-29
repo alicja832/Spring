@@ -74,11 +74,11 @@ public class SolutionServiceImpl implements SolutionService {
     }
 
     @Override
-    public void updateSolution(LongSolution solution,Student student)
+    public void updateSolution(LongSolution solution,String studentName)
     {
+        Student student = studentService.findByName(studentName).get();
         Exercise exercise =  exerciseService.findExerciseById(solution.getExercise().getId()).get();
         solution.setExercise(exercise);
-
         int newscore=solution.getScore();
 
         if(solution.getScore()==0)

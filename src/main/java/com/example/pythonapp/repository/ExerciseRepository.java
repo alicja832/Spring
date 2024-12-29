@@ -1,9 +1,6 @@
 package com.example.pythonapp.repository;
 
 import com.example.pythonapp.model.Exercise;
-import com.example.pythonapp.model.Student;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
