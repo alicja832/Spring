@@ -133,9 +133,7 @@ public class UserController {
     public JWTResponse GetNewToken(@CookieValue( name = "refreshToken") String refreshToken)
     {
         String userName="";
-
         try{
-            
             userName = jwt.getUsernameFromToken(refreshToken);
            
         }catch(Exception ex)
@@ -235,14 +233,12 @@ public class UserController {
        }
         else{
             name = SecurityContextHolder.getContext().getAuthentication().getName();
-            System.out.println(name);
             password = userService.findByName(name).get().getPassword();
-            System.out.println(password);
        }
        String role = teacherService.findByName(name).isPresent() ? "ROLE_"+Role.TEACHER : "ROLE_"+Role.STUDENT;
        UserDetails userDetails = new User(name, password, List.of(new SimpleGrantedAuthority(role)));
        String token = jwt.generateToken(userDetails);
-        return new JWTResponse(token,jwt.getExpirationDateFromToken(token));
+       return new JWTResponse(token,jwt.getExpirationDateFromToken(token));
 
    }
     /**
@@ -257,6 +253,7 @@ public class UserController {
         String name = SecurityContextHolder.getContext().getAuthentication().getName();
         UserEntity userEntity = userService.findByName(name).orElseThrow(UserNotFoundException::new);
         String role;
+        
         try{
             
             role = teacherService.findByName(name).isPresent() ? "ROLE_"+Role.TEACHER : "ROLE_"+Role.STUDENT;
@@ -272,8 +269,8 @@ public class UserController {
                 .httpOnly(true)
                 .secure(true)
                 .path("/")
-                .maxAge(90000)
-                .domain("pythfront.azurewebsites.net")
+                .maxAge(24*60*100)
+                .sameSite("None")
                 .build();   
 
         return ResponseEntity

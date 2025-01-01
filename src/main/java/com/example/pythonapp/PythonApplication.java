@@ -7,6 +7,7 @@ public class PythonApplication {
     
    
     public static final String frontend = "https://naukapython.azurewebsites.net/";
+    
     public static void main(String[] args) {
        
         SpringApplication.run(PythonApplication.class, args);

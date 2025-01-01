@@ -15,6 +15,20 @@ public class LongExerciseDto {
     private String[] testData;
     private Integer[] points;
 
+    public LongExerciseDto(){}
+    public LongExerciseDto(int id,boolean access,String name,String introduction,String content,int maxPoints,String[] correctSolutions,String solutionSchema,String[] testData,Integer[] points) {
+        this.id = id;
+        this.access = access;
+        this.name = name;
+        this.introduction = introduction;
+        this.content = content;
+        this.maxPoints = maxPoints;
+        this.correctSolutions = correctSolutions;
+        this.solutionSchema = solutionSchema;
+        this.testData = testData;
+        this.points = points;
+    }
+
     public int getId() {
         return id;
     }

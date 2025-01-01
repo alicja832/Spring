@@ -45,6 +45,7 @@ public class ExerciseController {
         String name = SecurityContextHolder.getContext().getAuthentication().getName();
         if(teacherService.findByName(name).isEmpty()) return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Użytkownik nie jest zalogowanym nauczycielem.");
         Teacher teacher = teacherService.findByName(name).get();
+        
         try{
             exerciseService.addLongExercise(exercise,teacher);
         }
@@ -120,13 +121,15 @@ public class ExerciseController {
      */
     @PutMapping("/programming")
     public ResponseEntity<String> updateLongExercise(@RequestBody LongExerciseDto exercise){
-    
+        
         try{
+            System.out.println(exercise.getSolutionSchema());
             exerciseService.updateLongExercise(exercise);
         }
         catch (Exception e)
         {
-            return ResponseEntity.status(HttpStatus.OK).body(e.getMessage());
+            System.out.println(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
         return ResponseEntity.status(HttpStatus.OK).body("Edycja zadania powiodła się");
     }
@@ -142,18 +145,16 @@ public class ExerciseController {
         List<Solution> solutions = new ArrayList<>();
         boolean access = false;
 
-          if(userService.findByName(SecurityContextHolder.getContext().getAuthentication().getName()).isPresent())
+        if(userService.findByName(SecurityContextHolder.getContext().getAuthentication().getName()).isPresent())
             access = true;
-          else if(studentService.findByName(SecurityContextHolder.getContext().getAuthentication().getName()).isPresent())
+        if(studentService.findByName(SecurityContextHolder.getContext().getAuthentication().getName()).isPresent())
             solutions = solutionService.findStudentSolution(studentService.findByName(SecurityContextHolder.getContext().getAuthentication().getName()).get());
-      
-
+    
         for(ShortExercise e:list)
         {
             Predicate<Solution> function = (solution) ->solution.getExercise().equals(e);
             boolean flag = solutions.stream().anyMatch(function);
-
-            if(e.getAccess()==access || !(e.getAccess()))
+            if(e.getAccess() == access || !(e.getAccess()))
             {
                 if(flag)
                     listExercise.add(new Pair<>(e,true));
@@ -180,7 +181,6 @@ public class ExerciseController {
             if(userService.findByName(SecurityContextHolder.getContext().getAuthentication().getName()).isPresent())
                 access = true;
             if(studentService.findByName(SecurityContextHolder.getContext().getAuthentication().getName()).isPresent())
-            
                 solutions = solutionService.findStudentSolution(studentService.findByName(SecurityContextHolder.getContext().getAuthentication().getName()).get());
             
        
