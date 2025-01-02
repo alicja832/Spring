@@ -175,7 +175,7 @@ public class ExerciseController {
         List<LongExercise> list = exerciseService.getAllLongExercises();
         List<Pair<LongExercise,Boolean>> listExercise = new ArrayList<>();
         List<Solution> solutions = new ArrayList<>();
-        Boolean access = false;
+        boolean access = false;
          
        
             if(userService.findByName(SecurityContextHolder.getContext().getAuthentication().getName()).isPresent())
