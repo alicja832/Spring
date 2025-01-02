@@ -1,6 +1,6 @@
 # Spring application with Python
 
-###If you want to visit homepage, get to through link: https://pythfront.azurewebsites.net/
+###If you want to visit homepage, get to through link: https://naukapython.azurewebsites.net/
 
 ### How to start a project locally?
 #### mvn clean
