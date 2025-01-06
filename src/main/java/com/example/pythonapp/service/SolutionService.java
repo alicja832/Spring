@@ -1,15 +1,13 @@
 package com.example.pythonapp.service;
 
-import com.example.pythonapp.exception.ExerciseNotFoundException;
 import com.example.pythonapp.model.*;
-import javafx.util.Pair;
 
 import java.util.List;
 import java.util.Map;
 
 public interface SolutionService {
-    Solution save(ShortSolution solution);
-    Solution save(LongSolution solution);
+    ShortSolution save(ShortSolution solution);
+    LongSolution save(LongSolution solution);
     List<Solution> findStudentSolution(Student student);
     Solution findById(int id);
     LongSolution findLongSolutionById(int id);

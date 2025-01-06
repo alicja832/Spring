@@ -8,10 +8,13 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
-
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 
+/**
+ * This class test only endpoints, which not demand the database connection
+ * Those which demand this connection are in folder service
+ */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class SolutionControllerTest {
@@ -52,9 +55,6 @@ public class SolutionControllerTest {
     }
 
 
-    /**
-     * get one's solutions with name exercise and score
-     **/
     @Test
     @Order(2)
     public void getProgrammingSolutionsTest(){

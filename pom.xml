@@ -31,7 +31,7 @@
         <java.version>17</java.version>
     </properties>
     <dependencies>
-        
+
         <dependency>
             <groupId>org.eclipse.angus</groupId>
             <artifactId>angus-mail</artifactId>
@@ -79,23 +79,23 @@
             <version>22.0.2</version>
         </dependency>
 
-    
-            <!-- JWT tokens -->
-          <dependency>
+
+        <!-- JWT tokens -->
+        <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-api</artifactId>
             <version>0.11.5</version>
-          </dependency>
-          <dependency>
+        </dependency>
+        <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-impl</artifactId>
             <version>0.11.5</version>
-          </dependency>
-          <dependency>
+        </dependency>
+        <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-jackson</artifactId>
             <version>0.11.5</version>
-          </dependency>
+        </dependency>
         <dependency>
             <groupId>io.rest-assured</groupId>
             <artifactId>rest-assured</artifactId>
@@ -114,6 +114,26 @@
             <artifactId>jackson-databind</artifactId>
             <version>2.15.0</version>
         </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.15.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <version>5.15.2</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.mockito/mockito-core -->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>5.15.2</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -150,7 +170,7 @@
                         <os>Linux</os>
                         <javaVersion>Java 17</javaVersion>
                         <webContainer>Java SE</webContainer>
-                    </runtime> 
+                    </runtime>
                     <deployment>
                         <resources>
                             <resource>

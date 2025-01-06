@@ -13,6 +13,10 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 
+/**
+ * This class test only endpoints, which not demand the database connection
+ * Those which demand this connection are in folder service
+ */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class UserControllerTest {
@@ -85,7 +89,7 @@ public class UserControllerTest {
                 .header("Authorization", "Bearer " + jwtToken)
                 .get("/user/exercises")
                 .then()
-                .body("size()", equalTo(4))
+                .body("size()", equalTo(5))
                 .statusCode(200);
     }
 

@@ -11,6 +11,7 @@ public class LongSolutionMapper {
         longSolution.setExercise(longSolutionDto.getExercise());
         longSolution.setStudent(longSolutionDto.getStudent());
         longSolution.setScore(longSolutionDto.getScore());
+        
         return longSolution;
     }
 }

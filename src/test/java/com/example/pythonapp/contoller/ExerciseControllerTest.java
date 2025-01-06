@@ -11,15 +11,20 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 
+/**
+ * This class test only endpoints, which not demand the database connection
+ * Those which demand this connection are in folder service
+ */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class ExerciseControllerTest {
 
     @Autowired
     UserController userController;
+
     @Autowired
     JWTToken token;
-    
+
     @LocalServerPort
     private Integer port;
     private static String jwtToken;
@@ -28,9 +33,6 @@ public class ExerciseControllerTest {
     void setUp() {
         RestAssured.port = port;
     }
-
-
-
 
      @Test
      @Order(1)
@@ -44,7 +46,7 @@ public class ExerciseControllerTest {
          try {
              jwt = userController.authenticate(teacher);
          } catch (Exception exception) {
-             exception.printStackTrace();
+             System.out.println(exception.getMessage());
          }
 
          if (jwt != null)
@@ -57,26 +59,27 @@ public class ExerciseControllerTest {
      @Order(2)
      void TestGetAbcExercises() {
 
+        int amountOfExercises = 2;
         given()
                 .when()
                 .header("Authorization", "Bearer " + jwtToken)
                 .get("exercise/abc")
                 .then()
-                .body("size()", equalTo(2))
+                .body("size()", equalTo(amountOfExercises))
                 .statusCode(200);
    
     }
-
 
     @Test
     @Order(3)
     void TestGetAbcExercisesUnAuthorized() {
 
+        int amountOfExercises = 1;
         given()
                 .when()
                 .get("exercise/abc")
                 .then()
-                .body("size()", equalTo(1))
+                .body("size()", equalTo(amountOfExercises))
                 .statusCode(200);
 
     }
@@ -85,12 +88,13 @@ public class ExerciseControllerTest {
     @Order(4)
     void TestGetProgrammingExercises() {
 
+        int amountOfExercises = 3;
         given()
                 .when()
                 .header("Authorization", "Bearer " + jwtToken)
                 .get("exercise/programming")
                 .then()
-                .body("size()", equalTo(2))
+                .body("size()", equalTo(amountOfExercises))
                 .statusCode(200);
 
     }
@@ -98,12 +102,12 @@ public class ExerciseControllerTest {
     @Test
     @Order(5)
     void  TestGetProgrammingExercisesUnAuthorized() {
-
+        int amountOfExercises = 1;
         given()
                 .when()
                 .get("exercise/programming")
                 .then()
-                .body("size()", equalTo(1))
+                .body("size()", equalTo(amountOfExercises))
                 .statusCode(200);
 
     }
@@ -133,6 +137,4 @@ public class ExerciseControllerTest {
                 .statusCode(200);
 
     }
-
-
 }

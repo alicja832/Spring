@@ -16,17 +16,37 @@ public class LongCorrectSolutionPart{
   
     @Column(name = "correct_solution_part")
     String correctSolutionPart;
+
+    @Column(name = "points")
+    Integer points;
+    
     public LongCorrectSolutionPart(){}
+    
     public LongCorrectSolutionPart(int order,  String correctSolutionPart){
         this.order = order;
         this.correctSolutionPart = correctSolutionPart;
     }
+    
+    public LongCorrectSolutionPart(int order,  String correctSolutionPart,int points){
+        this.order = order;
+        this.correctSolutionPart = correctSolutionPart;
+        this.points = points;
+    }
+    
     public String getCorrectSolutionPart() {
         return correctSolutionPart;
     }
 
     public void setCorrectSolutionPart(String correctSolutionPart) {
         this.correctSolutionPart = correctSolutionPart;
+    }
+
+    public int getPoints() {
+        return points;
+    }
+
+    public void setPoints(int points) {
+        this.points = points;
     }
 
     public int getOrder() {

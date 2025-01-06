@@ -29,6 +29,7 @@ public class LongCorrectSolutionPartId implements Serializable {
     public void setOrder(int order) {
         this.order = order;
     }
+
     @Override
     public boolean equals(Object other)
     {

@@ -1,10 +1,8 @@
 package com.example.pythonapp.service;
 
-import com.example.pythonapp.exception.ExerciseNotFoundException;
 import com.example.pythonapp.exception.SolutionNotFoundException;
 import com.example.pythonapp.model.*;
 import com.example.pythonapp.repository.*;
-import javafx.util.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,11 +24,11 @@ public class SolutionServiceImpl implements SolutionService {
   
 
     @Override
-    public Solution save(ShortSolution solution){
+    public ShortSolution save(ShortSolution solution){
         return shortSolutionRepository.save(solution);
     }
     @Override
-    public Solution save(LongSolution solution){
+    public LongSolution save(LongSolution solution){
         return longSolutionRepository.save(solution);
     }
 

@@ -42,6 +42,6 @@ public interface ExerciseService {
     int checkSolution(LongSolution longSolution);
     int checkSolution(ShortSolution shortSolution);
     Pair<LongExercise, ArrayList<LongCorrectSolutionPart>> createLongExerciseFromDto(LongExerciseDto exercise) throws Exception;
-    void addLongExercise(LongExerciseDto exercise,Teacher teacher) throws Exception;
+    LongExercise addLongExercise(LongExerciseDto exercise,Teacher teacher) throws Exception;
     void updateLongExercise(LongExerciseDto exercise) throws Exception;
 }

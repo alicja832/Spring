@@ -79,7 +79,7 @@ public class LongExerciseDto {
         return correctSolutions;
     }
 
-    public void setCorrectSolution(String[] correctSolutions) {
+    public void setCorrectSolutions(String[] correctSolutions) {
         this.correctSolutions = correctSolutions;
     }
     public void setSolutionSchema(String solutionSchema) {

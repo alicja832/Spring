@@ -45,27 +45,27 @@ public class UserController {
     private TeacherService teacherService;
     @Autowired
     private StudentService studentService;
-  
     @Autowired
     private SolutionService solutionService;
+
     @Autowired
     private JWTToken jwt;
     @Autowired
     private AuthenticationManager authenticationManager;
-    @Autowired
-    private ExerciseService exerciseService;
+
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
     private final UserMapper userMapper = new UserMapper();
-   
-  
+
+
     /**
-     * Dodawanie nowego uzytkownika
+     *
+     * @param userCreationDto - user data
+     * @return - ResponseEntity with HTTP status
      */
     @PostMapping("/")
     public ResponseEntity<String> add(@RequestBody UserCreationDto userCreationDto){
 
         userCreationDto.setPassword( encoder.encode(userCreationDto.getPassword()));
-        ResponseEntity<String> responseEntity = new ResponseEntity<>(HttpStatus.CREATED);
 
         if(userService.findByEmail(userCreationDto.getEmail()).isPresent())
         {
@@ -80,7 +80,7 @@ public class UserController {
         UserEntity createdEntity = userMapper.createDto(userCreationDto);
         if(createdEntity instanceof Teacher) teacherService.save((Teacher) createdEntity);
         if(createdEntity instanceof Student) studentService.save((Student) createdEntity);
-        return responseEntity;
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     /**
@@ -97,8 +97,10 @@ public class UserController {
             return List.of(userService.findByName(name).get());
         return List.of(userEntity);
     }
+
     /**
-     * zmiana hasła
+     * @param request - password and user email whom password should change
+     * @return ResponseEntity with HTTP status
      */
     @PutMapping("/changepassword")
     public ResponseEntity<String> changePassword(@RequestBody VerificationRequest request)
@@ -106,11 +108,11 @@ public class UserController {
         userService.updateUser(request.email,encoder.encode(request.password));
         return new ResponseEntity<>(HttpStatus.OK);
     }
-    
-   /**
-    * metoda generująca kod do zmiany hasła 
-    * zostaje wysłana na podany adres  
-   */
+
+    /**
+     * @param email - user email, who want to change password
+     * @return ResponseEntity with HTTP status
+     */
     @PostMapping("/code")
     public ResponseEntity<String> getCode(@RequestBody String email)
     {
@@ -129,6 +131,10 @@ public class UserController {
         return new ResponseEntity<String>(HttpStatus.OK);
     }
 
+    /**
+     * @param refreshToken - the refresh-token from cookie, which allow to get a new token
+     * @return new JWT token
+     */
     @GetMapping("/token")
     public JWTResponse GetNewToken(@CookieValue( name = "refreshToken") String refreshToken)
     {
@@ -158,13 +164,14 @@ public class UserController {
                 throw new UserNotFoundException();
             }
         }
-    
-      
+
         return generateNewToken();
     }
+
     /**
-    * weryfikacja kodu do zmiany hasła
-    */
+     * @param data - email and code send to change password
+     * @return ResponseEntity which inform about the correctness of code
+     */
     @PostMapping("/codeverification")
     public ResponseEntity<String> codeVerification(@RequestBody VerificationRequest data)
     {
@@ -172,8 +179,8 @@ public class UserController {
     }
 
     /**
-    * ranking użytkowników
-    */
+     * @return list of students sorted by their score
+     */
     @GetMapping("/ranking")
     public List<Student> getStudentRanking()
     {
@@ -183,16 +190,19 @@ public class UserController {
     }
 
     /**
-    * lista zadan stworzonych przez zalogowanego nauczyciela
-    */
+     *
+     * @return - the list of logged teacher exercises
+     */
     @GetMapping("/exercises")
     public List<Map<String,String>> getTeacherExercises(){
 
         Teacher loginTeacher = teacherService.findByName(SecurityContextHolder.getContext().getAuthentication().getName()).orElseThrow(UserNotFoundException::new);
         return solutionService.getAllTeacherExercises(loginTeacher);
     }
+
     /**
      * function which describe the position of student in ranking
+     * @return - pair with information about student
      */
     @GetMapping("/position")
     public Pair<Integer,Integer> getStudentPosition(){
@@ -205,12 +215,12 @@ public class UserController {
     }
    
    /**
-     * @return
-     * @throws Exception
-     * autentykacja uzytkownika, generowanie tokenu
+     * @return new token for logged user
+     * @throws Exception - if the user doesn't exist
+     * autentication of user, token generation
      */
    @PostMapping("/authenticate")
-   public JWTResponse authenticate(@RequestBody UserEntity userEntity){
+   public JWTResponse authenticate(@RequestBody UserEntity userEntity) throws UserNotFoundException{
 
         String name, password;
        if(userEntity!=null) {
@@ -242,8 +252,7 @@ public class UserController {
 
    }
     /**
-     * @return Response Entity with HttpOnlyCookie
-     * generowanie refresh tokenu
+     * @return Response Entity with HttpOnlyCookie with refresh-token
      */
     @GetMapping("/refreshtoken")
     public ResponseEntity<?> refreshToken() {

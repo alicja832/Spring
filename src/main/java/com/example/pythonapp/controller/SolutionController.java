@@ -2,7 +2,6 @@ package com.example.pythonapp.controller;
 import javafx.util.Pair;
 import com.example.pythonapp.PythonApplication;
 import com.example.pythonapp.dto.LongSolutionDto;
-import com.example.pythonapp.exception.ExerciseNotFoundException;
 import com.example.pythonapp.mapper.LongSolutionMapper;
 import com.example.pythonapp.model.*;
 import com.example.pythonapp.service.*;
@@ -45,13 +44,29 @@ public class SolutionController {
             Map<String,String> map = new HashMap<>();
             Exercise exercise=solution.getExercise();
 
+            if(exercise!=null) {
 
-                    map.put("id", Integer.toString(solution.getId()));
-                    map.put("name", solution.getExercise().getName());
-                    map.put("score", Integer.toString(solution.getScore()));
+                map.put("id", Integer.toString(solution.getId()));
+                map.put("name", exercise.getName());
+                map.put("score", Integer.toString(solution.getScore()));
 
-                    if(exercise instanceof LongExercise) { map.put("retakeposibility", "true");}
-                    else {map.put("retakeposibility", "false");}
+                if(exercise instanceof LongExercise) {
+
+                    if(exerciseService.findLongExerciseById(exercise.getId()).isPresent())
+                        map.put("retakeposibility", "true");
+                }
+                else {
+
+                    map.put("retakeposibility", "false");
+                }
+            }
+
+            else
+            {
+                map.put("name", "Zadanie usunięto");
+                map.put("score", Integer.toString(solution.getScore()));
+                map.put("retakeposibility", "deleted");
+            }
 
             exercisesAndScores.add(map);
         }
@@ -60,27 +75,26 @@ public class SolutionController {
     }
     
     /**
-     * add one's programming solution with name exercise and score
+     * add one's programming solution
      **/
     @PostMapping("/programming")
     public ResponseEntity<Solution> addSolution(@RequestBody LongSolutionDto solution){
 
         LongExercise exercise =  exerciseService.findLongExerciseById(solution.getExercise().getId()).get();
-        solution.setExercise(exercise);
-        LongSolutionMapper longSolutionMapper=new LongSolutionMapper();
+        LongSolutionMapper longSolutionMapper = new LongSolutionMapper();
         Student loginStudent = studentService.findByName(SecurityContextHolder.getContext().getAuthentication().getName()).get();
-        int newscore = (exercise.getSolutionSchema().isEmpty()) ? checkSolution(solution) : checkSolutionWithTests(solution).getValue();
-       
         LongSolution solutionCreated = longSolutionMapper.createLongSolution(solution);
+        int newScore = (exercise.getSolutionSchema()==null) ? checkSolution(solution) : checkSolutionWithTests(solution).getValue();
+    
+        solutionCreated.setScore(newScore);
         solutionCreated.setStudent(loginStudent);
-        solutionCreated.setScore(newscore);
-        
         try{
             solutionService.save(solutionCreated);
             studentService.update(loginStudent.getId(),solutionCreated.getScore());
-        }catch(Exception exception)
+        }
+        catch(Exception ex)
         {
-            System.out.println(exception.getMessage());
+            System.out.println(ex.getMessage());
         }
         return new ResponseEntity<>(solutionCreated,HttpStatus.CREATED);
     }
@@ -143,7 +157,7 @@ public class SolutionController {
     }
 
     /**
-     * function which check the solution of programming exercise
+     * function which check the solution of programming exercise with testData
      * @param solution - programming solution to check
      * @return
      */
