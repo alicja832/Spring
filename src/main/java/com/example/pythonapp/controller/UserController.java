@@ -84,8 +84,8 @@ public class UserController {
     }
 
     /**
-     * podaje informacje o użytkowniku
-     * @return
+     * give information about logged user
+     * @return List of userEntity
      */
     @GetMapping("/")
     public List<UserEntity> getUserInformation(){
@@ -190,7 +190,6 @@ public class UserController {
     }
 
     /**
-     *
      * @return - the list of logged teacher exercises
      */
     @GetMapping("/exercises")
@@ -217,7 +216,7 @@ public class UserController {
    /**
      * @return new token for logged user
      * @throws Exception - if the user doesn't exist
-     * autentication of user, token generation
+     * authentication of user, token generation
      */
    @PostMapping("/authenticate")
    public JWTResponse authenticate(@RequestBody UserEntity userEntity) throws UserNotFoundException{

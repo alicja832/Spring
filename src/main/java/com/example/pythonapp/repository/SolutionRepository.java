@@ -24,9 +24,7 @@ public interface SolutionRepository extends JpaRepository<Solution,Integer> {
     @Query(value = "update solution set score=:score where id=:id", nativeQuery = true)
     void updateById(@Param("id") int id, @Param("score") int score);
 
-    /**
-     * @param solutionId - id of solution in which we set the exercise to null
-     */
+
     @Transactional
     @Modifying
     @Query(value = "update solution set exercise_id=null where id=:id", nativeQuery = true)

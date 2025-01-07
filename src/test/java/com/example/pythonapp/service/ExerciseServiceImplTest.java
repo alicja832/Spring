@@ -6,6 +6,7 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 import static org.mockito.Mockito.doAnswer;
@@ -37,6 +38,9 @@ class ExerciseServiceImplTest {
 
     @Mock
     private TeacherRepository teacherRepository;
+
+    @Mock
+    private LongCorrectSolutionPartRepository longCorrectSolutionRepository;
 
     @InjectMocks
     private ExerciseServiceImpl exerciseService;
@@ -84,7 +88,7 @@ class ExerciseServiceImplTest {
 
     @Test
     @Order(2)
-    void getOutTest() {
+    void updateTest() {
 
         LongExercise longExercise1 = longExercise;
         longExercise1.setName("updateTest");
@@ -116,7 +120,7 @@ class ExerciseServiceImplTest {
     @Test
     @Order(4)
     void findExerciseByIdTest() {
-        when(exerciseRepository.findById(1)).thenReturn(Optional.of(longExercise));
+        when(exerciseRepository.findById(longExercise.getId())).thenReturn(Optional.of(longExercise));
         Assertions.assertTrue(exerciseService.findExerciseById(longExercise.getId()).isPresent());
     }
 
@@ -130,7 +134,7 @@ class ExerciseServiceImplTest {
     @Test
     @Order(6)
     void findLongExerciseByIdTest() {
-        when(longExerciseRepository.findById(1)).thenReturn(Optional.of(longExercise));
+        when(longExerciseRepository.findById(longExercise.getId())).thenReturn(Optional.of(longExercise));
         Assertions.assertTrue(exerciseService.findLongExerciseById(longExercise.getId()).isPresent());
     }
 
@@ -148,14 +152,15 @@ class ExerciseServiceImplTest {
     }
 
     @Test
-    @Order(10)
+    @Order(12)
     void deleteTest() {
 
-        when(exerciseRepository.findById(longExercise.getId())).thenReturn(Optional.empty());
-        Assertions.assertFalse(exerciseService.findExerciseById(longExercise.getId()).isPresent());
-        when(exerciseRepository.findById(longExercise.getId())).thenReturn(Optional.empty());
-        Assertions.assertFalse(exerciseService.findExerciseById(shortExercise.getId()).isPresent());
 
+        exerciseService.delete(longExercise.getId());
+        Mockito.verify(exerciseRepository, Mockito.times(1)).deleteById(longExercise.getId());
+
+        exerciseService.delete(shortExercise.getId());
+        Mockito.verify(exerciseRepository, Mockito.times(1)).deleteById(shortExercise.getId());
     }
 
     @Test
@@ -166,8 +171,8 @@ class ExerciseServiceImplTest {
         String [] tests = {"1"};
         Integer [] numbers = {1};
         LongExerciseDto longExercisedto;
-        longExercisedto = new LongExerciseDto(3,true,"TestB","Test","Test",10,words,"def fun(a):\nreturn",tests,numbers);
-        longExercise = new LongExercise("TestB","Test","Test",10,"print(1)","def fun(a):\nreturn", true);
+        longExercisedto = new LongExerciseDto(3,true,"TestB","Test","Test",10,words,"def fun(a):\n\treturn",tests,numbers);
+        longExercise = new LongExercise("TestB","Test","Test",10,"print(1)","def fun(a):\n\treturn", true);
         longExercise.setId(longExercisedto.getId());
         when(teacherRepository.findByName("alicja832")).thenReturn(Optional.of(mockTeacher));
         Teacher teacher = teacherService.findByName("alicja832").get();

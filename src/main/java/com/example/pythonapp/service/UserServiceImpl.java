@@ -45,6 +45,12 @@ public class UserServiceImpl implements UserService {
     {
         userRepository.updateByEmail(email, password);
     }
+
+    /**
+     *
+     * @param email - email of User for who have to generate code
+     * @throws Exception
+     */
     @Override
     public void generateCode(String email) throws Exception{  
         
@@ -100,7 +106,11 @@ public class UserServiceImpl implements UserService {
             EmailCode.add(new Pair<>(email,Integer.toString(code)));
         }
 
-        @Override
+    /**
+     * @param data - data to verify - email and code
+     * @return boolean if data are correct
+     */
+    @Override
         public boolean codeVerify(VerificationRequest data)
         {
            Pair<String,String> emailFounded = EmailCode.stream()

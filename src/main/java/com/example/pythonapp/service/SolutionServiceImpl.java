@@ -71,6 +71,11 @@ public class SolutionServiceImpl implements SolutionService {
         solutionRepository.deleteById(id);
     }
 
+    /**
+     *
+     * @param solution - solution to save
+     * @param studentName - student name who solution have to be save
+     */
     @Override
     public void updateSolution(LongSolution solution,String studentName)
     {
@@ -91,6 +96,12 @@ public class SolutionServiceImpl implements SolutionService {
         updateSolution(solution.getId(), solution);
         studentService.update(student.getId(),newscore-oldScore);
     }
+
+    /**
+     *
+     * @param teacher - teacher who exercises have to be founded
+     * @return list of maps with only chosen information about exercise
+     */
     @Override
     public List<Map<String,String>> getAllTeacherExercises(Teacher teacher)
     {

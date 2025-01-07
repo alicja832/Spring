@@ -27,10 +27,11 @@ public class SolutionController {
     @Autowired
     private StudentService studentService;
     private final LongSolutionMapper longSolutionMapper=new LongSolutionMapper();
-    
+
     /**
-     * get one's solutions with name exercise and score
-     **/
+     *
+     * @return List<Map<String,String>>- one's solutions with name exercise and score
+     */
     @GetMapping("/")
     public List<Map<String,String>> getSolutions(){
 
@@ -73,10 +74,12 @@ public class SolutionController {
 
         return exercisesAndScores;
     }
-    
+
     /**
-     * add one's programming solution
-     **/
+     *
+     * @param solution - add programming solution
+     * @return - ResponseEntity with HTTP status
+     */
     @PostMapping("/programming")
     public ResponseEntity<Solution> addSolution(@RequestBody LongSolutionDto solution){
 
@@ -98,9 +101,11 @@ public class SolutionController {
         }
         return new ResponseEntity<>(solutionCreated,HttpStatus.CREATED);
     }
+
     /**
-     * add one's abc solution with name exercise and score
-     **/
+     * @param solution  one's abc solution with name exercise and score
+     * @return ResponseEntity with HTTP status
+     */
     @PostMapping("/abc")
     public ResponseEntity<Solution> addSolution(@RequestBody ShortSolution solution){
 
@@ -114,9 +119,8 @@ public class SolutionController {
 
     }
     /**
-     * get one long solution from database
-     * @param id
-     * @return
+     * @param id - id of exercise which we want to found
+     * @return - founded long solution from database
      */
     @GetMapping("/{id}")
     public List<LongSolution> getLongSolution(@PathVariable int id){
@@ -124,8 +128,10 @@ public class SolutionController {
 
         return List.of(solutionService.findLongSolutionById(id));
     }
+
     /**
-     * get  Longcorrectsolutionparts from database for given long exercise
+     * @param id - id of exercise
+     * @return  Longcorrectsolutionparts from database for given long exercise
      */
      @GetMapping("/parts/{id}")
     public List<LongCorrectSolutionPart> getLongPart(@PathVariable int id){
@@ -135,8 +141,8 @@ public class SolutionController {
     }
      /**
      * get one short solution from database
-     * @param id
-     * @return
+     * @param id - id of exercise
+     * @return list of short solutions of exercise
      */
     @GetMapping("/abc/{id}")
     public List<ShortSolution> getShortSolution(@PathVariable int id){
@@ -159,7 +165,7 @@ public class SolutionController {
     /**
      * function which check the solution of programming exercise with testData
      * @param solution - programming solution to check
-     * @return
+     * @return - Pair with result of tests and score
      */
     @PostMapping("/programming/test")
     public Pair<String,Integer> checkSolutionWithTests(@RequestBody LongSolutionDto solution){
@@ -168,7 +174,7 @@ public class SolutionController {
     /**
      * function which check the solution of programming exercise
      * @param solution - programming solution to check
-     * @return
+     * @return score of checked solution
      */
     @PostMapping("/programming/check")
     public int checkSolution(@RequestBody LongSolutionDto solution){
@@ -177,7 +183,7 @@ public class SolutionController {
     /**
      * function which check the solution of abc exercise
      * @param solution - programming solution to check
-     * @return
+     * @return score of checked solution
      */
     @PostMapping("/abc/check")
     public int checkSolution(@RequestBody ShortSolution solution){

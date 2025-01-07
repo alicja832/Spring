@@ -1,22 +1,14 @@
 package com.example.pythonapp.service;
 import com.example.pythonapp.model.*;
-import com.example.pythonapp.repository.ExerciseRepository;
 import com.example.pythonapp.repository.ShortSolutionRepository;
 import com.example.pythonapp.repository.LongSolutionRepository;
-import com.example.pythonapp.repository.ShortSolutionRepository;
 import com.example.pythonapp.repository.SolutionRepository;
-import com.example.pythonapp.repository.StudentRepository;
-import io.restassured.RestAssured;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 
 import java.util.List;
@@ -31,25 +23,16 @@ class SolutionServiceImplTest {
 
     private static LongSolution longSolution;
     private static ShortSolution shortSolution;
-    private static Student mockStudent;
     private static Exercise exercise;
+    private static Student mockStudent;
     @Mock
     private SolutionRepository solutionRepository;
-    @Mock
-    private StudentRepository studentRepository;
-    @Mock
-    private ExerciseRepository exerciseRepository;
     @Mock
     private LongSolutionRepository longSolutionRepository;
     @Mock
     private ShortSolutionRepository shortSolutionRepository;
-
     @InjectMocks
-    private SolutionService solutionService;
-    @InjectMocks
-    private StudentService studentService;
-    @InjectMocks
-    private ExerciseService exerciseService;
+    private SolutionServiceImpl solutionService;
 
 
 
@@ -83,7 +66,6 @@ class SolutionServiceImplTest {
         ShortSolution shortSolution1 = shortSolution;
         longSolution1.setId(1);
         shortSolution1.setId(2);
-        when(studentRepository.findByName("alicja832")).thenReturn(Optional.of(mockStudent));
 
         when(longSolutionRepository.save(longSolution)).thenReturn(longSolution1);
         longSolution = solutionService.save(longSolution);
@@ -121,7 +103,7 @@ class SolutionServiceImplTest {
     @Test
     @Order(4)
     void findLongSolutionByIdTest() {
-        when(solutionRepository.findById(longSolution.getId())).thenReturn(Optional.of(longSolution));
+        when(longSolutionRepository.findById(longSolution.getId())).thenReturn(Optional.of(longSolution));
         Assertions.assertEquals(longSolution.getId(),solutionService.findLongSolutionById(longSolution.getId()).getId());
     }
 
@@ -129,16 +111,22 @@ class SolutionServiceImplTest {
     @Test
     @Order(5)
     void findShortSolutionByIdTest() {
-        when(solutionRepository.findById(longSolution.getId())).thenReturn(Optional.of(longSolution));
-        Assertions.assertEquals(longSolution.getId(),solutionService.findLongSolutionById(longSolution.getId()).getId());
+        when(shortSolutionRepository.findById(shortSolution.getId())).thenReturn(Optional.of(shortSolution));
+        Assertions.assertEquals(shortSolution.getId(),solutionService.findShortSolutionById(shortSolution.getId()).getId());
     }
 
     @Test
     @Order(6)
     void updateSolutionTest() {
-        longSolution.setSolutionContent("def fun(a):\n\tprint(12)");
-        Assertions.assertEquals("def fun(a):\n\tprint(12)",solutionService.findById(longSolution.getId()));
 
+        LongSolution longSolution1 = longSolution;
+        longSolution1.setSolutionContent("print(10)");
+        doAnswer((Answer<Void>) invocation -> {
+            longSolution.setSolutionContent(longSolution1.getSolutionContent());
+            return null;
+        }).when(longSolutionRepository).updateById(1, longSolution1.getSolutionContent());
+        solutionService.updateSolution (1,longSolution1);
+        Assertions.assertEquals(longSolution1.getSolutionContent(),longSolution.getSolutionContent());
     }
 
     @Test
@@ -148,19 +136,17 @@ class SolutionServiceImplTest {
         when(solutionRepository.getAllByExercise(exercise)).thenReturn(List.of(longSolution,shortSolution));
         Assertions.assertFalse(solutionService.getAllSolutionsByExercise(exercise).isEmpty());
     }
-
-
     @Test
     @Order(8)
     void deleteTest() {
 
-        when(solutionRepository.findById(longSolution.getId())).thenReturn(Optional.empty());
-        exerciseService.delete(longSolution.getId());
-        Assertions.assertThrows(RuntimeException.class, solutionService.findById(longSolution.getId()));
 
-        when(solutionRepository.findById(shortSolution.getId())).thenReturn(Optional.empty());
-        exerciseService.delete(shortSolution.getId());
-        Assertions.assertThrows(solutionService.findById(shortSolution.getId()));
+        solutionService.delete(longSolution.getId());
+        Mockito.verify(solutionRepository, Mockito.times(1)).deleteById(longSolution.getId());
 
+        solutionService.delete(shortSolution.getId());
+        Mockito.verify(solutionRepository, Mockito.times(1)).deleteById(shortSolution.getId());
     }
+
+
 }

@@ -23,7 +23,9 @@ public class Student  extends UserEntity{
     public int getScore() {
         return score;
     }
-
+    public void setScore(int score) {
+        this.score = score;
+    }
     public boolean equals(Object o) {
         if (this == o)
             return true;

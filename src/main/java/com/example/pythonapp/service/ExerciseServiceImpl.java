@@ -6,8 +6,6 @@ import com.example.pythonapp.repository.*;
 import javafx.util.Pair;
 import org.python.util.PythonInterpreter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import java.io.StringWriter;
 import java.util.*;
@@ -70,6 +68,11 @@ public class ExerciseServiceImpl implements ExerciseService {
         exerciseRepository.updateById(id,exercise.getName(),exercise.getIntroduction(),exercise.getContent(),exercise.getMaxPoints(),exercise.getAccess());
     }
 
+    /**
+     *
+     * @param exercise -exercise to save
+     * @throws Exception
+     */
     @Override
     public void updateLongExercise(LongExerciseDto exercise) throws Exception {
         
@@ -81,15 +84,15 @@ public class ExerciseServiceImpl implements ExerciseService {
         String[] testdata = exercise.getTestData();
         Integer[] testingPoints = exercise.getPoints();
         int i;
-        System.out.println("Problem");
+
         for (i = 0; i < testingdata.size(); i++) {
-             System.out.println("Problem");
+
             update(testingdata.get(i).getId(), new TestingData(longExerciseArrayListPair.getKey(), testingPoints[i], testdata[i]));
         }
 
         Exercise exercisefound = findExerciseById(exercise.getId()).get();
         while (i < testdata.length) {
-             System.out.println("Problem");
+
             save(new TestingData(exercisefound, testingPoints[i], testdata[i]));
             ++i;
         }
@@ -102,35 +105,34 @@ public class ExerciseServiceImpl implements ExerciseService {
         int diff = previous_size - exercise.getMaxPoints();
 
         for (LongCorrectSolutionPart longCorrectSolutionPart : longExerciseArrayListPair.getValue()) {
-             System.out.println("Problem");
+
             if (findAllLongCorrectSolutionByExerciseIdAndOrder(exercise.getId(), longCorrectSolutionPart.getOrder()).isEmpty()) {
-                 System.out.println("Problem");
+
                 longCorrectSolutionPart.setExercise(findExerciseById(exercise.getId()).get());
                 save(longCorrectSolutionPart);
 
             }
-             System.out.println("Problem");
+
             update(exercise.getId(), longCorrectSolutionPart);
         }
 
         if (diff > 0) {
-             System.out.println("Problem");
+
             int actual_size = exercise.getMaxPoints();
             while (actual_size < previous_size) {
-                 System.out.println("Problem");
+
                 try {
-                     System.out.println("Problem");
+
                     deleteLongCorrectSolutionPart(exercise.getId(), actual_size);
                 } catch (Exception exception) {
                     System.out.println(exception.getMessage());
                 }
                 ++actual_size;
-                 System.out.println("Problem");
             }
         }
     }
     /**
-     * A method which find exercise
+     * A method which find exercise by Name
      */
     @Override
     public Optional<LongExercise> findLongExerciseByName(String name)
@@ -164,8 +166,8 @@ public class ExerciseServiceImpl implements ExerciseService {
 
     /**
      * find all by exercise_id
-     * @param exerciseId
-     * @return
+     * @param exerciseId - id of exercise which correct solutions have to be found
+     * @return list of correct solutions
      */
     @Override
     public List<LongCorrectSolutionPart> findAllLongCorrectSolutionByExerciseId(int exerciseId)
@@ -175,8 +177,7 @@ public class ExerciseServiceImpl implements ExerciseService {
     /***
      * update correctSolutionPart
      * @param id
-     * @param correctSolutionPart
-     * @return
+     * @param correctSolutionPart - new version of correct solution part
      */
     public void update(int id,LongCorrectSolutionPart correctSolutionPart)
     {
@@ -206,10 +207,9 @@ public class ExerciseServiceImpl implements ExerciseService {
         return longExerciseRepository.findAll();
     }
     /**
-     * Function which create LongExercise from LongExerciseDto and save the parts of the solutions in the list
-     * this is because the exercise_id have to be set in each correct solution Part
-     * @param exercise
-     * @return
+     * @param exercise function which create LongExercise from LongExerciseDto and save the parts of the solutions in the list
+     *                 this is because the exercise_id have to be set in each correct solution Part
+     * @return pair with longExercise and list of correctSolutions of this exercise
      * @throws Exception
      */
     @Override
@@ -230,9 +230,6 @@ public class ExerciseServiceImpl implements ExerciseService {
             if(result.contains("Error") || result.contains("TraceBack"))
                 throw new Exception(result);
 
-            System.out.println(points);
-            System.out.println(correctSolutionParts);
-            System.out.println(points[0]);
             parts.add(new LongCorrectSolutionPart(i,correctSolutionParts[i],points[i]));
             cS.append(correctSolutionParts[i]);
             cS.append("\n");
@@ -243,6 +240,14 @@ public class ExerciseServiceImpl implements ExerciseService {
         return new Pair<>(new LongExercise(exercise.getName(),exercise.getIntroduction(),exercise.getContent(),exercise.getMaxPoints(),
                 correctSolution,exercise.getSolutionSchema(),exercise.getAccess()),parts);
     }
+
+    /**
+     *
+     * @param exercise - exercise to add
+     * @param teacher - teacher who created exrecise
+     * @return created LongExercise
+     * @throws Exception
+     */
     @Override
     public LongExercise addLongExercise(LongExerciseDto exercise,Teacher teacher)throws Exception {
         
@@ -303,7 +308,6 @@ public class ExerciseServiceImpl implements ExerciseService {
         {
             e.printStackTrace(new PrintWriter(output));
             String response = output.toString();
-            //separete the info warning from the all exception send from PythonInterpreter class
             return response.substring(0,response.indexOf("at org"));
         }
         
@@ -332,7 +336,8 @@ public class ExerciseServiceImpl implements ExerciseService {
         try{
             if(!testingDataRepository.findAllByExerciseId(id).isEmpty())
                 testingDataRepository.deleteAllByExerciseId(id);
-            longCorrectSolutionPartRepository.deleteAllByExerciseId(id);
+            if(!longCorrectSolutionPartRepository.findAllByExerciseId(id).isEmpty())
+                longCorrectSolutionPartRepository.deleteAllByExerciseId(id);
             List<Solution> solutionList= solutionRepository.getAllByExercise(exerciseRepository.findById(id).get());
             for(Solution solution:solutionList)
             {
@@ -378,9 +383,9 @@ public class ExerciseServiceImpl implements ExerciseService {
     }
 
     /**
-     * @param function
-     * @param parameters
-     * @return
+     * @param function - content of function which have to be run with parameters
+     * @param parameters - parameters to function
+     * @return String with output
      */
     @Override
     public String runFunction(String function, String parameters)
@@ -397,6 +402,11 @@ public class ExerciseServiceImpl implements ExerciseService {
         return returned;
     }
 
+    /**
+     *
+     * @param longSolution - solution to check
+     * @return a pair with result and score
+     */
     @Override
     public Pair<String, Integer> checkSolutionWithTests(LongSolution longSolution) {
 
@@ -426,6 +436,11 @@ public class ExerciseServiceImpl implements ExerciseService {
         return new Pair<>(sr.toString(),score);
     }
 
+    /**
+     *
+     * @param longSolution - solution to check
+     * @return score
+     */
     @Override
     public int checkSolution(LongSolution longSolution) {
 
@@ -444,6 +459,10 @@ public class ExerciseServiceImpl implements ExerciseService {
         return score;
     }
 
+    /**
+     * @param shortSolution - solution to check
+     * @return score
+     */
     @Override
     public int checkSolution(ShortSolution shortSolution) {
       

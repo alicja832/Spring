@@ -6,8 +6,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class PythonApplication {
     
    
-    // public static final String frontend = "https://naukapython.azurewebsites.net/";
-     public static final String frontend = "http://localhost:3000";
+    public static final String frontend = "https://naukapython.azurewebsites.net/";
+     
     public static void main(String[] args) {
        
         SpringApplication.run(PythonApplication.class, args);
