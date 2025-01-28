@@ -208,7 +208,7 @@ public class ExerciseServiceImpl implements ExerciseService {
     }
     /**
      * @param exercise function which create LongExercise from LongExerciseDto and save the parts of the solutions in the list
-     *                 this is because the exercise_id have to be set in each correct solution Part
+     * this is because the exercise_id have to be set in each correct solution Part
      * @return pair with longExercise and list of correctSolutions of this exercise
      * @throws Exception
      */

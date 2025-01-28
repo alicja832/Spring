@@ -147,7 +147,7 @@ public class SolutionServiceImpl implements SolutionService {
             info.put("maxPoints",Integer.toString(exercise.getMaxPoints()));
             info.put("score",Integer.toString(mostpopularScore));
             info.put("quantity",Integer.toString(scorecount));
-
+            info.put("access",Boolean.toString(exercise.getAccess()));
             if(exercise instanceof LongExercise)
             {
                 info.put("correctSolution",((LongExercise)exercise).getCorrectSolution());

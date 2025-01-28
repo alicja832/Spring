@@ -1,11 +1,7 @@
 package com.example.pythonapp.service;
-
 import com.example.pythonapp.model.UserEntity;
-
 import com.example.pythonapp.repository.UserRepository;
-
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.stereotype.Service;
 import jakarta.mail.*;
 import jakarta.mail.internet.InternetAddress;
@@ -48,7 +44,7 @@ public class UserServiceImpl implements UserService {
 
     /**
      *
-     * @param email - email of User for who have to generate code
+     * @param email - email of User for who have to be generated code
      * @throws Exception
      */
     @Override

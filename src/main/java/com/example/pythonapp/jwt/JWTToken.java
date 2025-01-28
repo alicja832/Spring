@@ -30,26 +30,26 @@ public class JWTToken implements Serializable {
     @Value("${security.jwt.secret-key}")
     private String secretKey;
 
-    public  long getJwtExpirationTime()
+    public long getJwtExpirationTime()
     {
         return jwtExpirationTime;
     }
-    //retrieve username from jwt token
+ 
     public String getUsernameFromToken(String token) {
         return getClaimFromToken(token, Claims::getSubject);
     }
 
-    //retrieve expiration date from jwt token
+   
     public Date getExpirationDateFromToken(String token) {
         return getClaimFromToken(token, Claims::getExpiration);
     }
-    // W tych dwóch funkcjach trochę nie wiem za bardzo o co chodzi niestety
+    
     public <T> T getClaimFromToken(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = getAllClaimsFromToken(token);
         return claimsResolver.apply(claims);
     }
 
-    //for retrieving any information from token we will need the secret key
+    
     private Claims getAllClaimsFromToken(String token) {
         Claims claims;
         try {
@@ -61,7 +61,7 @@ public class JWTToken implements Serializable {
         return claims;
     }
 
-    //check if the token has expired
+  
     private Boolean isTokenExpired(String token) {
         final Date expiration = getExpirationDateFromToken(token);
         return expiration.before(new Date());
@@ -89,7 +89,7 @@ public class JWTToken implements Serializable {
 
     }
 
-      public String  generateRefreshToken(UserDetails userDetails) {
+      public String generateRefreshToken(UserDetails userDetails) {
         
         Map<String, Object> claims = new HashMap<>();
         String subject = userDetails.getUsername();
@@ -123,7 +123,7 @@ public class JWTToken implements Serializable {
          PKCS8EncodedKeySpec pkcs8EncodedKeySpec=new PKCS8EncodedKeySpec(keyBytes);
          return keyFactory.generatePrivate(pkcs8EncodedKeySpec);
      }
-    //validate token
+   
     public Boolean validateToken(String token, UserDetails userDetails) {
 
         final String username = getUsernameFromToken(token);

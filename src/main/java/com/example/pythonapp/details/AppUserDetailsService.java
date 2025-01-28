@@ -18,9 +18,6 @@ public class AppUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) {
         UserEntity user = userRepository.findByName(username).orElseThrow(UserNotFoundException::new);
-        if (user == null) {
-            throw new UsernameNotFoundException(username);
-        }
         return new AppUserDetails(user);
     }
 }
