@@ -61,7 +61,7 @@ public class UserServiceImpl implements UserService {
 
             String host = "smtp.gmail.com";  
             final String username = "alicja.zosia.k@gmail.com"; 
-            final String password = "ogrl kvbf utms njjs"; 
+            final String password = "*****"; 
 
             Properties props = new Properties();
             props.put("mail.smtp.auth", "true");
